@@ -140,6 +140,8 @@ html,body{overflow-x:clip}
 .fighter .pick{font-size:18px;padding:12px;width:100%;font-family:var(--f-display);letter-spacing:.05em;text-transform:uppercase}
 .clashflag{background:var(--poppy);color:#FFF5E8;font-family:var(--f-body);font-weight:800;border-radius:10px;padding:6px 10px;font-size:12px;text-align:center;max-width:120px}
 .context{background:var(--forest);color:#FFF5E8;border-radius:12px;padding:10px 14px;font-weight:600;font-size:14px}
+.filternote{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#F4A12B33;border:2px solid var(--marigold);border-radius:12px;padding:6px 6px 6px 12px;font-size:13px}
+.filternote .btn{padding:5px 12px;font-size:13px}
 .context .up{color:#9BE7A8} .context .dn{color:#FFB4A6}
 .follow{background:var(--surface);border-radius:var(--r);padding:18px;display:grid;gap:12px;border:3px solid var(--marigold);max-width:640px;margin-inline:auto;width:100%}
 .follow h3{font-size:26px}
@@ -152,7 +154,7 @@ html,body{overflow-x:clip}
 .tierhead{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .tierhead h3{font-size:22px}
 .ranklist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.ranklist li{display:grid;grid-template-columns:40px 1fr auto 56px;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px;border-left:7px solid var(--unrated)}
+.ranklist li{display:grid;grid-template-columns:40px 1fr auto 56px auto;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px;border-left:7px solid var(--unrated)}
 .ranklist li.hot{border-left-color:var(--hot)} .ranklist li.warm{border-left-color:var(--warm)} .ranklist li.cool{border-left-color:var(--cool)} .ranklist li.cold{border-left-color:var(--cold)}
 .ranklist .n{font-family:var(--f-display);font-size:22px;text-align:right}
 .ranklist .nm{font-weight:800;min-width:0;overflow-wrap:anywhere}
@@ -188,6 +190,8 @@ details.foot p{font-size:13px;max-width:70ch}
 .planlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .planlist li{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
 .planlist .t{font-weight:800}
+.pinbtn{border:2px solid var(--ink);background:transparent;border-radius:999px;width:30px;height:30px;font-weight:800;font-size:14px;line-height:1;padding:0;display:grid;place-items:center;flex:none}
+.pinbtn.on{background:var(--ink);color:var(--bg)}
 .clash{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
 .dialog{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:50;padding:16px;overflow:auto}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:60;max-width:calc(100% - 32px);text-align:center}
@@ -196,9 +200,43 @@ details.foot p{font-size:13px;max-width:70ch}
 /* map */
 .mapgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:16px;align-items:start}
 .mapcard{display:grid;gap:10px;padding:12px}
+.daytabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface-2);border-radius:12px;padding:4px}
+.daytabs button{border:0;background:transparent;border-radius:9px;padding:8px 4px;font-family:var(--f-display);font-size:17px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
+.daytabs button small{font-family:var(--f-body);font-size:11px;font-weight:700;opacity:.7;letter-spacing:0}
+.daytabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.daytabs .ds{display:none}
+@media (max-width:640px){.daytabs .dl{display:none}.daytabs .ds{display:inline}
+  /* phones: keep the map itself clear; the buttons sit in a row underneath it */
+  .mapcard .mapframe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.mapcard .mapscroll{flex:1 1 100%}
+  .mapcard .mview{position:static;order:2}.mapcard .mapctl{position:static;order:3;margin-left:auto;display:flex}}
+.stepper{display:flex;gap:8px;align-items:center;justify-content:center}
+.stepper:empty{display:none}
+.stepper .sttxt{flex:1;min-width:0;display:grid;text-align:center;line-height:1.25}
+.stepper .sttxt b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stepper .mbtn:disabled{opacity:.35}
+.stepper .btn{padding:6px 12px;font-size:13px}
+#mapSvg .seg.past{opacity:.35} #mapSvg .seg.past .dots{stroke:#7E857B} #mapSvg .seg.past path[fill]{fill:#7E857B}
+#mapSvg .seg.future{opacity:.5}
+#mapSvg .seg.next .halo{stroke:#FFF5E8;opacity:.9}
+#mapSvg .tag.past{opacity:.4} #mapSvg .tag.past .tagn{fill:#B9B3A8}
+#mapSvg .tag.now .tagbg{fill:#1F6FB8;stroke:#163C29;stroke-width:2} #mapSvg .tag.now .tagtt{fill:#FFF5E8}
+#mapSvg .herering{fill:none;stroke:#1F6FB8;stroke-width:3}
+#mapSvg .herepulse{fill:none;stroke:#1F6FB8;stroke-width:3;transform-box:fill-box;transform-origin:center;animation:herepulse 1.8s ease-out infinite}
+@keyframes herepulse{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
+.itin li.past{opacity:.45;filter:grayscale(.9)}
+.itin li.now{outline:3px solid #1F6FB8;outline-offset:-1px;background:#1F6FB81f}
+.nowchip{background:#1F6FB8;color:#FFF5E8}
+.routes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.routes:empty{display:none}
+.routes b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-right:2px}
+.rchk{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:999px;padding:4px 10px 4px 6px;font-weight:700;cursor:pointer;background:var(--surface)}
+.rchk input{width:16px;height:16px;margin:0;accent-color:var(--rc)}
+.rchk i{width:18px;height:0;border-top:3px dotted var(--rc)}
+.rchk:has(input:checked){border-color:var(--rc)}
+.rchk.me{cursor:default;opacity:.9}
 @media (min-width:901px){.mapcard{position:sticky;top:64px}}
 .mapframe{position:relative}
-.mapscroll{position:relative;overflow:hidden;border-radius:12px;background:#4C6F3C;aspect-ratio:4/3;max-height:72vh;width:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.mapscroll{position:relative;overflow:hidden;border-radius:12px;background:#4C6F3C;aspect-ratio:4/3;width:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .mapscroll:active{cursor:grabbing}
 #mapSvg{display:block;width:100%;height:100%;font-family:var(--f-body)}
 .mapctl{position:absolute;right:8px;top:8px;display:grid;gap:6px;justify-items:end;z-index:2}
@@ -225,7 +263,7 @@ details.foot p{font-size:13px;max-width:70ch}
 .ksample.kbolt{width:20px;height:20px;border-radius:50%;background:#E5432B;justify-content:center;font-size:11px}
 .keysect{display:grid;gap:6px}
 .keysect .pill{padding:3px 10px;font-size:12px}
-@media (max-width:640px){.mapscroll{aspect-ratio:1/1;max-height:68vh}.zoompair{display:none}.mbtn{height:30px}.mbtn.wide{height:30px;font-size:12px}}
+@media (max-width:640px){.zoompair{display:none}.mbtn{height:30px}.mbtn.wide{height:30px;font-size:12px}}
 .mbtn[aria-pressed="true"]{background:#163C29;color:#FFF5E8}
 .mbtn:disabled{opacity:.45}
 #mapSvg .rd{fill:none;stroke:#E4D6A6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
@@ -250,6 +288,7 @@ details.foot p{font-size:13px;max-width:70ch}
 #mapSvg .tagn{fill:#C9BBAE;stroke:#FFF5E8;stroke-width:1} #mapSvg .tagn.hot{fill:#E5432B} #mapSvg .tagn.warm{fill:#F4A12B} #mapSvg .tagn.cool{fill:#5EC6F1} #mapSvg .tagn.cold{fill:#2F79C2}
 #mapSvg .tagnt{font-family:var(--f-display);font-size:10.5px;text-anchor:middle;fill:#163C29} #mapSvg .tagnt.hot,#mapSvg .tagnt.cold{fill:#FFF5E8}
 #mapSvg .tagtt{font-size:10px;font-weight:800;fill:#163C29}
+#mapSvg .leader{stroke:#163C29;stroke-width:1.5;opacity:.55}
 #mapSvg .xmark{font-family:var(--f-display);font-size:20px;fill:#E5432B;text-anchor:middle;paint-order:stroke;stroke:#FFF5E8;stroke-width:3px}
 #mapSvg .boltic{font-size:9px;text-anchor:middle}
 #mapSvg .compass{font-family:var(--f-display);font-size:8px;text-anchor:middle;fill:#163C29}
@@ -335,7 +374,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
   .arena{grid-template-columns:1fr}
   .vs{font-size:32px}
   .two{grid-template-columns:1fr}
-  .ranklist li{grid-template-columns:32px 1fr 50px}
+  .ranklist li{grid-template-columns:32px 1fr 50px auto}
   .ranklist li .rec{display:none}
   .planlist li{grid-template-columns:78px 1fr}
   .planlist li .heat{display:none}
@@ -392,6 +431,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
       <button class="switch" id="h2hSwitch" role="switch" aria-checked="true"><i></i><span>Head-to-head placement</span></button>
     </div>
     <div id="context"></div>
+    <div id="queueLine" style="display:grid;gap:6px"></div>
     <div id="stage"></div>
     <div class="row" style="justify-content:center" id="stageBtns"></div>
   </section>
@@ -443,7 +483,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     </div>
     <details class="foot">
       <summary>How scoring works</summary>
-      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Once you've rated everyone in view, head-to-head battles set the order inside each band. Newly rated artists take turns, one battle each, so you don't face the same act over and over, and each needs only about 4 battles to find its spot in a band of 15 (a binary search). Cards come broad first: every genre early, best-known names first. “Not sure yet” sends an artist to the back of the line; skip it twice and it waits until the very end. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
+      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Once you've rated everyone in view, head-to-head battles set the order inside each band. Newly rated artists take turns, one battle each, so you don't face the same act over and over, and each needs only about 4 battles to find its spot in a band of 15 (a binary search). Cards come broad first: every genre early, best-known names first. “Not sure yet” sends an artist to the back of the line, behind every new artist and battle; skip it twice and it waits until the very end. Filters limit the line to the artists in view. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
       <p>With head-to-head placement switched off, a newly rated artist sits at the middle of its band at the band's centre score until you battle it.</p>
       <p>A lower-rated act can beat a higher-rated one in a set-clash battle without changing bands, because genre and mood don't always line up. You choose whether to move either act or keep both ratings.</p>
       <p id="syncNote"></p>
@@ -466,7 +506,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     <div class="two">
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px">Your plan for <span id="planDay"></span></h3>
-        <p class="small muted" style="margin:0">Your highest-ranked sets go first; a set overlapping one you've already got by more than 15 minutes drops out unless you picked it head to head. 👎 sets never make the plan.</p>
+        <p class="small muted" style="margin:0">Suggested from your ranking: highest-ranked sets first, and a set overlapping one you've already got by more than 15 minutes drops out unless you picked it head to head. Tap any set on the grid to add it yourself, or ✕ to drop one; your changes stick.</p>
         <ol class="planlist" id="planlist"></ol>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
@@ -478,9 +518,9 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
   </section>
 
   <section class="panel" id="p-map" hidden>
-    <div class="row" id="mapDays" role="group" aria-label="Day" style="justify-content:center"><button class="pill" data-day="Fri">Fri 10/9</button><button class="pill" data-day="Sat">Sat 10/10</button><button class="pill" data-day="Sun">Sun 10/11</button></div>
     <div class="mapgrid">
       <div class="card mapcard">
+        <div class="daytabs" id="mapDays" role="tablist" aria-label="Day"><button role="tab" data-day="Fri"><span class="dl">Friday</span><span class="ds">Fri</span> <small>10/9</small></button><button role="tab" data-day="Sat"><span class="dl">Saturday</span><span class="ds">Sat</span> <small>10/10</small></button><button role="tab" data-day="Sun"><span class="dl">Sunday</span><span class="ds">Sun</span> <small>10/11</small></button></div>
         <div class="mapframe">
           <div class="mapscroll" id="mapWrap" aria-label="Festival map. Drag to move, pinch to zoom."></div>
           <div class="mapctl"><button class="mbtn keybtn" id="mKeyBtn" aria-expanded="false" aria-controls="mapKey">Key</button><div class="zoompair"><button class="mbtn" id="mZin" aria-label="Zoom in">+</button><button class="mbtn" id="mZout" aria-label="Zoom out">−</button></div></div>
@@ -490,18 +530,21 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
             <ul class="keylist">
               <li><svg viewBox="0 0 44 14" width="44" height="14" aria-hidden="true"><path d="M2,7 H34" stroke="#1F6FB8" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="0.01 7"/><path d="M34,2 L42,7 L34,12 Z" fill="#1F6FB8"/></svg><span>Your walking path. Arrows point the way.</span></li>
               <li><span class="ksample"><i class="kn">1</i>2:00pm</span><span>Your sets in order, with the time each one starts.</span></li>
-              <li><span class="ksample kmin">7+ min</span><span>Shortest possible walk. Crowds add more.</span></li>
-              <li><span class="ksample kx">✕</span><span>Your favourite set of the day.</span></li>
+              <li><span class="ksample kmin">7+ min</span><span>Shortest walk to your next stop (crowds add more). Tap a step to see its walk.</span></li>
+              <li><span class="ksample kx">✕</span><span>Next to a time: your favourite set of the day.</span></li>
               <li><span class="ksample kbolt">⚡</span><span>Heads up: a tight walk, or another set you like at the same time.</span></li>
               <li><span class="ksample">🍴 💧 🌳 ✚</span><span>Food, water, shade, first aid. Big ones are on your path.</span></li>
               <li id="keyFriendRow" hidden><svg viewBox="0 0 44 14" width="44" height="14" aria-hidden="true"><path d="M2,7 H40" stroke="#C2459A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.01 7"/></svg><span id="keyFriendTxt">Your friend's path.</span></li>
             </ul>
+            <button class="switch" id="mAllWalk" role="switch" aria-checked="false"><i></i><span>Show every walk time</span></button>
             <div id="mapOverlay"></div>
             <div class="keysect"><b class="small">Which gate are you using?</b><div class="row" id="mapGates" role="group" aria-label="Entrance"><button class="pill" data-gate="auto">Closest</button><button class="pill" data-gate="ladybird">Lady Bird</button><button class="pill" data-gate="west">West</button><button class="pill" data-gate="east">East</button></div></div>
             <p class="small" style="margin:0">Drag to move the map and pinch to zoom. Tap any step in your plan to find it here.</p>
             <p class="small muted" style="margin:0">Roads, lake and park are real (OpenStreetMap). Stages, food and water are placed from the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL map</a>, so they're close but not exact. Check the ACL app on the day for changes.</p>
           </aside>
         </div>
+        <div class="stepper" id="mapStep"></div>
+        <div class="routes" id="mapRoutes"></div>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px" id="itinHead">Your day</h3>
@@ -570,7 +613,8 @@ const rnd=arr=>arr[Math.floor(Math.random()*arr.length)];
 const LS="acl26w2-"+MODE;
 const blankF=()=>({days:[],from:750,to:1320,gen:[],pop:[],q:""});
 const blankUI=()=>({tab:"rate",f:blankF(),card:null,lastCard:null,ins:null,pair:null,pairKind:null,follow:[],ctx:null,showUnr:false,day:"Fri",sort:"time",filtersOpen:false,h2h:true,svc:"apple",zoom:null});
-function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],ui:blankUI(),u:0}}
+function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],pin:{a:[],r:[]},ui:blankUI(),u:0}}
+const cleanPin=x=>({a:((x&&x.a)||[]).filter(i=>Number.isInteger(i)&&i>=0&&i<N),r:((x&&x.r)||[]).filter(i=>Number.isInteger(i)&&i>=0&&i<N)});
 let VIEW=null,MY=null,cloudT=null;
 let S=fresh(MODE==="me"?"":"");
 function makeBid(name){const slug=(name||"guest").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16)||"guest";return slug+"-"+Math.floor(Date.now()/1000)}
@@ -581,6 +625,7 @@ function migrate(x){
   if(x.v===3&&Array.isArray(x.o)){s.o=[0,1,2,3].map(ti=>(x.o[ti]||[]).filter(i=>s.t[i]===ti));s.us=(x.us||[]).filter(i=>s.t[i]!==undefined);s.ui=Object.assign(blankUI(),x.ui||{});s.ui.f=Object.assign(blankF(),(x.ui||{}).f||{})}
   else{const w={},g={};for(const [a,b,r] of s.h){g[a]=(g[a]||0)+1;g[b]=(g[b]||0)+1;if(r===0)w[a]=(w[a]||0)+1;else if(r===1)w[b]=(w[b]||0)+1;else{w[a]=(w[a]||0)+.5;w[b]=(w[b]||0)+.5}}
     for(const k in s.t)s.o[s.t[k]].push(+k);s.o=s.o.map(l=>l.sort((p,q)=>((w[q]||0)/(g[q]||1))-((w[p]||0)/(g[p]||1))))}
+  s.pin=cleanPin(x.pin);
   if(x.cloud&&x.cloud.edit)s.cloud={id:x.cloud.id,edit:x.cloud.edit,share:x.cloud.share};s.cloudSig=x.cloudSig||null;s.cloudOff=!!x.cloudOff;
   const inList=new Set(s.o.flat());for(const k in s.t)if(!inList.has(+k)){s.o[s.t[k]].push(+k);s.us.push(+k)}
   return s}
@@ -620,8 +665,8 @@ async function initCloud(){
 
 /* ---------- undo ---------- */
 let UNDO=[];try{UNDO=JSON.parse(localStorage.getItem(LS+"-undo")||"[]")}catch(e){}
-function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx,skip:S.ui.skip||{},def:S.ui.def||[]}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
-function undo(){const x=UNDO.pop();if(!x)return toast("Nothing to undo");const o=JSON.parse(x);Object.assign(S,{t:o.t,o:o.o,us:o.us,h:o.h});Object.assign(S.ui,o.ui);try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}save();recompute();renderAll();toast("Undone")}
+function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,pin:S.pin,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx,skip:S.ui.skip||{},def:S.ui.def||[]}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
+function undo(){const x=UNDO.pop();if(!x)return toast("Nothing to undo");const o=JSON.parse(x);Object.assign(S,{t:o.t,o:o.o,us:o.us,h:o.h});if(o.pin)S.pin=o.pin;Object.assign(S.ui,o.ui);try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}save();recompute();renderAll();toast("Undone")}
 
 /* ---------- scoring ---------- */
 function invNorm(p){const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771720,-13.28068155288572],c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416];
@@ -640,7 +685,7 @@ function compute(st){
     const mid=Math.floor(n/2);order.push(...sorted.slice(0,mid),...loose,...sorted.slice(mid))});
   order.forEach((id,i)=>pos[id]=i);
   const unr=A.filter(a=>tier[a.id]<0).map(a=>a.id);
-  return {tier,score,pos,order,unr,W,L,us}}
+  return {tier,score,pos,order,unr,W,L,us,pin:st.pin||null}}
 let C;
 function recompute(){C=compute(S)}
 const heatOf=id=>C.tier[id]<0?"unrated":TIERS[C.tier[id]].heat;
@@ -780,8 +825,8 @@ function insList(ins){return S.o[ins.ti].filter(i=>i!==ins.id&&!S.us.includes(i)
 /* Queue order, broad first so every answer adds new information:
    1) artists you haven't seen yet, alternating genres, best-known first
    2) placement battles for what you've rated (binary search inside each rating)
-   3) artists you skipped once ("Not sure yet"), oldest skip first
-   4) fine-tuning and set-clash battles, always the pair with the fewest battles so far
+   3) fine-tuning and set-clash battles, always the pair with the fewest battles so far
+   4) artists you skipped once ("Not sure yet"), oldest skip first
    5) placements you put off, then battles you skipped once.
    Anything skipped twice is parked; the finish screen offers it again. Nothing loops back straight away. */
 // Where an unplaced artist can go inside its rating, worked out from every battle it has had against placed artists in that rating.
@@ -835,9 +880,9 @@ function nextStep(){
   const take=list=>{const a=list.find(x=>x.id!==ui.lastCard)||list[0];ui.card=a.id;ui.pair=null;ui.pairKind=null};
   const fight=p=>{ui.pair=[p[0],p[1]];ui.pairKind=p[2];ui.card=null};
   if(Q.unseen.length)return take(Q.unseen);
-  if(Q.skip1.length)return take(Q.skip1);
   if(h&&nextPlacement(false))return;
   let p;if(h&&(p=pickBattle(false)))return fight(p);
+  if(Q.skip1.length)return take(Q.skip1);
   if(h&&nextPlacement(true))return;
   if(h&&(p=pickBattle(true)))return fight(p);
   ui.card=null;ui.pair=null;ui.pairKind=null}
@@ -886,6 +931,11 @@ function renderRate(){
   document.getElementById("meterText").textContent=`${rated}/${N} rated · ${S.h.length} battles${S.us.length?` · ${S.us.length} to place`:""}`;
   document.getElementById("h2hSwitch").setAttribute("aria-checked",h2hOn());
   document.getElementById("context").innerHTML=ui.ctx?`<div class="context">${ui.ctx}</div>`:"";
+  const Q=cardQueue(),fOn=filtersActive(),f=ui.f;
+  const fDesc=[f.days.length?f.days.join(", "):"",f.from>750||f.to<1320?`${fmtP(f.from)}–${fmtP(f.to)}`:"",f.gen.join(", "),f.pop.length?"popularity":"",f.q?`“${esc(f.q)}”`:""].filter(Boolean).join(" · ");
+  const line=[Q.unseen.length?`${Q.unseen.length} new artist${Q.unseen.length===1?"":"s"}`:"",S.us.length&&h2hOn()?`${S.us.length} to place`:"",Q.skip1.length+Q.parked.length?`${Q.skip1.length+Q.parked.length} you skipped (they come back last)`:""].filter(Boolean).join(" · ");
+  document.getElementById("queueLine").innerHTML=(fOn?`<div class="filternote"><span><b>Filters on:</b> ${fDesc||"some"} · only ${A.filter(passes).length} of ${N} artists in view</span><button class="btn ghost" id="qClear">Show everyone</button></div>`:"")+(line?`<p class="small muted" style="margin:0;text-align:center">Up next: ${line}</p>`:"");
+  const qc=document.getElementById("qClear");if(qc)qc.onclick=()=>{S.ui.f=blankF();onFilter()};
   if(ui.follow.length){const f=ui.follow[0],w=A[f.w],l=A[f.l],tw=TIERS[C.tier[f.w]],tl=TIERS[C.tier[f.l]];
     st.innerHTML=`<div class="follow flash"><span class="chip" style="justify-self:start">Upset</span><h3>${esc(w.name)} beat a higher-rated act</h3>
     <p class="small" style="margin:0">${esc(w.name)} is ${tw.icon} ${tw.label} (${scoreTxt(f.w)}) and ${esc(l.name)} is ${tl.icon} ${tl.label} (${scoreTxt(f.l)}). What should change?</p>
@@ -960,10 +1010,11 @@ function renderRank(){
   let html="";
   TIERS.forEach((T,ti)=>{const m=C.order.filter(id=>C.tier[id]===ti);
     html+=`<div class="tierhead"><h3>${T.icon} ${T.label}</h3><span class="small muted">${m.length} artist${m.length===1?"":"s"}</span></div>`;
-    html+=m.length?`<ol class="ranklist">${m.map(id=>{const a=A[id];return `<li class="${T.heat}"><span class="n tnum">${C.pos[id]+1}</span><span class="nm">${esc(a.name)}<div class="sub">${a.day} ${fmt(a.s)} · ${a.stage} · ${esc(a.fam)}${C.us.has(id)?" · not placed yet":""}</div></span><span class="rec tnum">${C.W[id]+C.L[id]?C.W[id]+"–"+C.L[id]:""}</span><span class="sc tnum">${scoreTxt(id)}</span></li>`}).join("")}</ol>`:`<p class="small muted" style="margin:0">Nobody here yet.</p>`});
+    html+=m.length?`<ol class="ranklist">${m.map(id=>{const a=A[id];return `<li class="${T.heat}"><span class="n tnum">${C.pos[id]+1}</span><span class="nm">${esc(a.name)}<div class="sub">${a.day} ${fmt(a.s)} · ${a.stage} · ${esc(a.fam)}${C.us.has(id)?" · not placed yet":""}</div></span><span class="rec tnum">${C.W[id]+C.L[id]?C.W[id]+"–"+C.L[id]:""}</span><span class="sc tnum">${scoreTxt(id)}</span>${VIEW?"":`<button class="pinbtn${inPlan(id)?" on":""}" data-pl="${id}" title="${inPlan(id)?"In your plan · tap to remove":"Add to your plan"}" aria-label="${inPlan(id)?"Remove "+esc(a.name)+" from":"Add "+esc(a.name)+" to"} your ${a.day} plan">${inPlan(id)?"✓":"＋"}</button>`}</li>`}).join("")}</ol>`:`<p class="small muted" style="margin:0">Nobody here yet.</p>`});
   html+=`<div class="tierhead"><h3>Not rated yet</h3><span class="small muted">${C.unr.length}</span>${C.unr.length?`<button class="btn ghost" id="unrToggle" style="padding:3px 12px;font-size:12px">${S.ui.showUnr?"Hide names":"Show names"}</button>`:""}</div>`;
   if(S.ui.showUnr&&C.unr.length)html+=`<p class="small muted" style="margin:0">${C.unr.map(i=>esc(A[i].name)).join(" · ")}</p>`;
   document.getElementById("ranklist").innerHTML=html;
+  document.querySelectorAll("#ranklist [data-pl]").forEach(b=>b.onclick=()=>{togglePlan(+b.dataset.pl);renderRank()});
   const t=document.getElementById("unrToggle");if(t)t.onclick=()=>{S.ui.showUnr=!S.ui.showUnr;save();renderRank()};
   const nm=document.getElementById("myName");if(document.activeElement!==nm)nm.value=S.name||"";
   renderDist();renderCompareMini()}
@@ -984,12 +1035,13 @@ document.getElementById("myName").addEventListener("input",e=>{S.name=e.target.v
 function ensureBid(rename){if(!S.bid)S.bid=makeBid(S.name);else if(rename){const ts=S.bid.split("-").pop();S.bid=makeBid(S.name).replace(/-\d+$/,"-"+ts)}}
 function b64e(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function b64d(s){s=s.replace(/-/g,"+").replace(/_/g,"/");return decodeURIComponent(escape(atob(s)))}
-function makeCode(){ensureBid();return "ACL26."+b64e(JSON.stringify({v:3,n:S.name||"A friend",b:S.bid,o:S.o.map(l=>l.join(".")).join("|"),us:S.us.join("."),h:S.h.map(x=>x.slice(0,3).join(".")).join(",")}))}
+function makeCode(){ensureBid();return "ACL26."+b64e(JSON.stringify({v:3,n:S.name||"A friend",b:S.bid,o:S.o.map(l=>l.join(".")).join("|"),us:S.us.join("."),h:S.h.map(x=>x.slice(0,3).join(".")).join(","),pa:(S.pin&&S.pin.a||[]).join("."),pr:(S.pin&&S.pin.r||[]).join(".")}))}
 function readCode(txt){const o=JSON.parse(b64d(txt.trim().replace(/\s+/g,"").replace(/^ACL26\./,"")));
   const st=fresh(o.n);st.name=o.n||"";st.bid=o.b||null;
   st.o=(o.o||"").split("|").slice(0,4).map(l=>l?l.split(".").map(Number).filter(i=>i>=0&&i<N):[]);while(st.o.length<4)st.o.push([]);
   st.o.forEach((l,ti)=>l.forEach(i=>st.t[i]=ti));st.us=(o.us||"").split(".").filter(Boolean).map(Number).filter(i=>st.t[i]!==undefined);
-  st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];return st}
+  st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];
+  st.pin=cleanPin({a:(o.pa||"").split(".").filter(Boolean).map(Number),r:(o.pr||"").split(".").filter(Boolean).map(Number)});return st}
 document.getElementById("copyCode").onclick=()=>{if(!Object.keys(S.t).length)return toast("Rate a few artists first");copy(makeCode(),"Ranking code copied")};
 let FRIEND=null;
 document.getElementById("restoreBtn").onclick=()=>{document.getElementById("restoreBox").hidden=false};
@@ -1005,10 +1057,19 @@ function h2h(a,b){return h2hIn(S.h,a,b)}
 function h2hIn(hist,a,b){let wa=0,wb=0;for(const [x,y,r] of (hist||[])){if(r!==0&&r!==1)continue;const w=r===0?x:y,l=r===0?y:x;if(w===a&&l===b)wa++;if(w===b&&l===a)wb++}return wa>wb?a:wb>wa?b:null}
 function prefer(a,b){const h=h2h(a,b);if(h!==null)return h;return C.pos[a]<=C.pos[b]?a:b}
 function plan(d){return planFor(d,C,S.h)}
-function planFor(d,cc,hist){const sets=A.filter(a=>a.day===d&&cc.tier[a.id]>=0&&cc.tier[a.id]<3).sort((x,y)=>cc.pos[x.id]-cc.pos[y.id]);const pick=[];
+// Suggested plan from your ranking, plus any sets you added yourself (always kept) minus any you removed.
+function planFor(d,cc,hist){const pin=cc.pin||{},add=new Set(pin.a||[]),rm=new Set(pin.r||[]);
+  const pick=A.filter(a=>a.day===d&&add.has(a.id)&&!rm.has(a.id));
+  const sets=A.filter(a=>a.day===d&&!add.has(a.id)&&!rm.has(a.id)&&cc.tier[a.id]>=0&&cc.tier[a.id]<3).sort((x,y)=>cc.pos[x.id]-cc.pos[y.id]);
   for(const a of sets){const clash=pick.filter(p=>overlap(p,a)>15);
-    if(!clash.length)pick.push(a);else if(clash.length===1&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
+    if(!clash.length)pick.push(a);else if(clash.length===1&&!add.has(clash[0].id)&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
   return pick.sort((x,y)=>x.s-y.s)}
+const inPlan=id=>plan(A[id].day).some(x=>x.id===id);
+const pinnedAdd=id=>!!(S.pin&&S.pin.a.includes(id));
+function togglePlan(id){if(VIEW)return toast("View only. Open your own board to plan.");checkpoint();const P=S.pin||(S.pin={a:[],r:[]});const a=A[id];
+  if(inPlan(id)){P.a=P.a.filter(i=>i!==id);recompute();if(inPlan(id))P.r.push(id);toast(`Removed ${a.name} from your ${a.day} plan`)}
+  else{P.r=P.r.filter(i=>i!==id);recompute();if(!inPlan(id))P.a.push(id);toast(`Added ${a.name} to your ${a.day} plan`)}
+  save();recompute()}
 function renderSched(){
   const day=S.ui.day||"Fri";document.querySelectorAll("#dayBtns button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
   const T0=12*60+30,T1=22*60,PX=1.5,H=(T1-T0)*PX;const P=new Set(plan(day).map(a=>a.id));
@@ -1021,7 +1082,8 @@ function renderSched(){
   const el=document.getElementById("sched");el.innerHTML=html;el.querySelectorAll(".set").forEach(b=>b.onclick=()=>showArtist(A[+b.dataset.id]));
   requestAnimationFrame(()=>applyZoom(curZ()));
   document.getElementById("planDay").textContent=DAYS[day];const pl=plan(day);
-  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b><div class="small muted">${a.stage}</div></span><span class="heat ${heatOf(a.id)}">${iconOf(a.id)} ${scoreTxt(a.id)}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists and your plan appears here.</span></li>`;
+  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b>${pinnedAdd(a.id)?` <span class="chip">📌 added</span>`:""}<div class="small muted">${a.stage}</div></span><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="heat ${heatOf(a.id)}">${C.tier[a.id]>=0?iconOf(a.id)+" "+scoreTxt(a.id):"unrated"}</span>${VIEW?"":`<button class="pinbtn" data-rm="${a.id}" aria-label="Remove ${esc(a.name)} from your plan" title="Remove from plan">✕</button>`}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists, or tap any set on the grid to add it.</span></li>`;
+  document.querySelectorAll("#planlist [data-rm]").forEach(b=>b.onclick=()=>{togglePlan(+b.dataset.rm);renderSched()});
   const cl=CLASH.filter(([x,y])=>A[x].day===day&&C.tier[x]>=0&&C.tier[x]<=1&&C.tier[y]>=0&&C.tier[y]<=1);
   document.getElementById("clashes").innerHTML=cl.length?cl.map(([x,y])=>{const hw=h2h(x,y);const pf=prefer(x,y);
     return `<div class="clash"><span class="small"><b>${esc(A[x].name)}</b> ${scoreTxt(x)} vs <b>${esc(A[y].name)}</b> ${scoreTxt(y)} · ${overlap(A[x],A[y])} min<br><span class="muted">${hw!==null?"You picked "+esc(A[hw].name)+" head to head":"Leaning "+esc(A[pf].name)+" on ranking"}</span></span><button class="btn" data-p="${x},${y}">Battle</button></div>`}).join(""):`<p class="small muted" style="margin:0">No ❤️/👍 clashes on ${day} yet.</p>`;
@@ -1030,8 +1092,9 @@ function goBattle(p){S.ui.pair=p.split(",").map(Number);S.ui.pairKind="clash";S.
 function showArtist(a){const host=document.getElementById("dialogHost");const ov=A.filter(o=>o.id!==a.id&&overlap(o,a)>=20);
   host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="${esc(a.name)}"><div style="max-width:460px;width:100%;display:grid;gap:10px">${artCard(a)}
   ${ov.length?`<div class="card" style="display:grid;gap:6px"><b class="small">Overlaps with</b>${ov.map(o=>`<div class="clash"><span class="small"><b>${esc(o.name)}</b> ${iconOf(o.id)} ${scoreTxt(o.id)} · ${overlap(o,a)} min</span><button class="btn" data-p="${a.id},${o.id}">Battle</button></div>`).join("")}</div>`:""}
-  <div class="row" style="justify-content:center"><button class="btn" id="closeDlg">Close</button></div></div></div>`;
-  const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
+  <div class="row" style="justify-content:center">${VIEW?"":`<button class="btn ${inPlan(a.id)?"":"primary"}" id="planTgl">${inPlan(a.id)?`✓ In your ${a.day} plan · Remove`:`＋ Add to my ${a.day} plan`}</button>`}<button class="btn" id="closeDlg">Close</button></div></div></div>`;
+  const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;
+  const pt=document.getElementById("planTgl");if(pt)pt.onclick=()=>{togglePlan(a.id);showArtist(a)};host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
   bindRate(host,()=>showArtist(a));host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p));if(HOSTED)markPlaying();document.getElementById("closeDlg").focus()}
 
 
@@ -1143,14 +1206,14 @@ document.getElementById("shareBtn").onclick=openShare;
 /* ---------- online codes (website only): private edit code + public share code ---------- */
 const API="/api/board";
 const slugify=s=>String(s||"").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16);
-function coreState(st){st=st||S;return {v:3,name:st.name||"",bid:st.bid||"",t:st.t,o:st.o,us:st.us,h:st.h}}
+function coreState(st){st=st||S;const pin=st.pin||{a:[],r:[]};return {v:3,name:st.name||"",bid:st.bid||"",t:st.t,o:st.o,us:st.us,h:st.h,pa:pin.a||[],pr:pin.r||[]}}
 function persist(){if(VIEW)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
 async function api(body,share){
   const r=share!=null?await fetch(API+"?share="+encodeURIComponent(share),{cache:"no-store"}):await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||("HTTP "+r.status));e.status=r.status;throw e}return j}
 function fromServer(state,name){const st=fresh(name||state.name);st.name=name||state.name||"";st.bid=state.bid||"";st.t={};
   st.o=[0,1,2,3].map(ti=>((state.o||[])[ti]||[]).filter(i=>i>=0&&i<N));st.o.forEach((l,ti)=>l.forEach(i=>st.t[i]=ti));
-  st.us=(state.us||[]).filter(i=>st.t[i]!==undefined);st.h=(state.h||[]).filter(r=>r[0]<N&&r[1]<N);return st}
+  st.us=(state.us||[]).filter(i=>st.t[i]!==undefined);st.h=(state.h||[]).filter(r=>r[0]<N&&r[1]<N);st.pin=cleanPin({a:state.pa,r:state.pr});return st}
 let cloudBusy=false;
 function setSync(m){const el=document.getElementById("syncStatus");if(el)el.textContent=m}
 async function cloudSync(){
@@ -1218,6 +1281,10 @@ function subjectPerson(){return {name:VIEW?(VIEW.name||VIEW.share):(S.name||"You
 function mePerson(){if(VIEW)return MY&&Object.keys(MY.t||{}).length?{name:MY.name||"You",c:compute(MY),h:MY.h,me:true}:null;return {name:S.name||"You",c:C,h:S.h,me:true}}
 function friendPerson(){return FRIEND?{name:FRIEND.name,c:FRIEND.c,h:FRIEND.st.h,share:FRIEND.share}:null}
 function mapOverlay(){return VIEW?mePerson():friendPerson()}
+const RCOLS=["#C2459A","#7B4BC4","#138A7E","#B8641C","#5B6CC9","#8E3B5E"];
+const MAPSHOW=new Set();   // friends whose routes are switched on; not saved, so the map always opens with only your route
+function routeCands(){if(VIEW){const m=mePerson();return m?[{key:"me",name:"You",c:m.c,h:m.h,col:RCOLS[0]}]:[]}
+  return Object.values(CREW).map((f,i)=>({key:f.k,name:f.name,c:f.c,h:f.st.h,col:RCOLS[i%RCOLS.length]}))}
 const first=n=>String(n||"").trim().split(/\s+/)[0]||"Friend";
 
 /* ---------- crew: friends you compare with, kept in this browser (with a cached copy for bad festival signal) ---------- */
@@ -1351,7 +1418,7 @@ function renderCrew(){const out=document.getElementById("crewOut"),add=document.
   const P=mePerson(),Q=friendPerson();out.innerHTML=pairHTML(P,Q)+(Object.keys(CREW).length>=2?crewHTML(P):"");bindCrewOut(out,P,Q)}
 function bindCrewOut(out,P,Q){
   out.querySelectorAll("[data-a]").forEach(li=>li.onclick=()=>showArtist(A[+li.dataset.a]));
-  out.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.ui.mapFriend=true;setTab(b.dataset.go)});
+  out.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{MAPSHOW.add(VIEW?"me":(FRIEND&&FRIEND.k));setTab(b.dataset.go)});
   const sm=document.getElementById("shareMatch");if(sm&&P&&Q)sm.onclick=()=>openMatchShare(P,Q)}
 function openMatchShare(P,Q){const host=document.getElementById("dialogHost");const txt=matchupText(P,Q);const canNative=!!navigator.share;
   host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="Share this matchup"><div class="card sharebox"><h3 style="font-size:24px">Share this matchup</h3><textarea readonly aria-label="Message preview">${esc(txt)}</textarea>
@@ -1418,7 +1485,7 @@ function buildDay(day,P){
     if(wk>0)add({k:"walk",t:nx.s-wk,from:a.stage,to:nx.stage,wk,free})});
   const last=pl[pl.length-1];const eg=nearest(GATES,ST(last.stage));const we=walkT(ST(last.stage),eg);R.walk+=we;add({k:"exit",t:last.e,g:eg,wk:we,from:last.stage});
   const meals=items.filter(x=>x.k==="food");meals.forEach(m=>m.label=m.t<15*60+30?"Lunch window":m.t<17*60?"Snack window":"Dinner window");
-  if(!meals.length){const low=[...pl].sort((x,y)=>P.c.score[x.id]-P.c.score[y.id])[0];const f=nearest(MEALS,ST(low.stage));R.nofood={a:low,f,wk:walkT(ST(low.stage),f)}}
+  if(!meals.length){const low=[...pl].sort((x,y)=>(P.c.score[x.id]??0)-(P.c.score[y.id]??0))[0];const f=nearest(MEALS,ST(low.stage));R.nofood={a:low,f,wk:walkT(ST(low.stage),f)}}
   return R}
 
 function mapItemText(it,P){const nm=a=>`<b>${esc(a.name)}</b>`;
@@ -1444,7 +1511,7 @@ function routeSegs(R){const segs=[];let prev=null;
     if(it.k==="food"||it.k==="water"&&!it.warn||it.k==="chill"){if(prev){segs.push({p:prev,q:it.at,i:it.i,stop:it.k});prev=it.at}continue}
     if(it.k==="tight"){segs.push({p:ST(it.a.stage),q:ST(it.b.stage),i:it.i,tight:true});prev=ST(it.b.stage);continue}
     if(it.k==="exit"){segs.push({p:ST(it.from),q:it.g,i:it.i,exit:true});continue}}
-  segs.forEach(sg=>sg.m=walkT(sg.p,sg.q));return segs}
+  segs.forEach((sg,j)=>{sg.m=walkT(sg.p,sg.q);sg.j=j});return segs}
 
 /* ---------- map view: whole park by default; pinch / drag / ⌘-scroll / buttons to zoom and move ---------- */
 let MV=null,MVfit="park",MDATA=null,mapFocus=null,mpT=null;
@@ -1459,7 +1526,7 @@ function routeBox(){const D=MDATA;if(!D||!D.segs.length)return null;return bboxO
 function fitPx(b,pad,minW){const {W,H}=mapSize();const iw=Math.max(60,W-pad[0]-pad[2]),ih=Math.max(60,H-pad[1]-pad[3]);const bw=Math.max(minW||0,b[2]-b[0]),bh=b[3]-b[1];
   const k=Math.max(bw/iw,bh/ih);const cx=(b[0]+b[2])/2,cy=(b[1]+b[3])/2;const x=cx-(pad[0]+iw/2)*k,y=cy-(pad[1]+ih/2)*k;return {x,y,w:W*k,h:H*k}}
 const narrowMap=()=>mapSize().W<520;
-function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[40,48,84,48]:[70,50,130,50],260):fitPx(PARKB,n?[6,44,6,44]:[4,4,4,4])}else MV=fitPx(PARKB,n?[6,44,6,44]:[4,4,4,4])}
+function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[60,70,70,60]:[90,110,140,90],260):fitPx(PARKB,n?[22,8,8,34]:[24,30,24,40])}else MV=fitPx(PARKB,n?[22,8,8,34]:[24,30,24,40])}
 function setMV(v,now){const {W,H}=mapSize();const w=Math.min(1900,Math.max(110,v.w)),h=w*H/W,cx=v.x+v.w/2,cy=v.y+v.h/2;MV={x:cx-w/2,y:cy-h/2,w,h};
   const svg=document.getElementById("mapSvg");if(svg)svg.setAttribute("viewBox",`${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}`);
   clearTimeout(mpT);if(now)drawMap();else mpT=setTimeout(drawMap,140)}
@@ -1467,7 +1534,7 @@ function zoomAt(f,cx,cy){const r=mapEl().getBoundingClientRect();const fx=cx==nu
   const mx=MV.x+fx*MV.w,my=MV.y+fy*MV.h;const nw=Math.min(1900,Math.max(110,MV.w/f)),nh=nw*MV.h/MV.w;MVfit=null;setMV({x:mx-fx*nw,y:my-fy*nh,w:nw,h:nh})}
 
 function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSize();const k0=MV.w/W,k=k0*(narrowMap()?.8:1),u=v=>+(v*k).toFixed(2);
-  const {R,RO,P,O,meetIds,used,segs,osegs,top}=D;const day=S.ui.day||"Fri";
+  const {R,P,OL=[],meetIds,used,segs,top}=D;const day=S.ui.day||"Fri";
   const px=(x,y,inner,cls,it)=>`<g${cls?` class="${cls}"`:""}${it!=null?` data-it="${it}"`:""} transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${k.toFixed(4)})">${inner}</g>`;
   let s=`<svg id="mapSvg" viewBox="${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of Zilker Park with ${esc(P.name)}'s ${DAYS[day]} route">
   <rect x="-3000" y="-3000" width="6000" height="6000" fill="#4C6F3C"/><path d="${MAPG.lawn}" fill="#5B7D48"/>
@@ -1478,34 +1545,48 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
   MAPG.labels.forEach(l=>{s+=`<text class="mlab ${l.c}" transform="translate(${l.x} ${l.y}) rotate(${l.a})" font-size="${u(l.c==="wt"?10:l.c==="lm"?8.5:8)}" dy="${u(3)}">${l.t}</text>`});
   // amenities (bigger when your day uses them)
   const showLab=k0<1.3;
-  for(const sp of SPOTS){const on=used.has(sp.k);const r=sp.t==="water"?(on?8:5.5):sp.t==="med"?5.5:(on?10:7.5);
+  for(const sp of SPOTS){const on=used.has(sp.k);if(!on&&k0>0.95)continue;const r=sp.t==="water"?(on?8:5.5):sp.t==="med"?5.5:(on?10:7.5);
     const fill=sp.t==="water"?"#5EC6F1":sp.t==="med"?"#E5432B":sp.t==="chill"?"#3E6B37":"#F4A12B";const ic=sp.t==="water"?"💧":sp.t==="med"?"✚":sp.t==="chill"?"🌳":"🍴";
     const its=R.items.filter(it=>(it.at&&it.at.k===sp.k)||(it.water&&it.k==="food"&&it.water.k===sp.k)).map(it=>it.i);
     const lab=(sp.t==="food"||sp.t==="chill")&&(showLab||on)?`<text y="${r+10}" class="spotlab${on?" on":""}">${esc(sp.n.replace(/^The /,""))}</text>`:"";
     s+=px(sp.x,sp.y,`<circle r="${r}" fill="${fill}" stroke="#FFF5E8" stroke-width="${on?2.2:1.3}"/><text y="${on?3.6:2.7}" font-size="${on?10:7.5}" class="${sp.t==="med"?"medtxt":"ic"}">${ic}</text>${lab}<title>${esc(sp.t==="water"?"Hydration station: "+sp.n.replace(/^the /,""):sp.n+(sp.d?": "+sp.d:""))}</title>`,`spot${on?" used":""}`,its.length?its.join(" "):null)}
   for(const g of GATES){const on=R.gate===g||R.items.some(it=>it.k==="exit"&&it.g===g);const w=g.lab.length*5.3+12;
+    if(!on&&k0>0.95)continue;
     s+=px(g.x,g.y,`<rect x="${-w/2}" y="-7" width="${w}" height="14" rx="4"/><text y="3">${g.lab}</text><title>${esc(g.n)}</title>`,`gate${on?" on":""}`)}
   // treasure-map route: friend first (pink dots), then yours (blue dots), each with direction arrows and walk minutes
-  const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,(j%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
+  const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,((sg.j??j)%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
     let g=`<path d="${c.d}" class="halo" stroke-width="${u(cls==="mine"?7:5)}"/><path d="${c.d}" class="dots" stroke="${tcol}" stroke-width="${u(cls==="mine"?3.8:3)}" stroke-dasharray="0.01 ${u(cls==="mine"?8:7)}"/>`;
     const ts=Lpx>240?[.3,.7]:[.5];ts.forEach(t=>{const b=bez(sg.p,c.c,sg.q,t);g+=px(b.x,b.y,`<path d="M-4.5,-4.5 L4,0 L-4.5,4.5 Z" fill="${tcol}" stroke="#FFF5E8" stroke-width="1" transform="rotate(${b.ang.toFixed(0)})"/>`)});
-    if(withPills&&Lpx>56){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
-    s+=`<g class="seg ${cls}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
-  if(RO&&osegs.length)drawSegs(osegs,"#C2459A","theirs",-1.25,false);
-  drawSegs(segs,"#1F6FB8","mine",1,true);
+    const stc=cls!=="mine"||D.cur==null?"":sg.ai<=D.cur?"past":sg.ai===D.nextStepI?"next":"future";
+    const showPill=withPills&&stc!=="past"&&(S.ui.allWalk||String(sg.i)===String(mapFocus)||stc==="next"||(D.cur==null&&sg.i===D.nextI));
+    if(withPills&&!showPill&&sg.tight){const b=bez(sg.p,c.c,sg.q,.5);g+=px(b.x,b.y,`<circle r="7" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.3"/><text y="3.1" class="boltic">⚡</text>`)}
+    if(showPill&&Lpx>40){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
+    s+=`<g class="seg ${cls} ${stc}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
+  OL.forEach((o,n)=>{if(o.segs.length)drawSegs(o.segs,o.col,"theirs",-(1.25+n*.45),false)});
+  const segOrder=D.cur==null?segs:[...segs.filter(sg=>sg.ai<=D.cur),...segs.filter(sg=>sg.ai>D.cur&&sg.ai!==D.nextStepI),...segs.filter(sg=>sg.ai===D.nextStepI)];
+  drawSegs(segOrder,"#1F6FB8","mine",1,true);
+  // a pulsing ring where you are now (or the step you picked)
+  if(D.cur!=null){const it=R.items[D.cur];const at=it.k==="set"?ST(it.a.stage):it.k==="gate"||it.k==="exit"?it.g:it.at;if(at)s+=px(at.x,at.y,`<circle r="15" class="herering"/><circle r="15" class="herepulse"/>`)}
   // start / exit pins
   if(R.gate){const g=R.gate;const t=`START ${fmtP(R.items[0].t)}`;const w=t.length*5.9+14;s+=px(g.x,g.y,`<g transform="translate(0 -19)"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="#1F6FB8" stroke="#FFF5E8" stroke-width="1.2"/><text y="3.6" class="pilltxt">${t}</text></g>`,"startpin")}
-  // decisions: ⚡ beside the stage you'd be giving up
+  // stages: a small pin on the real spot; the name sits off to the side (away from the middle of the park, where paths cross),
+  // with your set times listed under it
+  const DIRS={"T-Mobile":[0,1],"Miller Lite":[-.25,-1],"Tito's":[1,-.25],"American Express":[.15,1],"Snapchat":[1,.3],"BMI":[-.25,1],"Beatbox":[1,.15]};
   const forkN={};
-  // stages + numbered time tags
-  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];const lw=g.lab.length*6.7+14;
-    s+=px(g.x,g.y,`<rect x="${-lw/2}" y="-9.5" width="${lw}" height="19" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.4:1.2}"/><text y="4.6" fill="${g.ink}" class="stlab">${g.lab}</text><title>${esc(name)}${visits.length?": "+visits.map(v=>fmt(v.a.s)+" "+v.a.name).join(", "):""}</title>`,`stage${visits.length?" on":ovis.length?" oon":""}`,visits.length?visits.map(v=>v.i).join(" "):null);
-    if(top&&top.stage===name)s+=px(g.x,g.y,`<text y="27" class="xmark">✕</text><title>X marks your top set: ${esc(top.name)}</title>`);
-    visits.forEach((v,j)=>{const meet=meetIds.has(v.a.id);const tw=66+(meet?16:0);
-      s+=px(g.x,g.y,`<g transform="translate(${lw/2+4} ${-9.5+j*20})"><rect width="${tw}" height="18" rx="9" class="tagbg${meet?" meet":""}"/><circle cx="9" cy="9" r="7.2" class="tagn ${heatOf2(P,v.a.id)}"/><text x="9" y="12.4" class="tagnt ${heatOf2(P,v.a.id)}">${v.n}</text><text x="20" y="12.6" class="tagtt">${fmtP(v.a.s)}</text>${meet?`<text x="${tw-9}" y="12.6" class="tagtt" text-anchor="middle">🤝</text>`:""}</g><title>${v.n}. ${fmtP(v.a.s)}–${fmtP(v.a.e)} ${esc(v.a.name)}${meet?" · meet-up":""}</title>`,"tag",v.i)});
-    if(RO&&!visits.length&&ovis.length)s+=px(g.x,g.y,`<circle cx="${lw/2+6}" cy="-8" r="4.5" fill="#C2459A" stroke="#FFF5E8" stroke-width="1.4"/><title>${esc(O.name)}: ${ovis.map(a=>fmt(a.s)+" "+a.name).join(", ")}</title>`)}
-  R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const lw=g.lab.length*6.7+14;const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
-    s+=px(g.x,g.y,`<g transform="translate(${-lw/2-11-(n-1)*18} 0)"><circle r="8" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.4" class="boltic">⚡</text></g><title>${fmt(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.i)});
+  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=OL.flatMap(o=>o.R.pl.filter(a=>a.stage===name).map(a=>({a,o})));
+    let [dx,dy]=DIRS[name]||[0,1];const L=Math.hypot(dx,dy);dx/=L;dy/=L;const D0=22,ax=dx*D0,ay=dy*D0;
+    const lw=g.lab.length*6.7+14,rows=visits.map(v=>({v,meet:meetIds.has(v.a.id),top:top&&top.id===v.a.id})),rw=r=>62+(r.meet?16:0)+(r.top?13:0);
+    const H=19+rows.length*20;const top0=dy<-.3?-H:dy>.3?0:-9.5;const xAt=w=>dx<-.3?-w:dx>.3?0:-w/2;
+    let blk=`<line x1="0" y1="0" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" class="leader"/><circle r="6" fill="${g.c}" stroke="#FFF5E8" stroke-width="2"/>`;
+    blk+=`<g transform="translate(${ax.toFixed(1)} ${ay.toFixed(1)})"><rect x="${xAt(lw)}" y="${top0}" width="${lw}" height="19" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.2:1.2}"/><text x="${xAt(lw)+lw/2}" y="${top0+14.1}" fill="${g.ink}" class="stlab">${g.lab}</text>`;
+    rows.forEach((r,j)=>{const w=rw(r),x=xAt(w),y=top0+21+j*20,h=heatOf2(P,r.v.a.id);const ps=D.cur==null?"":r.v.i===D.cur?" now":r.v.i<D.cur?" past":"";
+      blk+=`<g data-it="${r.v.i}" class="tag${ps}"><rect x="${x}" y="${y}" width="${w}" height="18" rx="9" class="tagbg${r.meet?" meet":""}"/><circle cx="${x+9}" cy="${y+9}" r="7.2" class="tagn ${h}"/><text x="${x+9}" y="${y+12.4}" class="tagnt ${h}">${r.v.n}</text><text x="${x+20}" y="${y+12.6}" class="tagtt">${fmtP(r.v.a.s)}</text>${r.top?`<text x="${x+w-(r.meet?24:8)}" y="${y+13.5}" class="xmark" font-size="13">✕</text>`:""}${r.meet?`<text x="${x+w-9}" y="${y+12.6}" class="tagtt" text-anchor="middle">🤝</text>`:""}<title>${r.v.n}. ${fmtP(r.v.a.s)}–${fmtP(r.v.a.e)} ${esc(r.v.a.name)}${r.top?" · your top set":""}${r.meet?" · meet-up":""}</title></g>`});
+    blk+=`</g><title>${esc(name)}${visits.length?": "+visits.map(v=>fmtP(v.a.s)+" "+v.a.name).join(", "):""}</title>`;
+    if(!visits.length&&ovis.length){const seen=[...new Set(ovis.map(x=>x.o))];seen.forEach((o,q)=>{blk+=`<circle cx="${7+q*9}" cy="-7" r="4.5" fill="${o.col}" stroke="#FFF5E8" stroke-width="1.4"><title>${esc(o.name)}: ${ovis.filter(x=>x.o===o).map(x=>fmtP(x.a.s)+" "+x.a.name).join(", ")}</title></circle>`})}
+    s+=px(g.x,g.y,blk,`stage${visits.length?" on":ovis.length?" oon":""}`)}
+  // decisions: ⚡ on the pin of the stage you'd be giving up
+  R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
+    s+=px(g.x,g.y,`<g transform="translate(${-11-(n-1)*16} -11)"><circle r="7.5" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.3" class="boltic">⚡</text></g><title>${fmtP(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.i)});
   // compass + attribution stay put in the corners
   s+=px(MV.x+k0*24,MV.y+k0*26,`<circle r="17" fill="#FFF5E8" opacity=".92"/><path d="M0,-12 L5,4 L0,1 L-5,4 Z" fill="#E5432B"/><text y="13.5" class="compass">N</text>`);
   s+=px(MV.x+MV.w-k0*6,MV.y+MV.h-k0*6,`<text class="osm" text-anchor="end">© OpenStreetMap contributors</text>`);
@@ -1514,39 +1595,76 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
   if(mapFocus!=null)markFocus()}
 
 function renderMap(){
-  const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
+  const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-selected",x.dataset.day===day));
   const gk=S.ui.gate||"auto";document.querySelectorAll("#mapGates button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.gate===gk));
-  const P=subjectPerson();const R=buildDay(day,P);const O=mapOverlay();const showO=!!O&&S.ui.mapFriend===true;const RO=showO?buildDay(day,O):null;
-  const meetIds=new Set(RO?RO.pl.map(a=>a.id).filter(id=>R.pl.some(a=>a.id===id)):[]);
+  const P=subjectPerson();const R=buildDay(day,P);const cands=routeCands();
+  const OL=cands.filter(o=>MAPSHOW.has(o.key)).map(o=>{const RR=buildDay(day,o);return {...o,R:RR,segs:RR.pl.length?routeSegs(RR):[]}});
+  const meetBy={};OL.forEach(o=>o.R.pl.forEach(a=>{if(R.pl.some(x=>x.id===a.id))(meetBy[a.id]=meetBy[a.id]||[]).push(first(o.name))}));
+  const meetIds=new Set(Object.keys(meetBy).map(Number));const showO=OL.length>0,RO=null,O=OL[0]||null;
   const used=new Set(R.items.filter(it=>it.at).map(it=>it.at.k).concat(R.items.filter(it=>it.water&&it.k==="food").map(it=>it.water.k)));
-  const segs=routeSegs(R),osegs=RO&&RO.pl.length?routeSegs(RO):[];
-  const top=R.pl.length?[...R.pl].sort((x,y)=>P.c.score[y.id]-P.c.score[x.id])[0]:null;
+  const segs=routeSegs(R),osegs=[];
+  const top=R.pl.length?[...R.pl].sort((x,y)=>(P.c.score[y.id]??-1)-(P.c.score[x.id]??-1))[0]:null;
   const itPts={};const addP=(i,...ps)=>{(itPts[i]=itPts[i]||[]).push(...ps)};
   segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.i,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
   if(MDATA&&MDATA.day!==day){MVfit="park";mapFocus=null}
-  MDATA={R,RO,P,O,meetIds,used,segs,osegs,top,itPts,day};
+  // the walk to show by default: the next one if today is this festival day, otherwise none (tap a step, or turn on all walk times in the Key)
+  let nextI=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+    const today={"2026-10-09":"Fri","2026-10-10":"Sat","2026-10-11":"Sun"}[`${parts.year}-${parts.month}-${parts.day}`];
+    if(today===day){const nowM=+parts.hour*60+ +parts.minute;const sg=segs.find(sg=>(R.items[sg.i].t||0)>=nowM-5);nextI=sg?sg.i:null}}catch(e){}
+  // steps you move through: past ones grey, the current one in full colour, the rest waiting. Device time picks the start on the day itself.
+  const steps=R.items.filter(it=>it.k==="gate"||it.k==="set"||it.k==="food"||(it.k==="water"&&!it.warn)||it.k==="chill"||it.k==="exit").map(it=>it.i);
+  let live=false,auto=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+    if({"2026-10-09":"Fri","2026-10-10":"Sat","2026-10-11":"Sun"}[`${parts.year}-${parts.month}-${parts.day}`]===day&&steps.length){live=true;const nowM=+parts.hour*60+ +parts.minute;auto=steps[0];steps.forEach(i=>{if((R.items[i].t||0)<=nowM)auto=i})}}catch(e){}
+  if(STEP.day!==day||(STEP.i!=null&&!steps.includes(STEP.i)))STEP={day,i:null,manual:false};
+  const cur=STEP.manual?STEP.i:auto,nextStepI=cur==null?null:(steps.find(i=>i>cur)??null);
+  segs.forEach(sg=>{sg.ai=sg.tight?R.items.findIndex(x=>x.k==="set"&&x.a===R.items[sg.i].b):sg.i});
+  MDATA={R,RO,P,O,OL,meetBy,meetIds,used,segs,osegs,top,itPts,day,nextI,steps,cur,nextStepI,live};
   if(!MV||MVfit)applyFit();
   drawMap();
-  updView();
-  document.getElementById("keyFriendRow").hidden=!showO;if(showO)document.getElementById("keyFriendTxt").textContent=`${VIEW?"Your":first(O.name)+"'s"} path.`;
-  // overlay toggle
-  document.getElementById("mapOverlay").innerHTML=O?`<button class="switch" id="mapFriendSw" role="switch" aria-checked="${showO}"><i></i><span>Show ${VIEW?"my":esc(first(O.name))+"'s"} path in pink${RO&&meetIds.size?` · ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""}</span></button>`:(VIEW?"":`<span class="small muted">Add a friend on the Crew tab to see their path here too.</span>`);
-  const sw=document.getElementById("mapFriendSw");if(sw)sw.onclick=()=>{S.ui.mapFriend=!showO;save();renderMap()};
+  updView();renderStepper();document.getElementById("mAllWalk").setAttribute("aria-checked",!!S.ui.allWalk);
+  document.getElementById("keyFriendRow").hidden=!showO;if(showO)document.getElementById("keyFriendTxt").textContent=`Dots in other colours: ${OL.map(o=>VIEW?"your":first(o.name)+"'s").join(", ")} route${OL.length===1?"":"s"}.`;
+  document.getElementById("mapOverlay").innerHTML=cands.length||VIEW?"":`<span class="small muted">Add friends on the Crew tab to compare routes here.</span>`;
+  // whose routes to show: yours always; friends by name, off until you tick them
+  const rt=document.getElementById("mapRoutes");
+  rt.innerHTML=cands.length?`<b>Routes</b><span class="rchk me" style="--rc:#1F6FB8"><i></i>${VIEW?esc(first(P.name)):"You"}</span>`+cands.map(o=>`<label class="rchk" style="--rc:${o.col}"><input type="checkbox" data-rk="${esc(o.key)}"${MAPSHOW.has(o.key)?" checked":""}><i></i>${esc(o.key==="me"?"You":first(o.name))}</label>`).join("")+(meetIds.size?`<span class="small muted">· ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝</span>`:""):"";
+  rt.querySelectorAll("[data-rk]").forEach(c=>c.onchange=()=>{if(c.checked)MAPSHOW.add(c.dataset.rk);else MAPSHOW.delete(c.dataset.rk);renderMap()});
   // itinerary
   const head=VIEW?`${esc(P.name)}'s ${DAYS[day]}`:`Your ${DAYS[day]}`;document.getElementById("itinHead").innerHTML=head;
-  document.getElementById("itinSum").innerHTML=R.pl.length?[`${R.pl.length} set${R.pl.length===1?"":"s"}`,`${R.walk}+ min walking`,R.decide+R.tight?`${R.decide+R.tight} heads-up${R.decide+R.tight===1?"":"s"} ⚡`:"",R.food?`${R.food} food break${R.food===1?"":"s"}`:"",meetIds.size?`${meetIds.size} with ${esc(first(O.name))} 🤝`:""].filter(Boolean).join(" · "):"";
+  document.getElementById("itinSum").innerHTML=R.pl.length?[`${R.pl.length} set${R.pl.length===1?"":"s"}`,`${R.walk}+ min walking`,R.decide+R.tight?`${R.decide+R.tight} heads-up${R.decide+R.tight===1?"":"s"} ⚡`:"",R.food?`${R.food} food break${R.food===1?"":"s"}`:"",meetIds.size?`${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""].filter(Boolean).join(" · "):"";
   let L="";
   if(!R.pl.length)L=`<li class="mini"><span></span><span>${VIEW?"Nothing planned this day yet.":`Rate some ${DAYS[day].split(",")[0]} artists ❤️ or 👍 and your route, decision points and breaks appear here.`}</span><span></span></li>`;
-  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
+  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick${P.c.tier[R.nofood.a.id]>=0?`, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}`:""}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
   for(const it of R.items){
-    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc(first(O.name))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
+    const pc=cur==null?"":it.i===cur?" now":it.i<cur?" past":"";const nowChip=it.i===cur?` <span class="chip nowchip">${live&&!STEP.manual?"You are here":"This step"}</span>`:"";
+    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}${pc}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${nowChip}${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc((meetBy[a.id]||[]).join(", "))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${P.c.tier[a.id]>=0?TIERS[P.c.tier[a.id]].icon+" "+sc1(P.c.score[a.id]):"📌"}</span></li>`;continue}
     const m=mapItemText(it,P);if(!m)continue;
-    L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmtP(it.t)}`}</span><span>${m.tx}</span><span>${m.btn||""}</span></li>`}
+    L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}${pc}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmtP(it.t)}`}</span><span>${m.tx}${nowChip}</span><span>${m.btn||""}</span></li>`}
   const ol=document.getElementById("itin");ol.innerHTML=L;
   ol.querySelectorAll("[data-p]").forEach(b=>b.onclick=e=>{e.stopPropagation();goBattle(b.dataset.p)});
   ol.querySelectorAll("button[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation();showArtist(A[+b.dataset.a])});
-  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>focusIt(li.dataset.it,true));
+  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>{const i=+li.dataset.it;if(MDATA.steps.includes(i)){setStep(i,true);if(window.innerWidth<=900){const c=document.querySelector(".mapcard"),t=document.querySelector(".tabs");window.scrollTo({top:c.getBoundingClientRect().top+window.scrollY-(t?t.offsetHeight:0)-8,behavior:"smooth"})}}else focusIt(li.dataset.it,true)});
   markFocus()}
+let STEP={day:null,i:null,manual:false};
+function stepLabel(it){if(!it)return"";switch(it.k){
+  case "gate":return `Arrive by ${fmtP(it.t)} · ${it.g.n}`;
+  case "set":return `${fmtP(it.a.s)} · ${it.a.name} @ ${stShort(it.a.stage)}`;
+  case "food":return `${fmtP(it.t)} · Eat at ${it.at.n}`;
+  case "water":return `${fmtP(it.t)} · Refill water`;
+  case "chill":return `${fmtP(it.t)} · Shade at ${it.at.n}`;
+  case "exit":return `${fmtP(it.t)} · Head out, ${it.g.n}`}return""}
+function setStep(i,zoom){const D=MDATA;if(!D)return;STEP={day:D.day,i,manual:true};mapFocus=null;renderMap();
+  if(zoom&&i!=null){const pts=[...(MDATA.itPts[i]||[])];const nx=MDATA.nextStepI;if(nx!=null)pts.push(...(MDATA.itPts[nx]||[]));
+    if(pts.length){MVfit=null;MV=fitBox(bboxOf(pts),110,380);drawMap();updView()}}}
+function renderStepper(){const el=document.getElementById("mapStep");const D=MDATA;if(!D||!D.steps.length){el.innerHTML="";return}
+  const n=D.steps.length,k=D.cur==null?-1:D.steps.indexOf(D.cur);
+  el.innerHTML=k<0?`<button class="btn primary" id="stGo">▶ Walk through your day</button>`:
+    `<button class="mbtn" id="stPrev" aria-label="Previous step"${k<=0?" disabled":""}>◀</button><div class="sttxt"><span class="small muted">${D.live&&!STEP.manual?"Now":"Step "+(k+1)+" of "+n}</span><b>${esc(stepLabel(D.R.items[D.cur]))}</b></div><button class="mbtn" id="stNext" aria-label="Next step"${k>=n-1?" disabled":""}>▶</button>${D.live&&STEP.manual?`<button class="btn ghost" id="stNow">Now</button>`:""}`;
+  const g=id=>document.getElementById(id);
+  if(g("stGo"))g("stGo").onclick=()=>setStep(D.steps[0],true);
+  if(g("stPrev"))g("stPrev").onclick=()=>setStep(D.steps[Math.max(0,k-1)],true);
+  if(g("stNext"))g("stNext").onclick=()=>setStep(D.steps[Math.min(n-1,k+1)],true);
+  if(g("stNow"))g("stNow").onclick=()=>{STEP.manual=false;renderMap()}}
+setInterval(()=>{if(S.ui.tab==="map"&&MDATA&&MDATA.live&&!STEP.manual)renderMap()},60000);
 function updView(){const b=document.getElementById("mView");const hasRoute=!!(MDATA&&MDATA.segs.length);
   const n=narrowMap();if(MVfit==="park"){b.textContent=n?"My route":"Zoom to my route";b.hidden=!hasRoute}else{b.textContent=n?"Whole park":"Show whole park";b.hidden=false}}
 function heatOf2(P,id){return P.c.tier[id]<0?"unrated":TIERS[P.c.tier[id]].heat}
@@ -1555,7 +1673,7 @@ function markFocus(){const svg=document.getElementById("mapSvg");if(!svg)return;
   svg.querySelectorAll("[data-it]").forEach(g=>g.classList.toggle("hl",mapFocus!=null&&g.getAttribute("data-it").split(" ").includes(String(mapFocus))));
   document.querySelectorAll("#itin li[data-it]").forEach(li=>li.classList.toggle("hl",mapFocus!=null&&li.dataset.it===String(mapFocus)));
   if(mapFocus!=null&&!svg.querySelector(".hl"))svg.classList.remove("focus")}
-function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;markFocus();return}mapFocus=i;
+function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;drawMap();return}mapFocus=i;drawMap();
   const pts=MDATA&&MDATA.itPts[i];
   if(fromList&&pts&&pts.length){const b=bboxOf(pts);const v=fitBox(b,90,360);if(v.w<MV.w||b[0]<MV.x||b[2]>MV.x+MV.w||b[1]<MV.y||b[3]>MV.y+MV.h){MVfit=null;MV=v;drawMap();updView()}}
   markFocus();if(fromList&&window.innerWidth<=900){const c=document.querySelector(".mapcard"),t=document.querySelector(".tabs");window.scrollTo({top:c.getBoundingClientRect().top+window.scrollY-(t?t.offsetHeight:0)-8,behavior:"smooth"})}}
@@ -1577,7 +1695,8 @@ function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;markFocu
   document.getElementById("mView").onclick=()=>{MVfit=MVfit==="park"&&MDATA&&MDATA.segs.length?"route":"park";applyFit();renderMap()};
   const key=document.getElementById("mapKey"),kb=document.getElementById("mKeyBtn");
   const setKey=o=>{key.hidden=!o;kb.setAttribute("aria-expanded",o);kb.classList.toggle("on",o)};
-  kb.onclick=()=>setKey(key.hidden);document.getElementById("mKeyX").onclick=()=>setKey(false);
+  kb.onclick=()=>setKey(key.hidden);
+  document.getElementById("mAllWalk").onclick=()=>{S.ui.allWalk=!S.ui.allWalk;save();renderMap()};document.getElementById("mKeyX").onclick=()=>setKey(false);
   let rzT=null;window.addEventListener("resize",()=>{if(S.ui.tab!=="map"||!MV)return;clearTimeout(rzT);rzT=setTimeout(()=>{if(MVfit)applyFit();else setMV(MV,true);drawMap()},120)})})();
 document.querySelectorAll("#mapDays button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;mapFocus=null;save();renderMap()});
 document.querySelectorAll("#mapGates button").forEach(b=>b.onclick=()=>{S.ui.gate=b.dataset.gate==="auto"?null:b.dataset.gate;save();renderMap()});
