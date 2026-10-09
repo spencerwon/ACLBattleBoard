@@ -200,6 +200,19 @@ details.foot p{font-size:13px;max-width:70ch}
 .sharebox .acts .btn{text-align:center;text-decoration:none}
 .check{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:700}
 .imgprev{max-width:100%;border-radius:10px;display:block}
+.np{position:fixed;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:41;width:min(380px,calc(100% - 36px));display:flex;align-items:center;gap:6px;background:#163C29;color:#FFF5E8;border-radius:18px;padding:8px;box-shadow:0 0 0 3px #FFF5E8,0 14px 30px -12px #163C29cc}
+.np .npbtn{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:#ffffff1f;color:#FFF5E8;display:grid;place-items:center;font-size:14px;text-decoration:none;font-weight:800}
+.np .npbtn:hover{background:#ffffff33}
+.np .npplay{width:42px;height:42px;background:#FA2D48;font-size:13px}
+.np.spot .npplay{background:#1DB954}
+.np .npmeta{flex:1;min-width:0;display:grid;gap:1px;text-align:left;background:transparent;border:0;color:inherit;padding:0 4px;cursor:pointer}
+.np .npkick{white-space:nowrap;font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.np b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np #npSub{font-size:11.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .npbar{height:3px;border-radius:3px;background:#ffffff33;overflow:hidden;margin-top:4px}
+.np .npbar i{display:block;height:100%;width:0;background:#FFF5E8;transition:width .25s linear}
+body.np-on .wrap{padding-bottom:110px}
+@media (max-width:640px){.np .npx{display:none}.np{left:12px;right:12px;width:auto;bottom:calc(74px + env(safe-area-inset-bottom,0px))}body.np-on .wrap{padding-bottom:170px}}
 @media (max-width:760px){
   .arena{grid-template-columns:1fr}
   .vs{font-size:32px}
@@ -335,6 +348,13 @@ details.foot p{font-size:13px;max-width:70ch}
   </section>
 </div>
 <div id="dialogHost"></div>
+<div class="np" id="np" hidden role="region" aria-label="Now playing">
+  <button class="npbtn npplay" id="npPlay" aria-label="Pause">❚❚</button>
+  <button class="npmeta" id="npMeta" title="Open artist"><span class="npkick">Now playing<span class="npx"> · 30s preview</span></span><b id="npTitle"></b><span id="npSub"></span><span class="npbar"><i id="npProg"></i></span></button>
+  <button class="npbtn" id="npNext" aria-label="Next song">⏭</button>
+  <a class="npbtn" id="npFull" href="#" target="_blank" rel="noopener" aria-label="Full song">↗</a>
+  <button class="npbtn" id="npClose" aria-label="Stop and close">✕</button>
+</div>
 <a class="coffee" href="https://venmo.com/u/speence" target="_blank" rel="noopener" aria-label="Buy me a coffee on Venmo, @speence">☕ Buy me a coffee</a>
 
 <script>
@@ -475,18 +495,45 @@ function setTab(t){S.ui.tab=t;document.querySelectorAll(".tab").forEach(b=>b.set
   save();renderAll()}
 
 /* ---------- audio previews (hosted version only) ---------- */
-const PV={};let audio=null,playingId=null;
+const PV={};let audio=null,cur=null;
+/* every playlist song by its Apple id, in festival time order, so Next walks the lineup */
+const SONG={},ORDER=[];
+[...A].sort((x,y)=>({Fri:0,Sat:1,Sun:2}[x.day]-{Fri:0,Sat:1,Sun:2}[y.day])||x.s-y.s).forEach(a=>(a.pl||[]).forEach(([t,p])=>{const sid=p.split("/").pop();if(SONG[sid])return;SONG[sid]={aid:a.id,title:t,path:p};ORDER.push(sid)}));
 function loadPreviews(){
-  const ids=[...new Set(A.flatMap(a=>(a.pl||[]).map(s=>s[1].split("/").pop())))];
+  const ids=ORDER.slice();
   for(let i=0;i<ids.length;i+=150){const cb="__pv"+i;window[cb]=j=>{(j.results||[]).forEach(r=>{if(r.previewUrl)PV[String(r.trackId)]=r.previewUrl});delete window[cb]};
     const s=document.createElement("script");s.src="https://itunes.apple.com/lookup?id="+ids.slice(i,i+150).join(",")+"&entity=song&callback="+cb;s.onerror=()=>{};document.head.appendChild(s)}}
+function fullLink(sid){const s=SONG[sid],a=A[s.aid];return S.ui.svc==="spotify"?spSearch(a.name,s.title):"https://music.apple.com/us/song/"+s.path}
+function ensureAudio(){if(audio)return;audio=new Audio();
+  audio.addEventListener("ended",()=>playNext(true));
+  audio.addEventListener("play",renderNP);audio.addEventListener("pause",renderNP);
+  audio.addEventListener("timeupdate",()=>{const pr=document.getElementById("npProg");if(pr&&audio.duration)pr.style.width=(audio.currentTime/audio.duration*100)+"%"});
+  if("mediaSession" in navigator){try{navigator.mediaSession.setActionHandler("play",()=>audio.play());navigator.mediaSession.setActionHandler("pause",()=>audio.pause());navigator.mediaSession.setActionHandler("nexttrack",()=>playNext(false))}catch(e){}}}
+function startSong(sid){ensureAudio();const url=PV[sid];if(!url)return false;cur={sid};audio.src=url;
+  audio.play().then(renderNP).catch(()=>{cur=null;renderNP();window.open(fullLink(sid),"_blank","noopener")});
+  if("mediaSession" in navigator&&window.MediaMetadata){try{navigator.mediaSession.metadata=new MediaMetadata({title:SONG[sid].title,artist:A[SONG[sid].aid].name,album:"ACL Battle Board · 30-second preview"})}catch(e){}}
+  renderNP();return true}
 function playPreview(sid,btn){
-  if(!audio){audio=new Audio();audio.addEventListener("ended",()=>{playingId=null;markPlaying()})}
-  if(playingId===sid&&!audio.paused){audio.pause();playingId=null;markPlaying();return}
-  const url=PV[sid];if(!url){window.open(btn.dataset.full,"_blank","noopener");return}
-  audio.src=url;audio.play().then(()=>{playingId=sid;markPlaying()}).catch(()=>{window.open(btn.dataset.full,"_blank","noopener")})}
-function markPlaying(){document.querySelectorAll(".sp[data-sid]").forEach(b=>{const on=b.dataset.sid===playingId;b.classList.toggle("playing",on);const p=b.querySelector(".play");if(p)p.textContent=on?"❚❚":"▶"})}
+  if(cur&&cur.sid===sid&&audio){if(audio.paused)audio.play();else audio.pause();return}
+  if(!startSong(sid))window.open(btn.dataset.full,"_blank","noopener")}
+function playNext(auto){if(!cur)return;let i=ORDER.indexOf(cur.sid);
+  for(let k=1;k<=ORDER.length;k++){const sid=ORDER[(i+k)%ORDER.length];if(PV[sid]){startSong(sid);return}}
+  if(auto){audio.pause()}}
+function stopNP(){if(audio){audio.pause();audio.removeAttribute("src");audio.load()}cur=null;renderNP()}
+function markPlaying(){const on=cur&&audio&&!audio.paused?cur.sid:null;document.querySelectorAll(".sp[data-sid]").forEach(b=>{const p=b.dataset.sid===on;b.classList.toggle("playing",p);const ic=b.querySelector(".play");if(ic)ic.textContent=p?"❚❚":"▶"})}
+function renderNP(){const np=document.getElementById("np");markPlaying();
+  if(!cur){np.hidden=true;document.body.classList.remove("np-on");return}
+  const s=SONG[cur.sid],a=A[s.aid];const playing=audio&&!audio.paused;
+  np.hidden=false;document.body.classList.add("np-on");np.classList.toggle("spot",S.ui.svc==="spotify");
+  document.getElementById("npPlay").textContent=playing?"❚❚":"▶";document.getElementById("npPlay").setAttribute("aria-label",playing?"Pause":"Play");
+  document.getElementById("npTitle").textContent=s.title;
+  document.getElementById("npSub").textContent=`${a.name} · ${a.day} ${fmt(a.s)} · ${a.stage==="American Express"?"AmEx":a.stage}`;
+  const f=document.getElementById("npFull");f.href=fullLink(cur.sid);f.title="Full song in "+(S.ui.svc==="spotify"?"Spotify":"Apple Music")}
 document.addEventListener("click",e=>{const b=e.target.closest(".sp[data-sid]");if(b){e.preventDefault();playPreview(b.dataset.sid,b)}});
+document.getElementById("npPlay").onclick=()=>{if(!cur||!audio)return;if(audio.paused)audio.play();else audio.pause()};
+document.getElementById("npNext").onclick=()=>playNext(false);
+document.getElementById("npClose").onclick=stopNP;
+document.getElementById("npMeta").onclick=()=>{if(cur)showArtist(A[SONG[cur.sid].aid])};
 
 /* ---------- shared pieces ---------- */
 const maxL=Math.max(...A.map(a=>a.listeners||0));
@@ -508,7 +555,7 @@ function renderService(){const sp=S.ui.svc==="spotify";
 document.getElementById("playlistBar").addEventListener("click",e=>{if(S.ui.svc!=="spotify")return;e.preventDefault();
   const L=[...A].sort((x,y)=>({Fri:0,Sat:1,Sun:2}[x.day]-{Fri:0,Sat:1,Sun:2}[y.day])||x.s-y.s);
   copy(L.flatMap(a=>(a.pl&&a.pl.length?a.pl.map(s=>s[0]):(a.topSongs||[]).map(s=>s.title)).map(t=>a.name+" - "+t)).join("\n"),"Song list copied. Paste it into TuneMyMusic or Soundiiz to build a Spotify playlist.")});
-document.querySelectorAll("[data-svc]").forEach(b=>b.onclick=()=>{S.ui.svc=b.dataset.svc;save();renderService();renderAll();toast(S.ui.svc==="spotify"?"Songs now open in Spotify":"Songs now open in Apple Music")});
+document.querySelectorAll("[data-svc]").forEach(b=>b.onclick=()=>{S.ui.svc=b.dataset.svc;save();renderService();renderAll();if(typeof renderNP==="function")renderNP();toast(S.ui.svc==="spotify"?"Songs now open in Spotify":"Songs now open in Apple Music")});
 function rateHTML(id){return `<div class="rate" role="group" aria-label="Rate ${esc(A[id].name)}">${TIERS.map((T,i)=>`<button data-rate="${id}:${i}" aria-pressed="${C.tier[id]===i}">${T.icon}<span>${T.label}</span></button>`).join("")}</div>`}
 function bindRate(root,after){root.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{const [id,ti]=b.dataset.rate.split(":").map(Number);
   checkpoint();const was=C.tier[id];rateArtist(id,was===ti?null:ti);save();recompute();
