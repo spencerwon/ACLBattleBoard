@@ -443,7 +443,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     </div>
     <details class="foot">
       <summary>How scoring works</summary>
-      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Head-to-head battles then set the order inside the band: each newly rated artist battles members of its band (a binary search, so a band of 15 takes about 4 battles) until its spot is clear. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
+      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Once you've rated everyone in view, head-to-head battles set the order inside each band. Newly rated artists take turns, one battle each, so you don't face the same act over and over, and each needs only about 4 battles to find its spot in a band of 15 (a binary search). Cards come broad first: every genre early, best-known names first. “Not sure yet” sends an artist to the back of the line; skip it twice and it waits until the very end. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
       <p>With head-to-head placement switched off, a newly rated artist sits at the middle of its band at the band's centre score until you battle it.</p>
       <p>A lower-rated act can beat a higher-rated one in a set-clash battle without changing bands, because genre and mood don't always line up. You choose whether to move either act or keep both ratings.</p>
       <p id="syncNote"></p>
@@ -620,7 +620,7 @@ async function initCloud(){
 
 /* ---------- undo ---------- */
 let UNDO=[];try{UNDO=JSON.parse(localStorage.getItem(LS+"-undo")||"[]")}catch(e){}
-function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
+function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx,skip:S.ui.skip||{},def:S.ui.def||[]}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
 function undo(){const x=UNDO.pop();if(!x)return toast("Nothing to undo");const o=JSON.parse(x);Object.assign(S,{t:o.t,o:o.o,us:o.us,h:o.h});Object.assign(S.ui,o.ui);try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}save();recompute();renderAll();toast("Undone")}
 
 /* ---------- scoring ---------- */
@@ -646,11 +646,12 @@ function recompute(){C=compute(S)}
 const heatOf=id=>C.tier[id]<0?"unrated":TIERS[C.tier[id]].heat;
 const iconOf=id=>C.tier[id]<0?"":TIERS[C.tier[id]].icon;
 const scoreTxt=id=>C.score[id]==null?"–":C.score[id].toFixed(1);
-function removeFromLists(id){S.o=S.o.map(l=>l.filter(i=>i!==id));S.us=S.us.filter(i=>i!==id);if(S.ui.ins&&S.ui.ins.id===id){S.ui.ins=null;S.ui.pair=null}}
+function removeFromLists(id){S.o=S.o.map(l=>l.filter(i=>i!==id));S.us=S.us.filter(i=>i!==id);if(S.ui.def)S.ui.def=S.ui.def.filter(i=>i!==id);if(S.ui.ins&&S.ui.ins.id===id){S.ui.ins=null;S.ui.pair=null}}
 const h2hOn=()=>S.ui.h2h!==false;
 function rateArtist(id,ti){
   removeFromLists(id);
   if(ti===null){delete S.t[id];return}
+  if(S.ui.skip)delete S.ui.skip[id];
   S.t[id]=ti;const list=S.o[ti];
   if(!list.length){list.push(id);return}
   list.splice(Math.floor(list.length/2),0,id);S.us.push(id)}   // waits mid-band until placement battles finish
@@ -776,52 +777,87 @@ const seen=(a,b)=>S.h.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a));
 document.getElementById("h2hSwitch").onclick=()=>{S.ui.h2h=!h2hOn();if(S.ui.pairKind==="place"||S.ui.ins){S.ui.ins=null;S.ui.pair=null;S.ui.pairKind=null}
   save();recompute();renderAll();toast(h2hOn()?"Head-to-head placement on":"Rate-only: just the four buttons. Switch back on anytime to place what you've rated.")};
 function insList(ins){return S.o[ins.ti].filter(i=>i!==ins.id&&!S.us.includes(i))}
-function startInsertion(){
-  for(const id of [...S.us]){const ti=S.t[id];if(ti===undefined){S.us=S.us.filter(i=>i!==id);continue}
-    const L=insList({id,ti});if(!L.length){S.us=S.us.filter(i=>i!==id);continue}
-    S.ui.ins={id,ti,lo:0,hi:L.length,n:0,max:Math.max(1,Math.ceil(Math.log2(L.length+1)))};return true}
-  return false}
+/* Queue order, broad first so every answer adds new information:
+   1) artists you haven't seen yet, alternating genres, best-known first
+   2) placement battles for what you've rated (binary search inside each rating)
+   3) artists you skipped once ("Not sure yet"), oldest skip first
+   4) fine-tuning and set-clash battles, always the pair with the fewest battles so far
+   5) placements you put off, then battles you skipped once.
+   Anything skipped twice is parked; the finish screen offers it again. Nothing loops back straight away. */
+// Where an unplaced artist can go inside its rating, worked out from every battle it has had against placed artists in that rating.
+// Stateless, so several new artists can be placed in turn (one battle each) without losing track.
+function placeRange(id){const ti=S.t[id];const L=insList({id,ti});let lo=0,hi=L.length,n=0;
+  for(const [a,b,r] of S.h){if(r!==0&&r!==1&&r!==2)continue;if(a!==id&&b!==id)continue;const k=L.indexOf(a===id?b:a);if(k<0)continue;n++;
+    if(r===2){lo=Math.max(lo,k+1);hi=Math.min(hi,k+1);continue}
+    const won=(r===0&&a===id)||(r===1&&b===id);if(won)hi=Math.min(hi,k);else lo=Math.max(lo,k+1)}
+  return {L,lo,hi:Math.max(lo,hi),n}}
+function finishPlace(id,quiet){const {L,lo}=placeRange(id);const ti=S.t[id];const before=snapshotScores();const target=L[lo];
+  S.o[ti]=S.o[ti].filter(i=>i!==id);S.us=S.us.filter(i=>i!==id);if(S.ui.def)S.ui.def=S.ui.def.filter(i=>i!==id);
+  const list=S.o[ti];const at=target===undefined?list.length:list.indexOf(target);list.splice(at<0?list.length:at,0,id);recompute();
+  if(!quiet)S.ui.ctx=`Placed <b>${esc(A[id].name)}</b> at ${TIERS[ti].icon} ${scoreTxt(id)} · #${C.pos[id]+1} overall`+deltaLine(before,[id])}
+// Next placement battle: the waiting artist with the fewest placement battles so far, never the one just shown (breadth first).
+function nextPlacement(withDeferred){const def=new Set(S.ui.def||[]),last=new Set(S.ui.lastPair||[]);let best=null;
+  for(const id of [...S.us]){if(!withDeferred&&def.has(id))continue;if(S.t[id]===undefined){S.us=S.us.filter(i=>i!==id);continue}
+    const rg=placeRange(id);if(!rg.L.length||rg.lo>=rg.hi){finishPlace(id,true);continue}
+    const sc=rg.n+(last.has(id)?100:0);if(!best||sc<best.sc)best={id,rg,sc}}
+  if(!best)return false;const {id,rg}=best;
+  // pivot near the middle of the open range, avoiding artists seen in the last few battles so opponents vary too
+  const recent=new Set(S.ui.recent||[]);const span=rg.hi-rg.lo,c0=rg.lo+Math.floor(span/2);let mid=c0;
+  if(span>2){const opts=[];for(let k=rg.lo+Math.floor(span*.3);k<=rg.lo+Math.ceil(span*.7)-1;k++)opts.push(k);const fresh=opts.filter(k=>!recent.has(rg.L[k]));if(fresh.length)mid=fresh.reduce((b,k)=>Math.abs(k-c0)<Math.abs(b-c0)?k:b,fresh[0])}
+  S.ui.ins={id,ti:S.t[id],n:rg.n,max:rg.n+Math.max(1,Math.ceil(Math.log2(rg.hi-rg.lo+1)))};S.ui.pair=[id,rg.L[mid]];S.ui.pairKind="place";S.ui.card=null;return true}
+function cardQueue(){const sk=S.ui.skip||{};const pool=A.filter(a=>C.tier[a.id]<0&&passes(a));
+  // genre with the least coverage so far goes next (best-known artist in it first), so early answers span every genre
+  const byFam={},total={},cov={};A.forEach(a=>{total[a.fam]=(total[a.fam]||0)+1;if(C.tier[a.id]>=0||sk[a.id])cov[a.fam]=(cov[a.fam]||0)+1});
+  const fresh=pool.filter(a=>!sk[a.id]).sort((x,y)=>(y.listeners||0)-(x.listeners||0));fresh.forEach(a=>(byFam[a.fam]=byFam[a.fam]||[]).push(a));
+  const unseen=[];while(unseen.length<fresh.length){let bf=null,br=0;
+    for(const f in byFam){if(!byFam[f].length)continue;const r=(cov[f]||0)/total[f];if(bf==null||r<br-1e-9||(Math.abs(r-br)<1e-9&&byFam[f].length>byFam[bf].length)){bf=f;br=r}}
+    unseen.push(byFam[bf].shift());cov[bf]=(cov[bf]||0)+1}
+  const skipped=pool.filter(a=>sk[a.id]).sort((x,y)=>sk[x.id][1]-sk[y.id][1]);
+  return {unseen,skip1:skipped.filter(a=>sk[a.id][0]<2),parked:skipped.filter(a=>sk[a.id][0]>=2)}}
+function battleCount(id){let n=0;for(const [a,b,r] of S.h)if(r!==-1&&(a===id||b===id))n++;return n}
+function pairState(a,b){let done=false,skips=0;for(const [x,y,r] of S.h)if((x===a&&y===b)||(x===b&&y===a)){if(r===-1)skips++;else done=true}return {done,skips}}
+function pickBattle(retrySkipped){const cand=[];
+  const ok=(a,b)=>{const p=pairState(a,b);return !p.done&&(retrySkipped?p.skips===1:p.skips===0)};
+  S.o.forEach(l=>{const L=l.filter(i=>!S.us.includes(i)&&passes(A[i]));for(let i=0;i+1<L.length;i++)if(ok(L[i],L[i+1]))cand.push([L[i],L[i+1],"refine"])});
+  CLASH.forEach(([a,b])=>{if(C.tier[a]>=0&&C.tier[a]<=1&&C.tier[b]>=0&&C.tier[b]<=1&&passes(A[a])&&passes(A[b])&&ok(a,b))cand.push([a,b,"clash"])});
+  if(!cand.length)return null;const bc={};const n=id=>bc[id]!=null?bc[id]:(bc[id]=battleCount(id));
+  const last=new Set(S.ui.lastPair||[]),recent=new Set(S.ui.recent||[]);
+  cand.forEach(c=>c.s=n(c[0])+n(c[1])+(last.has(c[0])||last.has(c[1])?3:0)+(recent.has(c[0])?1:0)+(recent.has(c[1])?1:0)-(c[2]==="clash"?.5:0));
+  const min=Math.min(...cand.map(c=>c.s));const pick=rnd(cand.filter(c=>c.s<=min+.01));
+  return Math.random()<.5?[pick[0],pick[1],pick[2]]:[pick[1],pick[0],pick[2]]}
 function nextStep(){
   const ui=S.ui;
   if(ui.follow&&ui.follow.length)return;
-  if(h2hOn()){
-    if(!ui.ins&&S.us.length)startInsertion();
-    if(ui.ins){const L=insList(ui.ins);if(!L.length||ui.ins.lo>=ui.ins.hi){finishInsertion();return nextStep()}
-      const mid=Math.floor((ui.ins.lo+ui.ins.hi)/2);ui.pair=[ui.ins.id,L[mid]];ui.pairKind="place";ui.card=null;return}
-  }
-  if(ui.pair&&ui.pairKind==="clash")return;
+  if(ui.pair&&ui.pairKind){if(h2hOn()||ui.pairKind==="clash")return;ui.pair=null;ui.pairKind=null}
+  ui.ins=null;
   if(ui.card!=null&&C.tier[ui.card]<0&&passes(A[ui.card])){ui.pair=null;return}
-  let pool=A.filter(a=>C.tier[a.id]<0&&passes(a));if(pool.length>1)pool=pool.filter(a=>a.id!==ui.lastCard);
-  if(pool.length){ui.card=rnd(pool).id;ui.pair=null;ui.pairKind=null;return}
-  ui.card=null;
-  if(!h2hOn()){ui.pair=null;ui.pairKind=null;return}
-  if(ui.pair&&ui.pairKind)return;
-  const cand=[];
-  S.o.forEach(l=>{const L=l.filter(i=>!S.us.includes(i)&&passes(A[i]));for(let i=0;i+1<L.length;i++)if(!seen(L[i],L[i+1]))cand.push([L[i],L[i+1],"refine"])});
-  const cl=CLASH.filter(([a,b])=>C.tier[a]>=0&&C.tier[a]<=1&&C.tier[b]>=0&&C.tier[b]<=1&&passes(A[a])&&passes(A[b])&&!seen(a,b)).map(p=>[p[0],p[1],"clash"]);
-  const pick=(cl.length&&(Math.random()<.5||!cand.length))?rnd(cl):cand.length?rnd(cand):null;
-  if(pick){ui.pair=Math.random()<.5?[pick[0],pick[1]]:[pick[1],pick[0]];ui.pairKind=pick[2]}else{ui.pair=null;ui.pairKind=null}}
-function finishInsertion(){const ins=S.ui.ins;if(!ins)return;const L=insList(ins);
-  const before=snapshotScores();const target=L[ins.lo];
-  S.o[ins.ti]=S.o[ins.ti].filter(i=>i!==ins.id);S.us=S.us.filter(i=>i!==ins.id);
-  const list=S.o[ins.ti];const at=target===undefined?list.length:list.indexOf(target);list.splice(at<0?list.length:at,0,ins.id);
-  S.ui.ins=null;S.ui.pair=null;S.ui.pairKind=null;recompute();
-  S.ui.ctx=`Placed <b>${esc(A[ins.id].name)}</b> at ${TIERS[ins.ti].icon} ${scoreTxt(ins.id)} · #${C.pos[ins.id]+1} overall`+deltaLine(before,[ins.id])}
+  const Q=cardQueue(),h=h2hOn();
+  const take=list=>{const a=list.find(x=>x.id!==ui.lastCard)||list[0];ui.card=a.id;ui.pair=null;ui.pairKind=null};
+  const fight=p=>{ui.pair=[p[0],p[1]];ui.pairKind=p[2];ui.card=null};
+  if(Q.unseen.length)return take(Q.unseen);
+  if(Q.skip1.length)return take(Q.skip1);
+  if(h&&nextPlacement(false))return;
+  let p;if(h&&(p=pickBattle(false)))return fight(p);
+  if(h&&nextPlacement(true))return;
+  if(h&&(p=pickBattle(true)))return fight(p);
+  ui.card=null;ui.pair=null;ui.pairKind=null}
 function snapshotScores(){return A.map(a=>C.score[a.id])}
 function deltaLine(before,skip){const ch=A.filter(a=>!skip.includes(a.id)&&before[a.id]!=null&&C.score[a.id]!=null&&before[a.id]!==C.score[a.id]).slice(0,4);
   return ch.length?" · "+ch.map(a=>`${esc(a.name)} <span class="${C.score[a.id]>before[a.id]?"up":"dn"}">${before[a.id].toFixed(1)}→${C.score[a.id].toFixed(1)}</span>`).join(", "):""}
 function swipeRate(ti){const id=S.ui.card;if(id==null)return;checkpoint();
   rateArtist(id,ti);S.ui.lastCard=id;S.ui.card=null;recompute();
-  S.ui.ctx=`<b>${esc(A[id].name)}</b> → ${TIERS[ti].icon} ${TIERS[ti].label}${C.us.has(id)&&h2hOn()?" · now a few head-to-heads to find its spot":` · ${scoreTxt(id)}`}`;
-  nextStep();save();renderRate()}
-function swipeSkip(){S.ui.lastCard=S.ui.card;S.ui.card=null;nextStep();save();renderRate()}
-function battle(res){const ui=S.ui;if(!ui.pair)return;checkpoint();
+  nextStep();
+  const placing=S.ui.pairKind==="place"&&S.ui.ins&&S.ui.ins.id===id;
+  S.ui.ctx=`<b>${esc(A[id].name)}</b> → ${TIERS[ti].icon} ${TIERS[ti].label}${C.us.has(id)&&h2hOn()?(placing?" · now a few head-to-heads to find its spot":" · head-to-heads to place it come after you've rated the rest"):` · ${scoreTxt(id)}`}`;
+  save();renderRate()}
+function swipeSkip(){const id=S.ui.card;if(id==null)return;const sk=S.ui.skip||(S.ui.skip={});sk[id]=[(sk[id]?sk[id][0]:0)+1,Date.now()];
+  S.ui.lastCard=id;S.ui.card=null;nextStep();
+  S.ui.ctx=sk[id][0]>=2?`<b>${esc(A[id].name)}</b> parked. You can come back to it at the end.`:`<b>${esc(A[id].name)}</b> moved to the back of the line.`;save();renderRate()}
+function battle(res){const ui=S.ui;if(!ui.pair)return;checkpoint();ui.lastPair=ui.pair.slice();ui.recent=(ui.recent||[]).concat(ui.pair).slice(-6);
   const [a,b]=ui.pair;S.h.push([a,b,res]);const w=res===1?b:a,l=res===1?a:b;const before=snapshotScores();
-  if(ui.pairKind==="place"&&ui.ins){const mid=Math.floor((ui.ins.lo+ui.ins.hi)/2);ui.ins.n++;
-    const newWon=(res===0&&a===ui.ins.id)||(res===1&&b===ui.ins.id);
-    if(res===2){ui.ins.lo=ui.ins.hi=mid+1}else if(newWon)ui.ins.hi=mid;else ui.ins.lo=mid+1;
-    ui.pair=null;ui.ctx=res===2?`Tie: <b>${esc(A[a].name)}</b> and <b>${esc(A[b].name)}</b>`:`<b>${esc(A[w].name)}</b> beat ${esc(A[l].name)}`;
-    if(ui.ins.lo>=ui.ins.hi)finishInsertion()}
+  if(ui.pairKind==="place"){const id=ui.ins?ui.ins.id:a;ui.pair=null;ui.pairKind=null;ui.ins=null;
+    ui.ctx=res===2?`Tie: <b>${esc(A[a].name)}</b> and <b>${esc(A[b].name)}</b>`:`<b>${esc(A[w].name)}</b> beat ${esc(A[l].name)}`;
+    if(S.us.includes(id)){const rg=placeRange(id);if(rg.lo>=rg.hi)finishPlace(id)}}
   else{
     if(res!==2&&C.tier[w]===C.tier[l]){const list=S.o[C.tier[w]];const iw=list.indexOf(w),il=list.indexOf(l);if(iw>il){list.splice(iw,1);list.splice(list.indexOf(l),0,w)}}
     recompute();ui.pair=null;ui.pairKind=null;
@@ -862,9 +898,9 @@ function renderRate(){
     st.querySelectorAll(".pick").forEach(b=>b.onclick=()=>battle(+b.dataset.side));
     btns.innerHTML=`<button class="btn" id="tieBtn">Can't split them</button>${ui.pairKind==="place"?`<button class="btn ghost" id="skipPlace">Place it later</button>`:`<button class="btn ghost" id="skipBtn">Skip</button>`}<button class="btn ghost" id="undoBtn">Undo</button>`;
     document.getElementById("tieBtn").onclick=()=>battle(2);
-    const sk=document.getElementById("skipBtn");if(sk)sk.onclick=()=>{S.h.push([ui.pair[0],ui.pair[1],-1]);ui.pair=null;ui.pairKind=null;nextStep();save();renderRate()};
-    const sp=document.getElementById("skipPlace");if(sp)sp.onclick=()=>{const id=ui.ins.id;ui.ins=null;ui.pair=null;ui.pairKind=null;S.us=S.us.filter(i=>i!==id).concat([id]);
-      const pool=A.filter(a=>C.tier[a.id]<0&&passes(a));ui.card=pool.length?rnd(pool).id:null;if(ui.card==null)nextStep();save();renderRate()}}
+    const sk=document.getElementById("skipBtn");if(sk)sk.onclick=()=>{S.h.push([ui.pair[0],ui.pair[1],-1]);ui.lastPair=ui.pair.slice();ui.pair=null;ui.pairKind=null;nextStep();ui.ctx="Skipped. That matchup goes to the back of the line.";save();renderRate()};
+    const sp=document.getElementById("skipPlace");if(sp)sp.onclick=()=>{const id=ui.ins?ui.ins.id:ui.pair[0];ui.ins=null;ui.pair=null;ui.pairKind=null;S.us=S.us.filter(i=>i!==id).concat([id]);
+      ui.def=(ui.def||[]).filter(i=>i!==id).concat([id]);ui.lastPair=[id];nextStep();ui.ctx=`Placing <b>${esc(A[id].name)}</b> later, after everything else.`;save();renderRate()}}
   else if(ui.card!=null){const a=A[ui.card];
     st.innerHTML=`<div class="deckwrap"><div class="swipe flash" id="swipeCard">
       <span class="stamp l">Nope</span><span class="stamp r">Like</span><span class="stamp u">Love</span><span class="stamp d">Meh</span>
@@ -877,7 +913,10 @@ function renderRate(){
     bindSwipe(document.getElementById("swipeCard"));
     btns.innerHTML=`<button class="btn ghost" id="skipCard">Not sure yet</button><button class="btn ghost" id="undoBtn">Undo</button>`;
     document.getElementById("skipCard").onclick=swipeSkip}
-  else{const done=!filtersActive();
+  else{const done=!filtersActive();const parked=cardQueue().parked;
+    if(parked.length){st.innerHTML=`<div class="card" style="text-align:center;display:grid;gap:10px;justify-items:center"><h3 style="font-size:26px">Just the maybes left</h3><p class="muted" style="margin:0">You skipped ${parked.length} artist${parked.length===1?"":"s"} twice: ${parked.slice(0,6).map(a=>esc(a.name)).join(", ")}${parked.length>6?"…":""}. Give them one more listen, or call it done.</p><div class="row" style="justify-content:center"><button class="btn primary" id="unpark">Give them another look</button><button class="btn" id="toRank">See my ranking</button></div></div>`;
+      document.getElementById("unpark").onclick=()=>{parked.forEach(a=>S.ui.skip[a.id]=[1,S.ui.skip[a.id][1]]);nextStep();save();renderRate()};
+      document.getElementById("toRank").onclick=()=>setTab("rank");btns.innerHTML=`<button class="btn ghost" id="undoBtn">Undo</button>`;const u0=document.getElementById("undoBtn");if(u0)u0.onclick=undo;return}
     st.innerHTML=`<div class="card" style="text-align:center;display:grid;gap:8px;justify-items:center"><h3 style="font-size:26px">${done?"Board complete":"All done for these filters"}</h3><p class="muted" style="margin:0">${done?(h2hOn()?"Every artist is rated and placed.":"Every artist is rated. Switch on head-to-head placement to sort within each rating."):"Everything in view is rated"+(h2hOn()?" and placed":"")+". Widen the filters for more."}</p><button class="btn primary" id="toRank">See my ranking</button></div>`;
     document.getElementById("toRank").onclick=()=>setTab("rank");btns.innerHTML=`<button class="btn ghost" id="undoBtn">Undo</button>`}
   const u=document.getElementById("undoBtn");if(u)u.onclick=undo;
