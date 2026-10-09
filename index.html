@@ -56,6 +56,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;letter-spacing:.01em;text-
 .btn{border:2px solid var(--ink);background:var(--surface);font-weight:800;border-radius:999px;padding:8px 16px;font-size:14px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn.ghost{background:transparent}
+a.btn{text-decoration:none;display:inline-block}
 
 input[type=text],input[type=search],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:2px solid var(--ink);border-radius:10px;padding:8px 10px;min-width:0}
 textarea{width:100%;min-height:70px;font-size:12px}
@@ -213,6 +214,12 @@ details.foot p{font-size:13px;max-width:70ch}
 .np .npbar i{display:block;height:100%;width:0;background:#FFF5E8;transition:width .25s linear}
 body.np-on .wrap{padding-bottom:110px}
 @media (max-width:640px){.np .npx{display:none}.np{left:12px;right:12px;width:auto;bottom:calc(74px + env(safe-area-inset-bottom,0px))}body.np-on .wrap{padding-bottom:170px}}
+.codebox{background:var(--surface-2);border-radius:12px;padding:10px 12px;display:grid;gap:6px}
+.codebox.private{border:2px dashed var(--ink-soft)}
+.codelab{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.codeval{font-family:ui-monospace,Menlo,monospace;font-weight:800;font-size:16px;background:var(--surface);padding:5px 10px;border-radius:8px;overflow-wrap:anywhere}
+.viewbanner{display:grid;gap:10px;border:3px solid var(--sky);margin-top:12px}
+body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareCard,body.viewing #boardCard,body.viewing details.foot,body.viewing #welcome{display:none!important}
 @media (max-width:760px){
   .arena{grid-template-columns:1fr}
   .vs{font-size:32px}
@@ -247,6 +254,7 @@ body.np-on .wrap{padding-bottom:110px}
     <button class="tab" role="tab" aria-selected="false" data-tab="lineup">Lineup</button>
   </nav>
 
+  <div class="card viewbanner" id="viewBanner" hidden></div>
   <div class="card welcome" id="welcome" hidden>
     <h2 style="font-size:24px">Start your board</h2>
     <p class="small" style="margin:0">Your board lives in this browser and saves after every tap. Add your name so friends can tell your rankings apart. Your name and rankings are also shared with Spencer, who runs this board, so he can compare everyone's picks.</p>
@@ -286,21 +294,39 @@ body.np-on .wrap{padding-bottom:110px}
           <h3 style="font-size:22px">Score spread</h3>
           <div id="distChart"></div>
         </div>
-        <div class="card" style="display:grid;gap:10px">
+        <div class="card" id="compareCard" style="display:grid;gap:10px">
           <h3 style="font-size:22px">Compare with a friend</h3>
-          <label class="small" for="friendCode" style="font-weight:800">Paste a friend's ranking code</label>
-          <textarea id="friendCode" placeholder="ACL26…"></textarea>
+          <label class="small" for="friendCode" style="font-weight:800" id="friendLabel">Paste a friend's ranking code</label>
+          <input type="text" id="friendCode" placeholder="ACL26…" autocomplete="off" autocapitalize="none">
           <div class="row"><button class="btn primary" id="loadFriend">Compare</button><button class="btn ghost" id="clearFriend">Clear</button></div>
           <div id="friendOut"></div>
         </div>
-        <div class="card" style="display:grid;gap:10px">
+        <div class="card" id="boardCard" style="display:grid;gap:10px">
           <h3 style="font-size:22px">Your board</h3>
           <input type="text" id="myName" placeholder="Your name" aria-label="Your name">
+          <div id="codesBox" hidden style="display:grid;gap:10px">
+            <div class="codebox">
+              <div class="codelab">Share code · view &amp; compare only</div>
+              <div class="row"><span class="codeval" id="shareVal">…</span><button class="btn" id="copyShare">Copy link</button><button class="btn ghost" id="editShareBtn">Customize</button></div>
+              <div id="shareEdit" hidden style="display:grid;gap:6px"><div class="row"><input type="text" id="shareInput" maxlength="20" placeholder="your-name" autocomplete="off" autocapitalize="none" aria-label="New share code" style="flex:1 1 140px"><button class="btn primary" id="shareSave">Save</button><button class="btn ghost" id="shareCancel">Cancel</button></div></div>
+              <p class="small muted" id="shareMsg" style="margin:0">Send this to friends. They can see and compare your rankings but never change them.</p>
+            </div>
+            <div class="codebox private">
+              <div class="codelab">🔒 Private edit code · don't share</div>
+              <div class="row"><span class="codeval" id="editVal">••••••••</span><button class="btn ghost" id="revealEdit">Show</button><button class="btn" id="copyEdit">Copy</button></div>
+              <p class="small muted" style="margin:0">Opens and edits your board on any device. Keep it to yourself, like a password.</p>
+            </div>
+            <div class="row"><button class="btn ghost" id="openOther">Open my board with an edit code</button></div>
+            <div id="openBox" hidden style="display:grid;gap:8px"><input type="text" id="openCode" placeholder="e.g. disco-mango-4821" autocomplete="off" autocapitalize="none" aria-label="Edit code"><div class="row"><button class="btn primary" id="openYes">Open that board here</button><button class="btn ghost" id="openNo">Cancel</button></div><p class="small muted" style="margin:0">This replaces the board in this browser with the one the code belongs to.</p></div>
+            <p class="small muted" id="syncStatus" style="margin:0"></p>
+          </div>
+          <div id="legacyBox" style="display:grid;gap:10px">
           <p class="small muted" style="margin:0">Board ID <span class="idchip" id="bidChip2"></span> keeps your board separate from anyone with the same name.</p>
           <div class="row"><button class="btn primary" id="copyCode">Copy my ranking code</button></div>
           <p class="small muted" style="margin:0">Send the code to friends to compare. It's also your backup: paste it on another device and choose Restore to pick up exactly where you left off.</p>
           <div class="row"><button class="btn ghost" id="restoreBtn">Restore my board from a code</button></div>
           <div id="restoreBox" hidden style="display:grid;gap:8px"><textarea id="restoreCode" placeholder="ACL26…"></textarea><div class="row"><button class="btn primary" id="restoreYes">Replace this board</button><button class="btn ghost" id="restoreNo">Cancel</button></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -310,6 +336,7 @@ body.np-on .wrap{padding-bottom:110px}
       <p>With head-to-head placement switched off, a newly rated artist sits at the middle of its band at the band's centre score until you battle it.</p>
       <p>A lower-rated act can beat a higher-rated one in a set-clash battle without changing bands, because genre and mood don't always line up. You choose whether to move either act or keep both ratings.</p>
       <p id="syncNote"></p>
+      <div class="row" id="cloudDelRow" hidden><button class="btn ghost" id="cloudDel">Delete my online copy</button><span id="cloudDelConfirm" hidden class="row small"><span>Delete the online copy? Your share link stops working; this browser keeps your board.</span><button class="btn primary" id="cloudDelYes">Delete it</button><button class="btn ghost" id="cloudDelNo">Keep it</button></span></div>
       <div class="row"><button class="btn ghost" id="resetBtn">Reset my board</button><span id="resetConfirm" hidden class="row small"><span>Erase every rating and battle?</span><button class="btn primary" id="resetYes">Yes, reset</button><button class="btn ghost" id="resetNo">Keep them</button></span></div>
     </details>
   </section>
@@ -388,6 +415,7 @@ const LS="acl26w2-"+MODE;
 const blankF=()=>({days:[],from:750,to:1320,gen:[],pop:[],q:""});
 const blankUI=()=>({tab:"rate",f:blankF(),card:null,lastCard:null,ins:null,pair:null,pairKind:null,follow:[],ctx:null,showUnr:false,day:"Fri",sort:"time",filtersOpen:false,h2h:true,svc:"apple",zoom:null});
 function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],ui:blankUI(),u:0}}
+let VIEW=null,MY=null,cloudT=null;
 let S=fresh(MODE==="me"?"":"");
 function makeBid(name){const slug=(name||"guest").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16)||"guest";return slug+"-"+Math.floor(Date.now()/1000)}
 function migrate(x){
@@ -397,6 +425,7 @@ function migrate(x){
   if(x.v===3&&Array.isArray(x.o)){s.o=[0,1,2,3].map(ti=>(x.o[ti]||[]).filter(i=>s.t[i]===ti));s.us=(x.us||[]).filter(i=>s.t[i]!==undefined);s.ui=Object.assign(blankUI(),x.ui||{});s.ui.f=Object.assign(blankF(),(x.ui||{}).f||{})}
   else{const w={},g={};for(const [a,b,r] of s.h){g[a]=(g[a]||0)+1;g[b]=(g[b]||0)+1;if(r===0)w[a]=(w[a]||0)+1;else if(r===1)w[b]=(w[b]||0)+1;else{w[a]=(w[a]||0)+.5;w[b]=(w[b]||0)+.5}}
     for(const k in s.t)s.o[s.t[k]].push(+k);s.o=s.o.map(l=>l.sort((p,q)=>((w[q]||0)/(g[q]||1))-((w[p]||0)/(g[p]||1))))}
+  if(x.cloud&&x.cloud.edit)s.cloud={id:x.cloud.id,edit:x.cloud.edit,share:x.cloud.share};s.cloudSig=x.cloudSig||null;s.cloudOff=!!x.cloudOff;
   const inList=new Set(s.o.flat());for(const k in s.t)if(!inList.has(+k)){s.o[s.t[k]].push(+k);s.us.push(+k)}
   return s}
 try{const x=migrate(JSON.parse(localStorage.getItem(LS)||"null"));if(x)S=x}catch(e){}
@@ -406,15 +435,18 @@ const PING_URL="https://acl2026battleboard.netlify.app/api/ping";
 const PING_LIVE=HOSTED&&/^(acl2026battleboard\.netlify\.app|spencerwon\.github\.io)$/.test(location.hostname);
 let DEV=null;try{DEV=localStorage.getItem("acl26w2-device");if(!DEV){DEV="d_"+(crypto.randomUUID?crypto.randomUUID().replace(/-/g,""):(Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^a-z0-9]/g,""));localStorage.setItem("acl26w2-device",DEV)}}catch(e){}
 let pingT=null,pingLast="",pingVisit=true;
-function sendPing(){if(!PING_LIVE||!DEV)return;const rated=Object.keys(S.t).length;
-  const body={d:DEV,n:S.name||"",r:rated,bt:S.h.length,c:rated?makeCode():"",host:location.hostname,v:pingVisit?1:0};
+function sendPing(){if(!PING_LIVE||!DEV)return;
+  // On a /b/<name> share link the screen shows someone else's board; report the visitor's own board (MY) and no code.
+  const B=VIEW?(MY||fresh("")):S,rated=Object.keys(B.t).length;
+  const body={d:DEV,n:B.name||"",r:rated,bt:B.h.length,c:rated&&!VIEW?makeCode():"",host:location.hostname,v:pingVisit?1:0};
   const sig=JSON.stringify([body.n,body.r,body.bt,body.c]);if(sig===pingLast&&!pingVisit)return;pingLast=sig;pingVisit=false;
   try{fetch(PING_URL,{method:"POST",headers:{"content-type":"text/plain"},body:JSON.stringify(body),keepalive:true,mode:location.origin===new URL(PING_URL).origin?"same-origin":"cors"}).catch(()=>{})}catch(e){}}
 function ping(){if(!PING_LIVE)return;clearTimeout(pingT);pingT=setTimeout(sendPing,5000)}
 window.addEventListener("pagehide",()=>{if(pingT){clearTimeout(pingT);pingT=null;sendPing()}});
-function save(){S.u=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}ping();
+function save(){if(VIEW)return;S.u=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}ping();
+  if(HOSTED){clearTimeout(cloudT);cloudT=setTimeout(cloudSync,1500)}
   if(cloud){clearTimeout(saveT);saveT=setTimeout(()=>cloud.set({j:JSON.stringify(S),u:S.u}).catch(()=>{}),700)}}
-window.addEventListener("pagehide",()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}});
+window.addEventListener("pagehide",()=>{if(VIEW)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(HOSTED)cloudFlush()});
 async function initCloud(){
   const note=document.getElementById("syncNote");note.textContent="Your board saves in this browser after every tap, so a refresh or a closed tab reopens exactly where you left off. The ranking code is your backup if the browser's data is ever cleared. Your name, ranking code and a random ID for this browser are shared with Spencer, who runs this board; nothing else about you is collected.";
   if(!CLOUD)return;
@@ -569,7 +601,7 @@ document.getElementById("playlistBar").addEventListener("click",e=>{if(S.ui.svc!
   copy(L.flatMap(a=>(a.pl&&a.pl.length?a.pl.map(s=>s[0]):(a.topSongs||[]).map(s=>s.title)).map(t=>a.name+" - "+t)).join("\n"),"Song list copied. Paste it into TuneMyMusic or Soundiiz to build a Spotify playlist.")});
 document.querySelectorAll("[data-svc]").forEach(b=>b.onclick=()=>{S.ui.svc=b.dataset.svc;save();renderService();renderAll();if(typeof renderNP==="function")renderNP();toast(S.ui.svc==="spotify"?"Songs now open in Spotify":"Songs now open in Apple Music")});
 function rateHTML(id){return `<div class="rate" role="group" aria-label="Rate ${esc(A[id].name)}">${TIERS.map((T,i)=>`<button data-rate="${id}:${i}" aria-pressed="${C.tier[id]===i}">${T.icon}<span>${T.label}</span></button>`).join("")}</div>`}
-function bindRate(root,after){root.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{const [id,ti]=b.dataset.rate.split(":").map(Number);
+function bindRate(root,after){root.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{if(VIEW)return toast("View only. Open your own board to rate.");const [id,ti]=b.dataset.rate.split(":").map(Number);
   checkpoint();const was=C.tier[id];rateArtist(id,was===ti?null:ti);save();recompute();
   if(was!==ti)toast(`${A[id].name}: ${TIERS[ti].icon} ${scoreTxt(id)} · #${C.pos[id]+1}${C.us.has(id)&&h2hOn()?" · placement battles waiting on Rate & Battle":""}`);(after||renderAll)()})}
 function setLine(a){return `${a.day} · ${fmt(a.s)}–${fmt(a.e)} · ${a.stage}`}
@@ -720,7 +752,7 @@ document.getElementById("copyPlaylist").onclick=()=>{
 /* ---------- rankings ---------- */
 function renderRank(){
   document.getElementById("rankTitle").textContent=S.name?S.name+"'s ranking":"My ranking";
-  ["bidChip","bidChip2"].forEach(id=>document.getElementById(id).textContent=S.bid||"set a name");
+  ["bidChip","bidChip2"].forEach(id=>document.getElementById(id).textContent=HOSTED?(S.cloud?"share: "+S.cloud.share:(VIEW?"share: "+VIEW.share:"")):(S.bid||"set a name"));if(HOSTED)renderCodes();
   let html="";
   TIERS.forEach((T,ti)=>{const m=C.order.filter(id=>C.tier[id]===ti);
     html+=`<div class="tierhead"><h3>${T.icon} ${T.label}</h3><span class="small muted">${m.length} artist${m.length===1?"":"s"}</span></div>`;
@@ -756,7 +788,7 @@ function readCode(txt){const o=JSON.parse(b64d(txt.trim().replace(/\s+/g,"").rep
   st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];return st}
 document.getElementById("copyCode").onclick=()=>{if(!Object.keys(S.t).length)return toast("Rate a few artists first");copy(makeCode(),"Ranking code copied")};
 let FRIEND=null;
-document.getElementById("loadFriend").onclick=()=>{try{const st=readCode(document.getElementById("friendCode").value);
+document.getElementById("loadFriend").onclick=()=>{const raw=document.getElementById("friendCode").value.trim();if(HOSTED&&raw&&!/^ACL26\./.test(raw))return compareShare(raw);try{const st=readCode(raw);
   if(st.bid&&st.bid===S.bid)return toast("That's your own code. Paste a friend's.");FRIEND={name:st.name||"Friend",bid:st.bid,c:compute(st)};renderRank();toast("Loaded "+FRIEND.name+"'s board")}catch(e){toast("That code didn't read. Copy the whole thing, starting with ACL26.")}};
 document.getElementById("clearFriend").onclick=()=>{FRIEND=null;document.getElementById("friendCode").value="";renderRank()};
 function renderFriend(){const o=document.getElementById("friendOut");if(!FRIEND){o.innerHTML="";return}
@@ -884,14 +916,15 @@ function shareText(scope,withCode){const days=scope==="all"?["Fri","Sat","Sun"]:
   let s=`${S.name?S.name+"'s":"My"} ACL Weekend Two picks 🎶\n`;
   days.forEach(d=>{const pl=plan(d);s+=`\n${DAYS[d]}\n`+(pl.length?pl.map(a=>`• ${fmt(a.s)} ${a.name} — ${iconOf(a.id)} ${scoreTxt(a.id)} (${a.stage==="American Express"?"AmEx":a.stage})`).join("\n"):"• still rating this day")+"\n"});
   s+=`\nMake your own board: ${SITE_URL}`;
-  if(withCode&&Object.keys(S.t).length)s+=`\n\nCompare with me: paste this on the Rankings tab →\n${makeCode()}`;
+  if(withCode&&HOSTED&&S.cloud)s+=`\n\nSee and compare my rankings: ${SITE_URL}b/${S.cloud.share}`;
+  else if(withCode&&Object.keys(S.t).length)s+=`\n\nCompare with me: paste this on the Rankings tab →\n${makeCode()}`;
   return s}
 function openShare(){const host=document.getElementById("dialogHost");let scope="day",withCode=false;const canNative=!!navigator.share;
   const subject=`${S.name?S.name+"'s":"My"} ACL Weekend Two picks`;
   host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="Share your schedule"><div class="card sharebox">
     <h3 style="font-size:24px">Share your picks</h3>
     <div class="row" role="group" aria-label="What to share"><button class="pill" data-scope="day" aria-pressed="true">${DAYS[S.ui.day||"Fri"]}</button><button class="pill" data-scope="all" aria-pressed="false">Whole weekend</button></div>
-    <label class="check"><input type="checkbox" id="withCode"> Include my ranking code so friends can compare</label>
+    <label class="check"><input type="checkbox" id="withCode"> ${HOSTED?"Include my share link so friends can see and compare":"Include my ranking code so friends can compare"}</label>
     <textarea id="shareTxt" readonly aria-label="Message preview"></textarea>
     <div class="acts"><a class="btn" id="shSms" href="#">Text</a><a class="btn" id="shMail" href="#">Email</a><button class="btn" id="shCopy">Copy</button>${canNative?`<button class="btn primary" id="shNative">More…</button>`:""}</div>
     <p class="small muted" style="margin:0">${canNative?"More… opens your phone's share sheet and attaches the schedule image.":"Text and Email open your messaging apps with this message filled in."}</p>
@@ -910,19 +943,98 @@ function openShare(){const host=document.getElementById("dialogHost");let scope=
 document.getElementById("dlBtn").onclick=downloadJPEG;
 document.getElementById("shareBtn").onclick=openShare;
 
+
+/* ---------- online codes (website only): private edit code + public share code ---------- */
+const API="/api/board";
+const slugify=s=>String(s||"").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16);
+function coreState(st){st=st||S;return {v:3,name:st.name||"",bid:st.bid||"",t:st.t,o:st.o,us:st.us,h:st.h}}
+function persist(){if(VIEW)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+async function api(body,share){
+  const r=share!=null?await fetch(API+"?share="+encodeURIComponent(share),{cache:"no-store"}):await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||("HTTP "+r.status));e.status=r.status;throw e}return j}
+function fromServer(state,name){const st=fresh(name||state.name);st.name=name||state.name||"";st.bid=state.bid||"";st.t={};
+  st.o=[0,1,2,3].map(ti=>((state.o||[])[ti]||[]).filter(i=>i>=0&&i<N));st.o.forEach((l,ti)=>l.forEach(i=>st.t[i]=ti));
+  st.us=(state.us||[]).filter(i=>st.t[i]!==undefined);st.h=(state.h||[]).filter(r=>r[0]<N&&r[1]<N);return st}
+let cloudBusy=false;
+function setSync(m){const el=document.getElementById("syncStatus");if(el)el.textContent=m}
+async function cloudSync(){
+  if(!HOSTED||VIEW||cloudBusy||S.cloudOff)return;
+  if(!S.name&&!Object.keys(S.t).length)return;
+  const sig=JSON.stringify(coreState());if(S.cloud&&sig===S.cloudSig){setSync("Synced online ✓");return}
+  if(!navigator.onLine){setSync("Saved on this device. It will sync online when you're back on the internet.");return}
+  cloudBusy=true;
+  try{
+    if(!S.cloud){const r=await api({action:"create",state:coreState(),share:slugify(S.name)+"26"});S.cloud={id:r.id,edit:r.edit,share:r.share};renderCodes()}
+    else await api({action:"save",edit:S.cloud.edit,state:coreState()});
+    S.cloudSig=sig;persist();setSync("Synced online ✓ "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}));
+  }catch(e){
+    if(e.status===404&&S.cloud){S.cloud=null;S.cloudSig=null;persist();renderCodes()}
+    setSync("Saved on this device. Couldn't reach the server, so it will try again shortly.");setTimeout(cloudSync,15000);
+  }finally{cloudBusy=false;if(S.cloud&&JSON.stringify(coreState())!==S.cloudSig){clearTimeout(cloudT);cloudT=setTimeout(cloudSync,1500)}}}
+function cloudFlush(){if(VIEW||!S.cloud||S.cloudOff)return;const sig=JSON.stringify(coreState());if(sig===S.cloudSig)return;
+  try{fetch(API,{method:"POST",keepalive:true,headers:{"content-type":"application/json"},body:JSON.stringify({action:"save",edit:S.cloud.edit,state:coreState()})})}catch(e){}}
+window.addEventListener("online",()=>cloudSync());
+let editShown=false;
+function renderCodes(){if(!HOSTED)return;const box=document.getElementById("codesBox");box.hidden=false;document.getElementById("legacyBox").hidden=true;
+  document.getElementById("cloudDelRow").hidden=!S.cloud;
+  const sv=document.getElementById("shareVal"),ev=document.getElementById("editVal");
+  if(S.cloud){sv.textContent=S.cloud.share;ev.textContent=editShown?S.cloud.edit:"••••••••";document.getElementById("revealEdit").textContent=editShown?"Hide":"Show"}
+  else{sv.textContent=S.cloudOff?"off":(S.name?"creating…":"add your name");ev.textContent="—"}
+  ["copyShare","editShareBtn","copyEdit","revealEdit"].forEach(id=>document.getElementById(id).disabled=!S.cloud);
+  if(S.cloudOff)setSync("Your online copy is deleted. Codes are off; this browser still has your board.")}
+document.getElementById("copyShare").onclick=()=>S.cloud&&copy(SITE_URL+"b/"+S.cloud.share,"Share link copied");
+document.getElementById("copyEdit").onclick=()=>S.cloud&&copy(S.cloud.edit,"Edit code copied. Keep it private.");
+document.getElementById("revealEdit").onclick=()=>{editShown=!editShown;renderCodes()};
+document.getElementById("editShareBtn").onclick=()=>{document.getElementById("shareEdit").hidden=false;const i=document.getElementById("shareInput");i.value=S.cloud?S.cloud.share:"";i.focus()};
+document.getElementById("shareCancel").onclick=()=>{document.getElementById("shareEdit").hidden=true;document.getElementById("shareMsg").textContent="Send this to friends. They can see and compare your rankings but never change them."};
+let chkT=null;document.getElementById("shareInput").addEventListener("input",e=>{const v=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,"");e.target.value=v;const m=document.getElementById("shareMsg");
+  clearTimeout(chkT);if(!/^[a-z0-9](?:[a-z0-9-]{1,18}[a-z0-9])$/.test(v)){m.textContent="Use 3–20 letters, numbers or dashes.";return}
+  if(S.cloud&&v===S.cloud.share){m.textContent="That's your current share code.";return}
+  m.textContent="Checking…";chkT=setTimeout(async()=>{try{const r=await api({action:"check",share:v});m.textContent=r.ok?`✓ ${v} is available`:`${v} is taken. Try another.`}catch(_){m.textContent="Couldn't check right now."}},350)});
+document.getElementById("shareSave").onclick=async()=>{const v=document.getElementById("shareInput").value.trim().toLowerCase();const m=document.getElementById("shareMsg");
+  try{const r=await api({action:"rename",edit:S.cloud.edit,share:v});S.cloud.share=r.share;persist();document.getElementById("shareEdit").hidden=true;m.textContent="Send this to friends. They can see and compare your rankings but never change them.";renderRank();toast("Share code is now "+r.share)}catch(e){m.textContent=e.message}};
+document.getElementById("openOther").onclick=()=>{document.getElementById("openBox").hidden=false;document.getElementById("openCode").focus()};
+document.getElementById("openNo").onclick=()=>{document.getElementById("openBox").hidden=true};
+document.getElementById("openYes").onclick=async()=>{const code=document.getElementById("openCode").value.trim();if(!code)return toast("Enter the edit code first");
+  try{const r=await api({action:"load",edit:code});checkpoint();const st=fromServer(r.state,r.name);st.ui=Object.assign(S.ui,{card:null,pair:null,pairKind:null,ins:null,follow:[],ctx:null});
+    st.cloud={id:r.id,edit:code.toLowerCase(),share:r.share};st.cloudSig=JSON.stringify(coreState(st));st.bid=st.bid||makeBid(st.name);S=st;persist();recompute();
+    document.getElementById("openBox").hidden=true;document.getElementById("openCode").value="";renderAll();toast("Opened "+(S.name||"your")+"'s board")}
+  catch(e){toast(e.status===404?"That edit code doesn't match a board. Check the spelling.":"Couldn't reach the server. Try again in a moment.")}};
+document.getElementById("cloudDel").onclick=()=>{document.getElementById("cloudDelConfirm").hidden=false};
+document.getElementById("cloudDelNo").onclick=()=>{document.getElementById("cloudDelConfirm").hidden=true};
+document.getElementById("cloudDelYes").onclick=async()=>{try{await api({action:"delete",edit:S.cloud.edit});S.cloud=null;S.cloudSig=null;S.cloudOff=true;persist();document.getElementById("cloudDelConfirm").hidden=true;renderRank();toast("Online copy deleted")}catch(e){toast("Couldn't delete right now. Try again.")}};
+async function compareShare(raw){const m=raw.match(/\/b\/([a-z0-9-]+)/i);const handle=(m?m[1]:raw).toLowerCase().replace(/[^a-z0-9-]/g,"");
+  if(S.cloud&&handle===S.cloud.share)return toast("That's your own share code. Paste a friend's.");
+  try{const r=await api(null,handle);FRIEND={name:r.name||handle,bid:handle,c:compute(fromServer(r.state,r.name))};renderRank();toast("Comparing with "+FRIEND.name)}
+  catch(e){toast(e.status===404?`No board called "${handle}". Check the spelling.`:"Couldn't reach the server. Try again.")}}
+function renderViewBanner(mode){const b=document.getElementById("viewBanner");b.hidden=false;
+  const mine=MY&&MY.name;
+  if(mode==="loading")b.innerHTML=`<b>Loading ${esc(VIEW.share)}'s board…</b>`;
+  else if(mode==="missing")b.innerHTML=`<h3 style="font-size:22px">No board called “${esc(VIEW.share)}”</h3><p class="small" style="margin:0">Check the link with whoever sent it.</p><div class="row"><a class="btn primary" href="/">${mine?"Go to my board":"Make my own board"}</a></div>`;
+  else b.innerHTML=`<span class="chip" style="justify-self:start">👀 View only</span><h3 style="font-size:24px">You're viewing ${esc(VIEW.name||VIEW.share)}'s board</h3><p class="small" style="margin:0">You can browse their ranking and heat schedule but can't change anything.</p><div class="row"><a class="btn primary" href="/" id="cmpMine">${mine?"Compare with my board":"Make my own board"}</a></div>`;
+  const c=document.getElementById("cmpMine");if(c)c.onclick=()=>{try{sessionStorage.setItem("acl26-compare",VIEW.share)}catch(e){}}}
+async function startView(){const handle=decodeURIComponent(location.pathname.slice(3)).replace(/\/+$/,"").toLowerCase();VIEW={share:handle};MY=S;
+  document.body.classList.add("viewing");S=fresh("");S.ui=Object.assign(blankUI(),{tab:"rank",day:MY.ui.day||"Fri",svc:MY.ui.svc,zoom:MY.ui.zoom});
+  afterLoad();renderViewBanner("loading");
+  try{const r=await api(null,handle);const st=fromServer(r.state,r.name);st.ui=S.ui;S=st;VIEW.name=r.name;recompute();renderViewBanner("ok");setTab(S.ui.tab==="rate"?"rank":S.ui.tab)}
+  catch(e){renderViewBanner("missing")}}
+function pendingCompare(){let h=null;try{h=sessionStorage.getItem("acl26-compare");sessionStorage.removeItem("acl26-compare")}catch(e){}
+  if(h){document.getElementById("friendCode").value=h;setTab("rank");compareShare(h)}}
+
 /* ---------- utils & boot ---------- */
 function toast(m){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
 function copy(txt,msg){const fallback=()=>{const host=document.getElementById("dialogHost");
     host.innerHTML=`<div class="dialog"><div class="card" style="display:grid;gap:10px;max-width:460px;width:100%"><b>Copy this</b><textarea id="cpy" style="min-height:160px">${esc(txt)}</textarea><button class="btn" id="cpyClose">Done</button></div></div>`;
     const c=document.getElementById("cpy");c.focus();c.select();document.getElementById("cpyClose").onclick=()=>host.innerHTML=""};
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(msg),fallback)}else fallback()}
-function renderWelcome(){document.getElementById("welcome").hidden=!!S.name}
+function renderWelcome(){document.getElementById("welcome").hidden=!!S.name||!!VIEW}
 document.getElementById("welcomeGo").onclick=()=>{const v=document.getElementById("welcomeName").value.trim();if(!v)return toast("Add a name first");S.name=v.slice(0,40);ensureBid();save();renderWelcome();setTab("rate")};
 document.getElementById("welcomeName").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("welcomeGo").click()});
 function renderAll(){renderWelcome();updateFcount();const t=S.ui.tab;if(t==="lineup")renderLineup();if(t==="rate")renderRate();if(t==="rank")renderRank();if(t==="sched")renderSched()}
 function afterLoad(){recompute();renderService();if(S.name)ensureBid();buildFilters();document.getElementById("filterCard").open=!!S.ui.filtersOpen;
   let t=S.ui.tab||"rate";if(location.hash&&["rate","rank","sched","lineup"].includes(location.hash.slice(1)))t=location.hash.slice(1);setTab(t)}
-afterLoad();
+if(HOSTED){document.getElementById("friendLabel").textContent="Friend's share code or link";document.getElementById("friendCode").placeholder="e.g. spencer26";}
+if(HOSTED&&location.pathname.startsWith("/b/"))startView();else{afterLoad();if(HOSTED){pendingCompare();cloudSync()}}
 if(HOSTED)loadPreviews();
 initCloud();
 setTimeout(sendPing,1500);
