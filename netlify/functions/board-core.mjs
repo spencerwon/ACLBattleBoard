@@ -33,6 +33,9 @@ function cleanState(st) {
   for (const k in st.t || {}) { const v = st.t[k]; if (okId(+k) && [0, 1, 2, 3].includes(v)) out.t[+k] = v; }
   (Array.isArray(st.o) ? st.o : []).slice(0, 4).forEach((l, ti) => { out.o[ti] = (Array.isArray(l) ? l : []).filter(okId).slice(0, 500); });
   out.us = (Array.isArray(st.us) ? st.us : []).filter(okId).slice(0, 500);
+  // sets you added to / removed from your plan by hand
+  out.pa = (Array.isArray(st.pa) ? st.pa : []).filter(okId).slice(0, 300);
+  out.pr = (Array.isArray(st.pr) ? st.pr : []).filter(okId).slice(0, 300);
   out.h = (Array.isArray(st.h) ? st.h : []).filter((r) => Array.isArray(r) && okId(r[0]) && okId(r[1]) && [-1, 0, 1, 2].includes(r[2])).map((r) => [r[0], r[1], r[2]]).slice(0, 6000);
   if (JSON.stringify(out).length > MAX_STATE_BYTES) throw httpErr(413, "Board is too large.");
   return out;

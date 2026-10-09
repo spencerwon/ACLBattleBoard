@@ -154,7 +154,7 @@ html,body{overflow-x:clip}
 .tierhead{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .tierhead h3{font-size:22px}
 .ranklist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
-.ranklist li{display:grid;grid-template-columns:40px 1fr auto 56px;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px;border-left:7px solid var(--unrated)}
+.ranklist li{display:grid;grid-template-columns:40px 1fr auto 56px auto;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px;border-left:7px solid var(--unrated)}
 .ranklist li.hot{border-left-color:var(--hot)} .ranklist li.warm{border-left-color:var(--warm)} .ranklist li.cool{border-left-color:var(--cool)} .ranklist li.cold{border-left-color:var(--cold)}
 .ranklist .n{font-family:var(--f-display);font-size:22px;text-align:right}
 .ranklist .nm{font-weight:800;min-width:0;overflow-wrap:anywhere}
@@ -190,6 +190,8 @@ details.foot p{font-size:13px;max-width:70ch}
 .planlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .planlist li{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
 .planlist .t{font-weight:800}
+.pinbtn{border:2px solid var(--ink);background:transparent;border-radius:999px;width:30px;height:30px;font-weight:800;font-size:14px;line-height:1;padding:0;display:grid;place-items:center;flex:none}
+.pinbtn.on{background:var(--ink);color:var(--bg)}
 .clash{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
 .dialog{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:50;padding:16px;overflow:auto}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:60;max-width:calc(100% - 32px);text-align:center}
@@ -207,6 +209,23 @@ details.foot p{font-size:13px;max-width:70ch}
   /* phones: keep the map itself clear; the buttons sit in a row underneath it */
   .mapcard .mapframe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.mapcard .mapscroll{flex:1 1 100%}
   .mapcard .mview{position:static;order:2}.mapcard .mapctl{position:static;order:3;margin-left:auto;display:flex}}
+.stepper{display:flex;gap:8px;align-items:center;justify-content:center}
+.stepper:empty{display:none}
+.stepper .sttxt{flex:1;min-width:0;display:grid;text-align:center;line-height:1.25}
+.stepper .sttxt b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stepper .mbtn:disabled{opacity:.35}
+.stepper .btn{padding:6px 12px;font-size:13px}
+#mapSvg .seg.past{opacity:.35} #mapSvg .seg.past .dots{stroke:#7E857B} #mapSvg .seg.past path[fill]{fill:#7E857B}
+#mapSvg .seg.future{opacity:.5}
+#mapSvg .seg.next .halo{stroke:#FFF5E8;opacity:.9}
+#mapSvg .tag.past{opacity:.4} #mapSvg .tag.past .tagn{fill:#B9B3A8}
+#mapSvg .tag.now .tagbg{fill:#1F6FB8;stroke:#163C29;stroke-width:2} #mapSvg .tag.now .tagtt{fill:#FFF5E8}
+#mapSvg .herering{fill:none;stroke:#1F6FB8;stroke-width:3}
+#mapSvg .herepulse{fill:none;stroke:#1F6FB8;stroke-width:3;transform-box:fill-box;transform-origin:center;animation:herepulse 1.8s ease-out infinite}
+@keyframes herepulse{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
+.itin li.past{opacity:.45;filter:grayscale(.9)}
+.itin li.now{outline:3px solid #1F6FB8;outline-offset:-1px;background:#1F6FB81f}
+.nowchip{background:#1F6FB8;color:#FFF5E8}
 .routes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
 .routes:empty{display:none}
 .routes b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-right:2px}
@@ -355,7 +374,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
   .arena{grid-template-columns:1fr}
   .vs{font-size:32px}
   .two{grid-template-columns:1fr}
-  .ranklist li{grid-template-columns:32px 1fr 50px}
+  .ranklist li{grid-template-columns:32px 1fr 50px auto}
   .ranklist li .rec{display:none}
   .planlist li{grid-template-columns:78px 1fr}
   .planlist li .heat{display:none}
@@ -487,7 +506,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     <div class="two">
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px">Your plan for <span id="planDay"></span></h3>
-        <p class="small muted" style="margin:0">Your highest-ranked sets go first; a set overlapping one you've already got by more than 15 minutes drops out unless you picked it head to head. 👎 sets never make the plan.</p>
+        <p class="small muted" style="margin:0">Suggested from your ranking: highest-ranked sets first, and a set overlapping one you've already got by more than 15 minutes drops out unless you picked it head to head. Tap any set on the grid to add it yourself, or ✕ to drop one; your changes stick.</p>
         <ol class="planlist" id="planlist"></ol>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
@@ -524,6 +543,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
             <p class="small muted" style="margin:0">Roads, lake and park are real (OpenStreetMap). Stages, food and water are placed from the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL map</a>, so they're close but not exact. Check the ACL app on the day for changes.</p>
           </aside>
         </div>
+        <div class="stepper" id="mapStep"></div>
         <div class="routes" id="mapRoutes"></div>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
@@ -593,7 +613,8 @@ const rnd=arr=>arr[Math.floor(Math.random()*arr.length)];
 const LS="acl26w2-"+MODE;
 const blankF=()=>({days:[],from:750,to:1320,gen:[],pop:[],q:""});
 const blankUI=()=>({tab:"rate",f:blankF(),card:null,lastCard:null,ins:null,pair:null,pairKind:null,follow:[],ctx:null,showUnr:false,day:"Fri",sort:"time",filtersOpen:false,h2h:true,svc:"apple",zoom:null});
-function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],ui:blankUI(),u:0}}
+function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],pin:{a:[],r:[]},ui:blankUI(),u:0}}
+const cleanPin=x=>({a:((x&&x.a)||[]).filter(i=>Number.isInteger(i)&&i>=0&&i<N),r:((x&&x.r)||[]).filter(i=>Number.isInteger(i)&&i>=0&&i<N)});
 let VIEW=null,MY=null,cloudT=null;
 let S=fresh(MODE==="me"?"":"");
 function makeBid(name){const slug=(name||"guest").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16)||"guest";return slug+"-"+Math.floor(Date.now()/1000)}
@@ -604,6 +625,7 @@ function migrate(x){
   if(x.v===3&&Array.isArray(x.o)){s.o=[0,1,2,3].map(ti=>(x.o[ti]||[]).filter(i=>s.t[i]===ti));s.us=(x.us||[]).filter(i=>s.t[i]!==undefined);s.ui=Object.assign(blankUI(),x.ui||{});s.ui.f=Object.assign(blankF(),(x.ui||{}).f||{})}
   else{const w={},g={};for(const [a,b,r] of s.h){g[a]=(g[a]||0)+1;g[b]=(g[b]||0)+1;if(r===0)w[a]=(w[a]||0)+1;else if(r===1)w[b]=(w[b]||0)+1;else{w[a]=(w[a]||0)+.5;w[b]=(w[b]||0)+.5}}
     for(const k in s.t)s.o[s.t[k]].push(+k);s.o=s.o.map(l=>l.sort((p,q)=>((w[q]||0)/(g[q]||1))-((w[p]||0)/(g[p]||1))))}
+  s.pin=cleanPin(x.pin);
   if(x.cloud&&x.cloud.edit)s.cloud={id:x.cloud.id,edit:x.cloud.edit,share:x.cloud.share};s.cloudSig=x.cloudSig||null;s.cloudOff=!!x.cloudOff;
   const inList=new Set(s.o.flat());for(const k in s.t)if(!inList.has(+k)){s.o[s.t[k]].push(+k);s.us.push(+k)}
   return s}
@@ -643,8 +665,8 @@ async function initCloud(){
 
 /* ---------- undo ---------- */
 let UNDO=[];try{UNDO=JSON.parse(localStorage.getItem(LS+"-undo")||"[]")}catch(e){}
-function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx,skip:S.ui.skip||{},def:S.ui.def||[]}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
-function undo(){const x=UNDO.pop();if(!x)return toast("Nothing to undo");const o=JSON.parse(x);Object.assign(S,{t:o.t,o:o.o,us:o.us,h:o.h});Object.assign(S.ui,o.ui);try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}save();recompute();renderAll();toast("Undone")}
+function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,pin:S.pin,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx,skip:S.ui.skip||{},def:S.ui.def||[]}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
+function undo(){const x=UNDO.pop();if(!x)return toast("Nothing to undo");const o=JSON.parse(x);Object.assign(S,{t:o.t,o:o.o,us:o.us,h:o.h});if(o.pin)S.pin=o.pin;Object.assign(S.ui,o.ui);try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}save();recompute();renderAll();toast("Undone")}
 
 /* ---------- scoring ---------- */
 function invNorm(p){const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771720,-13.28068155288572],c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416];
@@ -663,7 +685,7 @@ function compute(st){
     const mid=Math.floor(n/2);order.push(...sorted.slice(0,mid),...loose,...sorted.slice(mid))});
   order.forEach((id,i)=>pos[id]=i);
   const unr=A.filter(a=>tier[a.id]<0).map(a=>a.id);
-  return {tier,score,pos,order,unr,W,L,us}}
+  return {tier,score,pos,order,unr,W,L,us,pin:st.pin||null}}
 let C;
 function recompute(){C=compute(S)}
 const heatOf=id=>C.tier[id]<0?"unrated":TIERS[C.tier[id]].heat;
@@ -988,10 +1010,11 @@ function renderRank(){
   let html="";
   TIERS.forEach((T,ti)=>{const m=C.order.filter(id=>C.tier[id]===ti);
     html+=`<div class="tierhead"><h3>${T.icon} ${T.label}</h3><span class="small muted">${m.length} artist${m.length===1?"":"s"}</span></div>`;
-    html+=m.length?`<ol class="ranklist">${m.map(id=>{const a=A[id];return `<li class="${T.heat}"><span class="n tnum">${C.pos[id]+1}</span><span class="nm">${esc(a.name)}<div class="sub">${a.day} ${fmt(a.s)} · ${a.stage} · ${esc(a.fam)}${C.us.has(id)?" · not placed yet":""}</div></span><span class="rec tnum">${C.W[id]+C.L[id]?C.W[id]+"–"+C.L[id]:""}</span><span class="sc tnum">${scoreTxt(id)}</span></li>`}).join("")}</ol>`:`<p class="small muted" style="margin:0">Nobody here yet.</p>`});
+    html+=m.length?`<ol class="ranklist">${m.map(id=>{const a=A[id];return `<li class="${T.heat}"><span class="n tnum">${C.pos[id]+1}</span><span class="nm">${esc(a.name)}<div class="sub">${a.day} ${fmt(a.s)} · ${a.stage} · ${esc(a.fam)}${C.us.has(id)?" · not placed yet":""}</div></span><span class="rec tnum">${C.W[id]+C.L[id]?C.W[id]+"–"+C.L[id]:""}</span><span class="sc tnum">${scoreTxt(id)}</span>${VIEW?"":`<button class="pinbtn${inPlan(id)?" on":""}" data-pl="${id}" title="${inPlan(id)?"In your plan · tap to remove":"Add to your plan"}" aria-label="${inPlan(id)?"Remove "+esc(a.name)+" from":"Add "+esc(a.name)+" to"} your ${a.day} plan">${inPlan(id)?"✓":"＋"}</button>`}</li>`}).join("")}</ol>`:`<p class="small muted" style="margin:0">Nobody here yet.</p>`});
   html+=`<div class="tierhead"><h3>Not rated yet</h3><span class="small muted">${C.unr.length}</span>${C.unr.length?`<button class="btn ghost" id="unrToggle" style="padding:3px 12px;font-size:12px">${S.ui.showUnr?"Hide names":"Show names"}</button>`:""}</div>`;
   if(S.ui.showUnr&&C.unr.length)html+=`<p class="small muted" style="margin:0">${C.unr.map(i=>esc(A[i].name)).join(" · ")}</p>`;
   document.getElementById("ranklist").innerHTML=html;
+  document.querySelectorAll("#ranklist [data-pl]").forEach(b=>b.onclick=()=>{togglePlan(+b.dataset.pl);renderRank()});
   const t=document.getElementById("unrToggle");if(t)t.onclick=()=>{S.ui.showUnr=!S.ui.showUnr;save();renderRank()};
   const nm=document.getElementById("myName");if(document.activeElement!==nm)nm.value=S.name||"";
   renderDist();renderCompareMini()}
@@ -1012,12 +1035,13 @@ document.getElementById("myName").addEventListener("input",e=>{S.name=e.target.v
 function ensureBid(rename){if(!S.bid)S.bid=makeBid(S.name);else if(rename){const ts=S.bid.split("-").pop();S.bid=makeBid(S.name).replace(/-\d+$/,"-"+ts)}}
 function b64e(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function b64d(s){s=s.replace(/-/g,"+").replace(/_/g,"/");return decodeURIComponent(escape(atob(s)))}
-function makeCode(){ensureBid();return "ACL26."+b64e(JSON.stringify({v:3,n:S.name||"A friend",b:S.bid,o:S.o.map(l=>l.join(".")).join("|"),us:S.us.join("."),h:S.h.map(x=>x.slice(0,3).join(".")).join(",")}))}
+function makeCode(){ensureBid();return "ACL26."+b64e(JSON.stringify({v:3,n:S.name||"A friend",b:S.bid,o:S.o.map(l=>l.join(".")).join("|"),us:S.us.join("."),h:S.h.map(x=>x.slice(0,3).join(".")).join(","),pa:(S.pin&&S.pin.a||[]).join("."),pr:(S.pin&&S.pin.r||[]).join(".")}))}
 function readCode(txt){const o=JSON.parse(b64d(txt.trim().replace(/\s+/g,"").replace(/^ACL26\./,"")));
   const st=fresh(o.n);st.name=o.n||"";st.bid=o.b||null;
   st.o=(o.o||"").split("|").slice(0,4).map(l=>l?l.split(".").map(Number).filter(i=>i>=0&&i<N):[]);while(st.o.length<4)st.o.push([]);
   st.o.forEach((l,ti)=>l.forEach(i=>st.t[i]=ti));st.us=(o.us||"").split(".").filter(Boolean).map(Number).filter(i=>st.t[i]!==undefined);
-  st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];return st}
+  st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];
+  st.pin=cleanPin({a:(o.pa||"").split(".").filter(Boolean).map(Number),r:(o.pr||"").split(".").filter(Boolean).map(Number)});return st}
 document.getElementById("copyCode").onclick=()=>{if(!Object.keys(S.t).length)return toast("Rate a few artists first");copy(makeCode(),"Ranking code copied")};
 let FRIEND=null;
 document.getElementById("restoreBtn").onclick=()=>{document.getElementById("restoreBox").hidden=false};
@@ -1033,10 +1057,19 @@ function h2h(a,b){return h2hIn(S.h,a,b)}
 function h2hIn(hist,a,b){let wa=0,wb=0;for(const [x,y,r] of (hist||[])){if(r!==0&&r!==1)continue;const w=r===0?x:y,l=r===0?y:x;if(w===a&&l===b)wa++;if(w===b&&l===a)wb++}return wa>wb?a:wb>wa?b:null}
 function prefer(a,b){const h=h2h(a,b);if(h!==null)return h;return C.pos[a]<=C.pos[b]?a:b}
 function plan(d){return planFor(d,C,S.h)}
-function planFor(d,cc,hist){const sets=A.filter(a=>a.day===d&&cc.tier[a.id]>=0&&cc.tier[a.id]<3).sort((x,y)=>cc.pos[x.id]-cc.pos[y.id]);const pick=[];
+// Suggested plan from your ranking, plus any sets you added yourself (always kept) minus any you removed.
+function planFor(d,cc,hist){const pin=cc.pin||{},add=new Set(pin.a||[]),rm=new Set(pin.r||[]);
+  const pick=A.filter(a=>a.day===d&&add.has(a.id)&&!rm.has(a.id));
+  const sets=A.filter(a=>a.day===d&&!add.has(a.id)&&!rm.has(a.id)&&cc.tier[a.id]>=0&&cc.tier[a.id]<3).sort((x,y)=>cc.pos[x.id]-cc.pos[y.id]);
   for(const a of sets){const clash=pick.filter(p=>overlap(p,a)>15);
-    if(!clash.length)pick.push(a);else if(clash.length===1&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
+    if(!clash.length)pick.push(a);else if(clash.length===1&&!add.has(clash[0].id)&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
   return pick.sort((x,y)=>x.s-y.s)}
+const inPlan=id=>plan(A[id].day).some(x=>x.id===id);
+const pinnedAdd=id=>!!(S.pin&&S.pin.a.includes(id));
+function togglePlan(id){if(VIEW)return toast("View only. Open your own board to plan.");checkpoint();const P=S.pin||(S.pin={a:[],r:[]});const a=A[id];
+  if(inPlan(id)){P.a=P.a.filter(i=>i!==id);recompute();if(inPlan(id))P.r.push(id);toast(`Removed ${a.name} from your ${a.day} plan`)}
+  else{P.r=P.r.filter(i=>i!==id);recompute();if(!inPlan(id))P.a.push(id);toast(`Added ${a.name} to your ${a.day} plan`)}
+  save();recompute()}
 function renderSched(){
   const day=S.ui.day||"Fri";document.querySelectorAll("#dayBtns button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
   const T0=12*60+30,T1=22*60,PX=1.5,H=(T1-T0)*PX;const P=new Set(plan(day).map(a=>a.id));
@@ -1049,7 +1082,8 @@ function renderSched(){
   const el=document.getElementById("sched");el.innerHTML=html;el.querySelectorAll(".set").forEach(b=>b.onclick=()=>showArtist(A[+b.dataset.id]));
   requestAnimationFrame(()=>applyZoom(curZ()));
   document.getElementById("planDay").textContent=DAYS[day];const pl=plan(day);
-  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b><div class="small muted">${a.stage}</div></span><span class="heat ${heatOf(a.id)}">${iconOf(a.id)} ${scoreTxt(a.id)}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists and your plan appears here.</span></li>`;
+  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b>${pinnedAdd(a.id)?` <span class="chip">📌 added</span>`:""}<div class="small muted">${a.stage}</div></span><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="heat ${heatOf(a.id)}">${C.tier[a.id]>=0?iconOf(a.id)+" "+scoreTxt(a.id):"unrated"}</span>${VIEW?"":`<button class="pinbtn" data-rm="${a.id}" aria-label="Remove ${esc(a.name)} from your plan" title="Remove from plan">✕</button>`}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists, or tap any set on the grid to add it.</span></li>`;
+  document.querySelectorAll("#planlist [data-rm]").forEach(b=>b.onclick=()=>{togglePlan(+b.dataset.rm);renderSched()});
   const cl=CLASH.filter(([x,y])=>A[x].day===day&&C.tier[x]>=0&&C.tier[x]<=1&&C.tier[y]>=0&&C.tier[y]<=1);
   document.getElementById("clashes").innerHTML=cl.length?cl.map(([x,y])=>{const hw=h2h(x,y);const pf=prefer(x,y);
     return `<div class="clash"><span class="small"><b>${esc(A[x].name)}</b> ${scoreTxt(x)} vs <b>${esc(A[y].name)}</b> ${scoreTxt(y)} · ${overlap(A[x],A[y])} min<br><span class="muted">${hw!==null?"You picked "+esc(A[hw].name)+" head to head":"Leaning "+esc(A[pf].name)+" on ranking"}</span></span><button class="btn" data-p="${x},${y}">Battle</button></div>`}).join(""):`<p class="small muted" style="margin:0">No ❤️/👍 clashes on ${day} yet.</p>`;
@@ -1058,8 +1092,9 @@ function goBattle(p){S.ui.pair=p.split(",").map(Number);S.ui.pairKind="clash";S.
 function showArtist(a){const host=document.getElementById("dialogHost");const ov=A.filter(o=>o.id!==a.id&&overlap(o,a)>=20);
   host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="${esc(a.name)}"><div style="max-width:460px;width:100%;display:grid;gap:10px">${artCard(a)}
   ${ov.length?`<div class="card" style="display:grid;gap:6px"><b class="small">Overlaps with</b>${ov.map(o=>`<div class="clash"><span class="small"><b>${esc(o.name)}</b> ${iconOf(o.id)} ${scoreTxt(o.id)} · ${overlap(o,a)} min</span><button class="btn" data-p="${a.id},${o.id}">Battle</button></div>`).join("")}</div>`:""}
-  <div class="row" style="justify-content:center"><button class="btn" id="closeDlg">Close</button></div></div></div>`;
-  const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
+  <div class="row" style="justify-content:center">${VIEW?"":`<button class="btn ${inPlan(a.id)?"":"primary"}" id="planTgl">${inPlan(a.id)?`✓ In your ${a.day} plan · Remove`:`＋ Add to my ${a.day} plan`}</button>`}<button class="btn" id="closeDlg">Close</button></div></div></div>`;
+  const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;
+  const pt=document.getElementById("planTgl");if(pt)pt.onclick=()=>{togglePlan(a.id);showArtist(a)};host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
   bindRate(host,()=>showArtist(a));host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p));if(HOSTED)markPlaying();document.getElementById("closeDlg").focus()}
 
 
@@ -1171,14 +1206,14 @@ document.getElementById("shareBtn").onclick=openShare;
 /* ---------- online codes (website only): private edit code + public share code ---------- */
 const API="/api/board";
 const slugify=s=>String(s||"").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16);
-function coreState(st){st=st||S;return {v:3,name:st.name||"",bid:st.bid||"",t:st.t,o:st.o,us:st.us,h:st.h}}
+function coreState(st){st=st||S;const pin=st.pin||{a:[],r:[]};return {v:3,name:st.name||"",bid:st.bid||"",t:st.t,o:st.o,us:st.us,h:st.h,pa:pin.a||[],pr:pin.r||[]}}
 function persist(){if(VIEW)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
 async function api(body,share){
   const r=share!=null?await fetch(API+"?share="+encodeURIComponent(share),{cache:"no-store"}):await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||("HTTP "+r.status));e.status=r.status;throw e}return j}
 function fromServer(state,name){const st=fresh(name||state.name);st.name=name||state.name||"";st.bid=state.bid||"";st.t={};
   st.o=[0,1,2,3].map(ti=>((state.o||[])[ti]||[]).filter(i=>i>=0&&i<N));st.o.forEach((l,ti)=>l.forEach(i=>st.t[i]=ti));
-  st.us=(state.us||[]).filter(i=>st.t[i]!==undefined);st.h=(state.h||[]).filter(r=>r[0]<N&&r[1]<N);return st}
+  st.us=(state.us||[]).filter(i=>st.t[i]!==undefined);st.h=(state.h||[]).filter(r=>r[0]<N&&r[1]<N);st.pin=cleanPin({a:state.pa,r:state.pr});return st}
 let cloudBusy=false;
 function setSync(m){const el=document.getElementById("syncStatus");if(el)el.textContent=m}
 async function cloudSync(){
@@ -1450,7 +1485,7 @@ function buildDay(day,P){
     if(wk>0)add({k:"walk",t:nx.s-wk,from:a.stage,to:nx.stage,wk,free})});
   const last=pl[pl.length-1];const eg=nearest(GATES,ST(last.stage));const we=walkT(ST(last.stage),eg);R.walk+=we;add({k:"exit",t:last.e,g:eg,wk:we,from:last.stage});
   const meals=items.filter(x=>x.k==="food");meals.forEach(m=>m.label=m.t<15*60+30?"Lunch window":m.t<17*60?"Snack window":"Dinner window");
-  if(!meals.length){const low=[...pl].sort((x,y)=>P.c.score[x.id]-P.c.score[y.id])[0];const f=nearest(MEALS,ST(low.stage));R.nofood={a:low,f,wk:walkT(ST(low.stage),f)}}
+  if(!meals.length){const low=[...pl].sort((x,y)=>(P.c.score[x.id]??0)-(P.c.score[y.id]??0))[0];const f=nearest(MEALS,ST(low.stage));R.nofood={a:low,f,wk:walkT(ST(low.stage),f)}}
   return R}
 
 function mapItemText(it,P){const nm=a=>`<b>${esc(a.name)}</b>`;
@@ -1476,7 +1511,7 @@ function routeSegs(R){const segs=[];let prev=null;
     if(it.k==="food"||it.k==="water"&&!it.warn||it.k==="chill"){if(prev){segs.push({p:prev,q:it.at,i:it.i,stop:it.k});prev=it.at}continue}
     if(it.k==="tight"){segs.push({p:ST(it.a.stage),q:ST(it.b.stage),i:it.i,tight:true});prev=ST(it.b.stage);continue}
     if(it.k==="exit"){segs.push({p:ST(it.from),q:it.g,i:it.i,exit:true});continue}}
-  segs.forEach(sg=>sg.m=walkT(sg.p,sg.q));return segs}
+  segs.forEach((sg,j)=>{sg.m=walkT(sg.p,sg.q);sg.j=j});return segs}
 
 /* ---------- map view: whole park by default; pinch / drag / ⌘-scroll / buttons to zoom and move ---------- */
 let MV=null,MVfit="park",MDATA=null,mapFocus=null,mpT=null;
@@ -1519,15 +1554,19 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
     if(!on&&k0>0.95)continue;
     s+=px(g.x,g.y,`<rect x="${-w/2}" y="-7" width="${w}" height="14" rx="4"/><text y="3">${g.lab}</text><title>${esc(g.n)}</title>`,`gate${on?" on":""}`)}
   // treasure-map route: friend first (pink dots), then yours (blue dots), each with direction arrows and walk minutes
-  const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,(j%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
+  const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,((sg.j??j)%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
     let g=`<path d="${c.d}" class="halo" stroke-width="${u(cls==="mine"?7:5)}"/><path d="${c.d}" class="dots" stroke="${tcol}" stroke-width="${u(cls==="mine"?3.8:3)}" stroke-dasharray="0.01 ${u(cls==="mine"?8:7)}"/>`;
     const ts=Lpx>240?[.3,.7]:[.5];ts.forEach(t=>{const b=bez(sg.p,c.c,sg.q,t);g+=px(b.x,b.y,`<path d="M-4.5,-4.5 L4,0 L-4.5,4.5 Z" fill="${tcol}" stroke="#FFF5E8" stroke-width="1" transform="rotate(${b.ang.toFixed(0)})"/>`)});
-    const showPill=withPills&&(S.ui.allWalk||String(sg.i)===String(mapFocus)||sg.i===D.nextI);
+    const stc=cls!=="mine"||D.cur==null?"":sg.ai<=D.cur?"past":sg.ai===D.nextStepI?"next":"future";
+    const showPill=withPills&&stc!=="past"&&(S.ui.allWalk||String(sg.i)===String(mapFocus)||stc==="next"||(D.cur==null&&sg.i===D.nextI));
     if(withPills&&!showPill&&sg.tight){const b=bez(sg.p,c.c,sg.q,.5);g+=px(b.x,b.y,`<circle r="7" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.3"/><text y="3.1" class="boltic">⚡</text>`)}
     if(showPill&&Lpx>40){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
-    s+=`<g class="seg ${cls}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
+    s+=`<g class="seg ${cls} ${stc}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
   OL.forEach((o,n)=>{if(o.segs.length)drawSegs(o.segs,o.col,"theirs",-(1.25+n*.45),false)});
-  drawSegs(segs,"#1F6FB8","mine",1,true);
+  const segOrder=D.cur==null?segs:[...segs.filter(sg=>sg.ai<=D.cur),...segs.filter(sg=>sg.ai>D.cur&&sg.ai!==D.nextStepI),...segs.filter(sg=>sg.ai===D.nextStepI)];
+  drawSegs(segOrder,"#1F6FB8","mine",1,true);
+  // a pulsing ring where you are now (or the step you picked)
+  if(D.cur!=null){const it=R.items[D.cur];const at=it.k==="set"?ST(it.a.stage):it.k==="gate"||it.k==="exit"?it.g:it.at;if(at)s+=px(at.x,at.y,`<circle r="15" class="herering"/><circle r="15" class="herepulse"/>`)}
   // start / exit pins
   if(R.gate){const g=R.gate;const t=`START ${fmtP(R.items[0].t)}`;const w=t.length*5.9+14;s+=px(g.x,g.y,`<g transform="translate(0 -19)"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="#1F6FB8" stroke="#FFF5E8" stroke-width="1.2"/><text y="3.6" class="pilltxt">${t}</text></g>`,"startpin")}
   // stages: a small pin on the real spot; the name sits off to the side (away from the middle of the park, where paths cross),
@@ -1540,8 +1579,8 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
     const H=19+rows.length*20;const top0=dy<-.3?-H:dy>.3?0:-9.5;const xAt=w=>dx<-.3?-w:dx>.3?0:-w/2;
     let blk=`<line x1="0" y1="0" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" class="leader"/><circle r="6" fill="${g.c}" stroke="#FFF5E8" stroke-width="2"/>`;
     blk+=`<g transform="translate(${ax.toFixed(1)} ${ay.toFixed(1)})"><rect x="${xAt(lw)}" y="${top0}" width="${lw}" height="19" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.2:1.2}"/><text x="${xAt(lw)+lw/2}" y="${top0+14.1}" fill="${g.ink}" class="stlab">${g.lab}</text>`;
-    rows.forEach((r,j)=>{const w=rw(r),x=xAt(w),y=top0+21+j*20,h=heatOf2(P,r.v.a.id);
-      blk+=`<g data-it="${r.v.i}" class="tag"><rect x="${x}" y="${y}" width="${w}" height="18" rx="9" class="tagbg${r.meet?" meet":""}"/><circle cx="${x+9}" cy="${y+9}" r="7.2" class="tagn ${h}"/><text x="${x+9}" y="${y+12.4}" class="tagnt ${h}">${r.v.n}</text><text x="${x+20}" y="${y+12.6}" class="tagtt">${fmtP(r.v.a.s)}</text>${r.top?`<text x="${x+w-(r.meet?24:8)}" y="${y+13.5}" class="xmark" font-size="13">✕</text>`:""}${r.meet?`<text x="${x+w-9}" y="${y+12.6}" class="tagtt" text-anchor="middle">🤝</text>`:""}<title>${r.v.n}. ${fmtP(r.v.a.s)}–${fmtP(r.v.a.e)} ${esc(r.v.a.name)}${r.top?" · your top set":""}${r.meet?" · meet-up":""}</title></g>`});
+    rows.forEach((r,j)=>{const w=rw(r),x=xAt(w),y=top0+21+j*20,h=heatOf2(P,r.v.a.id);const ps=D.cur==null?"":r.v.i===D.cur?" now":r.v.i<D.cur?" past":"";
+      blk+=`<g data-it="${r.v.i}" class="tag${ps}"><rect x="${x}" y="${y}" width="${w}" height="18" rx="9" class="tagbg${r.meet?" meet":""}"/><circle cx="${x+9}" cy="${y+9}" r="7.2" class="tagn ${h}"/><text x="${x+9}" y="${y+12.4}" class="tagnt ${h}">${r.v.n}</text><text x="${x+20}" y="${y+12.6}" class="tagtt">${fmtP(r.v.a.s)}</text>${r.top?`<text x="${x+w-(r.meet?24:8)}" y="${y+13.5}" class="xmark" font-size="13">✕</text>`:""}${r.meet?`<text x="${x+w-9}" y="${y+12.6}" class="tagtt" text-anchor="middle">🤝</text>`:""}<title>${r.v.n}. ${fmtP(r.v.a.s)}–${fmtP(r.v.a.e)} ${esc(r.v.a.name)}${r.top?" · your top set":""}${r.meet?" · meet-up":""}</title></g>`});
     blk+=`</g><title>${esc(name)}${visits.length?": "+visits.map(v=>fmtP(v.a.s)+" "+v.a.name).join(", "):""}</title>`;
     if(!visits.length&&ovis.length){const seen=[...new Set(ovis.map(x=>x.o))];seen.forEach((o,q)=>{blk+=`<circle cx="${7+q*9}" cy="-7" r="4.5" fill="${o.col}" stroke="#FFF5E8" stroke-width="1.4"><title>${esc(o.name)}: ${ovis.filter(x=>x.o===o).map(x=>fmtP(x.a.s)+" "+x.a.name).join(", ")}</title></circle>`})}
     s+=px(g.x,g.y,blk,`stage${visits.length?" on":ovis.length?" oon":""}`)}
@@ -1564,7 +1603,7 @@ function renderMap(){
   const meetIds=new Set(Object.keys(meetBy).map(Number));const showO=OL.length>0,RO=null,O=OL[0]||null;
   const used=new Set(R.items.filter(it=>it.at).map(it=>it.at.k).concat(R.items.filter(it=>it.water&&it.k==="food").map(it=>it.water.k)));
   const segs=routeSegs(R),osegs=[];
-  const top=R.pl.length?[...R.pl].sort((x,y)=>P.c.score[y.id]-P.c.score[x.id])[0]:null;
+  const top=R.pl.length?[...R.pl].sort((x,y)=>(P.c.score[y.id]??-1)-(P.c.score[x.id]??-1))[0]:null;
   const itPts={};const addP=(i,...ps)=>{(itPts[i]=itPts[i]||[]).push(...ps)};
   segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.i,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
   if(MDATA&&MDATA.day!==day){MVfit="park";mapFocus=null}
@@ -1572,10 +1611,17 @@ function renderMap(){
   let nextI=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
     const today={"2026-10-09":"Fri","2026-10-10":"Sat","2026-10-11":"Sun"}[`${parts.year}-${parts.month}-${parts.day}`];
     if(today===day){const nowM=+parts.hour*60+ +parts.minute;const sg=segs.find(sg=>(R.items[sg.i].t||0)>=nowM-5);nextI=sg?sg.i:null}}catch(e){}
-  MDATA={R,RO,P,O,OL,meetBy,meetIds,used,segs,osegs,top,itPts,day,nextI};
+  // steps you move through: past ones grey, the current one in full colour, the rest waiting. Device time picks the start on the day itself.
+  const steps=R.items.filter(it=>it.k==="gate"||it.k==="set"||it.k==="food"||(it.k==="water"&&!it.warn)||it.k==="chill"||it.k==="exit").map(it=>it.i);
+  let live=false,auto=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+    if({"2026-10-09":"Fri","2026-10-10":"Sat","2026-10-11":"Sun"}[`${parts.year}-${parts.month}-${parts.day}`]===day&&steps.length){live=true;const nowM=+parts.hour*60+ +parts.minute;auto=steps[0];steps.forEach(i=>{if((R.items[i].t||0)<=nowM)auto=i})}}catch(e){}
+  if(STEP.day!==day||(STEP.i!=null&&!steps.includes(STEP.i)))STEP={day,i:null,manual:false};
+  const cur=STEP.manual?STEP.i:auto,nextStepI=cur==null?null:(steps.find(i=>i>cur)??null);
+  segs.forEach(sg=>{sg.ai=sg.tight?R.items.findIndex(x=>x.k==="set"&&x.a===R.items[sg.i].b):sg.i});
+  MDATA={R,RO,P,O,OL,meetBy,meetIds,used,segs,osegs,top,itPts,day,nextI,steps,cur,nextStepI,live};
   if(!MV||MVfit)applyFit();
   drawMap();
-  updView();document.getElementById("mAllWalk").setAttribute("aria-checked",!!S.ui.allWalk);
+  updView();renderStepper();document.getElementById("mAllWalk").setAttribute("aria-checked",!!S.ui.allWalk);
   document.getElementById("keyFriendRow").hidden=!showO;if(showO)document.getElementById("keyFriendTxt").textContent=`Dots in other colours: ${OL.map(o=>VIEW?"your":first(o.name)+"'s").join(", ")} route${OL.length===1?"":"s"}.`;
   document.getElementById("mapOverlay").innerHTML=cands.length||VIEW?"":`<span class="small muted">Add friends on the Crew tab to compare routes here.</span>`;
   // whose routes to show: yours always; friends by name, off until you tick them
@@ -1587,16 +1633,38 @@ function renderMap(){
   document.getElementById("itinSum").innerHTML=R.pl.length?[`${R.pl.length} set${R.pl.length===1?"":"s"}`,`${R.walk}+ min walking`,R.decide+R.tight?`${R.decide+R.tight} heads-up${R.decide+R.tight===1?"":"s"} ⚡`:"",R.food?`${R.food} food break${R.food===1?"":"s"}`:"",meetIds.size?`${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""].filter(Boolean).join(" · "):"";
   let L="";
   if(!R.pl.length)L=`<li class="mini"><span></span><span>${VIEW?"Nothing planned this day yet.":`Rate some ${DAYS[day].split(",")[0]} artists ❤️ or 👍 and your route, decision points and breaks appear here.`}</span><span></span></li>`;
-  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
+  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick${P.c.tier[R.nofood.a.id]>=0?`, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}`:""}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
   for(const it of R.items){
-    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc((meetBy[a.id]||[]).join(", "))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
+    const pc=cur==null?"":it.i===cur?" now":it.i<cur?" past":"";const nowChip=it.i===cur?` <span class="chip nowchip">${live&&!STEP.manual?"You are here":"This step"}</span>`:"";
+    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}${pc}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${nowChip}${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc((meetBy[a.id]||[]).join(", "))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${P.c.tier[a.id]>=0?TIERS[P.c.tier[a.id]].icon+" "+sc1(P.c.score[a.id]):"📌"}</span></li>`;continue}
     const m=mapItemText(it,P);if(!m)continue;
-    L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmtP(it.t)}`}</span><span>${m.tx}</span><span>${m.btn||""}</span></li>`}
+    L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}${pc}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmtP(it.t)}`}</span><span>${m.tx}${nowChip}</span><span>${m.btn||""}</span></li>`}
   const ol=document.getElementById("itin");ol.innerHTML=L;
   ol.querySelectorAll("[data-p]").forEach(b=>b.onclick=e=>{e.stopPropagation();goBattle(b.dataset.p)});
   ol.querySelectorAll("button[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation();showArtist(A[+b.dataset.a])});
-  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>focusIt(li.dataset.it,true));
+  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>{const i=+li.dataset.it;if(MDATA.steps.includes(i)){setStep(i,true);if(window.innerWidth<=900){const c=document.querySelector(".mapcard"),t=document.querySelector(".tabs");window.scrollTo({top:c.getBoundingClientRect().top+window.scrollY-(t?t.offsetHeight:0)-8,behavior:"smooth"})}}else focusIt(li.dataset.it,true)});
   markFocus()}
+let STEP={day:null,i:null,manual:false};
+function stepLabel(it){if(!it)return"";switch(it.k){
+  case "gate":return `Arrive by ${fmtP(it.t)} · ${it.g.n}`;
+  case "set":return `${fmtP(it.a.s)} · ${it.a.name} @ ${stShort(it.a.stage)}`;
+  case "food":return `${fmtP(it.t)} · Eat at ${it.at.n}`;
+  case "water":return `${fmtP(it.t)} · Refill water`;
+  case "chill":return `${fmtP(it.t)} · Shade at ${it.at.n}`;
+  case "exit":return `${fmtP(it.t)} · Head out, ${it.g.n}`}return""}
+function setStep(i,zoom){const D=MDATA;if(!D)return;STEP={day:D.day,i,manual:true};mapFocus=null;renderMap();
+  if(zoom&&i!=null){const pts=[...(MDATA.itPts[i]||[])];const nx=MDATA.nextStepI;if(nx!=null)pts.push(...(MDATA.itPts[nx]||[]));
+    if(pts.length){MVfit=null;MV=fitBox(bboxOf(pts),110,380);drawMap();updView()}}}
+function renderStepper(){const el=document.getElementById("mapStep");const D=MDATA;if(!D||!D.steps.length){el.innerHTML="";return}
+  const n=D.steps.length,k=D.cur==null?-1:D.steps.indexOf(D.cur);
+  el.innerHTML=k<0?`<button class="btn primary" id="stGo">▶ Walk through your day</button>`:
+    `<button class="mbtn" id="stPrev" aria-label="Previous step"${k<=0?" disabled":""}>◀</button><div class="sttxt"><span class="small muted">${D.live&&!STEP.manual?"Now":"Step "+(k+1)+" of "+n}</span><b>${esc(stepLabel(D.R.items[D.cur]))}</b></div><button class="mbtn" id="stNext" aria-label="Next step"${k>=n-1?" disabled":""}>▶</button>${D.live&&STEP.manual?`<button class="btn ghost" id="stNow">Now</button>`:""}`;
+  const g=id=>document.getElementById(id);
+  if(g("stGo"))g("stGo").onclick=()=>setStep(D.steps[0],true);
+  if(g("stPrev"))g("stPrev").onclick=()=>setStep(D.steps[Math.max(0,k-1)],true);
+  if(g("stNext"))g("stNext").onclick=()=>setStep(D.steps[Math.min(n-1,k+1)],true);
+  if(g("stNow"))g("stNow").onclick=()=>{STEP.manual=false;renderMap()}}
+setInterval(()=>{if(S.ui.tab==="map"&&MDATA&&MDATA.live&&!STEP.manual)renderMap()},60000);
 function updView(){const b=document.getElementById("mView");const hasRoute=!!(MDATA&&MDATA.segs.length);
   const n=narrowMap();if(MVfit==="park"){b.textContent=n?"My route":"Zoom to my route";b.hidden=!hasRoute}else{b.textContent=n?"Whole park":"Show whole park";b.hidden=false}}
 function heatOf2(P,id){return P.c.tier[id]<0?"unrated":TIERS[P.c.tier[id]].heat}
