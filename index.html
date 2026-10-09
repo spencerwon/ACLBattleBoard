@@ -119,8 +119,10 @@ textarea{width:100%;min-height:70px;font-size:12px}
 .meter{height:10px;background:var(--surface-2);border-radius:9px;overflow:hidden;flex:1 1 200px}
 .meter i{display:block;height:100%;background:linear-gradient(90deg,var(--cold),var(--cool),var(--warm),var(--hot))}
 .deckwrap{display:grid;justify-items:center;gap:12px;padding-block:6px}
-.swipe{width:min(460px,100%);background:var(--surface);border-radius:22px;padding:18px;display:grid;gap:10px;box-shadow:0 18px 40px -18px #163C2988, 0 0 0 1px var(--line);touch-action:pan-y;user-select:none;-webkit-user-select:none;position:relative;transition:transform .25s ease, opacity .25s ease;cursor:grab}
+.swipe{width:min(460px,100%);background:var(--surface);border-radius:22px;padding:18px;display:grid;gap:10px;box-shadow:0 18px 40px -18px #163C2988, 0 0 0 1px var(--line);touch-action:none;user-select:none;-webkit-user-select:none;position:relative;transition:transform .25s ease, opacity .25s ease;cursor:grab}
 .swipe.dragging{transition:none;cursor:grabbing}
+.bigrate button{touch-action:manipulation}
+html,body{overflow-x:clip}
 .swipe h2{font-size:clamp(34px,7vw,48px);line-height:.95;overflow-wrap:anywhere}
 .swipe .stamp{position:absolute;top:18px;padding:6px 12px;border:4px solid currentColor;border-radius:10px;font-family:var(--f-display);font-size:26px;text-transform:uppercase;opacity:0;pointer-events:none;background:var(--surface)}
 .swipe .stamp.l{right:16px;color:var(--cold);transform:rotate(8deg)} .swipe .stamp.r{left:16px;color:var(--warm);transform:rotate(-8deg)} .swipe .stamp.u{left:50%;top:auto;bottom:24px;transform:translateX(-50%);color:var(--hot)} .swipe .stamp.d{left:50%;transform:translateX(-50%);color:var(--cool)}
@@ -847,14 +849,21 @@ function renderRate(){
   const u=document.getElementById("undoBtn");if(u)u.onclick=undo;
   if(HOSTED)markPlaying()}
 function flyOut(ti){const c=document.getElementById("swipeCard");if(!c){swipeRate(ti);return}
-  const v={3:[-1,0],2:[0,1],1:[1,0],0:[0,-1]}[ti];c.style.transform=`translate(${v[0]*600}px,${v[1]*500}px) rotate(${v[0]*20}deg)`;c.style.opacity="0";setTimeout(()=>swipeRate(ti),200)}
-function bindSwipe(c){let x0=0,y0=0,dx=0,dy=0,on=false;
+  // straight out along one axis, no rotation; short vertical travel so the page never grows or zooms out
+  const v={3:[-1,0],2:[0,1],1:[1,0],0:[0,-1]}[ti];c.style.transform=v[0]?`translate(${v[0]*120}%,0)`:`translate(0,${v[1]*180}px)`;c.style.opacity="0";setTimeout(()=>swipeRate(ti),200)}
+function bindSwipe(c){let x0=0,y0=0,dx=0,dy=0,on=false,axis=null,pid=null;
   const st={l:c.querySelector(".stamp.l"),r:c.querySelector(".stamp.r"),u:c.querySelector(".stamp.u"),d:c.querySelector(".stamp.d")};
-  c.addEventListener("pointerdown",e=>{if(e.target.closest("a,button"))return;on=true;x0=e.clientX;y0=e.clientY;dx=dy=0;c.classList.add("dragging");try{c.setPointerCapture(e.pointerId)}catch(_){}});
-  c.addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-x0;dy=e.clientY-y0;c.style.transform=`translate(${dx}px,${dy}px) rotate(${dx/18}deg)`;
-    const h=Math.abs(dx)>Math.abs(dy);st.l.style.opacity=h&&dx<0?Math.min(1,-dx/110):0;st.r.style.opacity=h&&dx>0?Math.min(1,dx/110):0;st.u.style.opacity=!h&&dy<0?Math.min(1,-dy/110):0;st.d.style.opacity=!h&&dy>0?Math.min(1,dy/110):0});
-  const end=()=>{if(!on)return;on=false;c.classList.remove("dragging");const h=Math.abs(dx)>Math.abs(dy),d=h?Math.abs(dx):Math.abs(dy);
-    if(d>110)flyOut(h?(dx<0?3:1):(dy<0?0:2));else{c.style.transform="";Object.values(st).forEach(s=>s.style.opacity=0)}};
+  const reset=()=>{c.style.transform="";Object.values(st).forEach(s=>s.style.opacity=0)};
+  c.addEventListener("pointerdown",e=>{if(e.target.closest("a,button")||on)return;on=true;pid=e.pointerId;x0=e.clientX;y0=e.clientY;dx=dy=0;axis=null;c.classList.add("dragging");try{c.setPointerCapture(e.pointerId)}catch(_){}});
+  c.addEventListener("pointermove",e=>{if(!on||e.pointerId!==pid)return;dx=e.clientX-x0;dy=e.clientY-y0;
+    // dead zone, then lock to whichever axis clearly leads; the card only ever moves along that one axis
+    if(!axis){const ax=Math.abs(dx),ay=Math.abs(dy);if(Math.max(ax,ay)<14)return;if(ax>ay*1.25)axis="h";else if(ay>ax*1.25)axis="v";else return}
+    const d=axis==="h"?dx:dy;c.style.transform=axis==="h"?`translate(${dx}px,0)`:`translate(0,${dy}px)`;const k=Math.min(1,Math.abs(d)/limit());
+    st.l.style.opacity=axis==="h"&&dx<0?k:0;st.r.style.opacity=axis==="h"&&dx>0?k:0;st.u.style.opacity=axis==="v"&&dy<0?k:0;st.d.style.opacity=axis==="v"&&dy>0?k:0});
+  const limit=()=>axis==="h"?Math.max(120,c.offsetWidth*.33):130;
+  const end=e=>{if(!on||(e&&e.pointerId!==pid))return;on=false;c.classList.remove("dragging");
+    if(e&&e.type==="pointercancel"){axis=null;reset();return}
+    const d=axis==="h"?dx:axis==="v"?dy:0;if(axis&&Math.abs(d)>=limit())flyOut(axis==="h"?(dx<0?3:1):(dy<0?0:2));else reset();axis=null};
   c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end)}
 document.addEventListener("keydown",e=>{if(S.ui.tab!=="rate"||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const ui=S.ui;
   if(ui.card!=null&&!ui.pair&&!(ui.follow||[]).length){const m={"1":3,"2":2,"3":1,"4":0,ArrowLeft:3,ArrowDown:2,ArrowRight:1,ArrowUp:0}[e.key];if(m!==undefined){e.preventDefault();flyOut(m)}}
