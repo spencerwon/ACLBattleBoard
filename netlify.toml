@@ -1,0 +1,11 @@
+# The site is plain static files at the repo root; the only server code is in netlify/functions.
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Keep the stats page out of search engines.
+[[headers]]
+  for = "/stats.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"

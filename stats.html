@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Battle Board Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: poster masthead, four headline tiles (1h / 6h / 24h / all time), hourly + daily charts, then the roster of names and codes. Same tokens as the Battle Board. */
+:root{
+  --forest:#163C29; --poppy:#E5432B; --marigold:#F4A12B; --sky:#5EC6F1; --blue:#2F79C2;
+  --bg:#EC86BC; --surface:#FFF5E8; --surface-2:#FCE7D4; --ink:#163C29; --ink-soft:#4A6656; --line:#16402B22; --accent:#E5432B; --on-accent:#FFF5E8;
+  --bar:#E5432B; --bar2:#2F79C2; --grid:#16402B1a;
+  --f-display:"Anton","Impact","Arial Narrow Bold",sans-serif; --f-body:"Archivo","Helvetica Neue",Arial,sans-serif; --r:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0E2519; --surface:#163627; --surface-2:#1D4532; --ink:#FFF0E0; --ink-soft:#BFD3C6; --line:#FFF0E01f; --accent:#F0609F; --on-accent:#0E2519;
+  --bar:#EE5A3C; --bar2:#3C9FD6; --grid:#FFF0E01a; color-scheme:dark }}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;margin:0;padding-top:env(safe-area-inset-top,0px)}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 60px;display:grid;gap:16px}
+h1,h2{font-family:var(--f-display);font-weight:400;text-transform:uppercase;margin:0;letter-spacing:.01em;text-wrap:balance}
+button{font-family:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+.mast{display:grid;gap:6px;text-align:center;justify-items:center;padding-block:6px}
+.mast .kick{font-weight:800;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+.mast h1{font-size:clamp(42px,8vw,80px);line-height:.92}
+.mast h1 span{color:var(--accent)}
+.card{background:var(--surface);border-radius:var(--r);padding:16px;min-width:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--ink-soft)} .small{font-size:12.5px} .tnum{font-variant-numeric:tabular-nums}
+.btn{border:2px solid var(--ink);background:var(--surface);font-weight:800;border-radius:999px;padding:7px 15px;font-size:14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.sm{padding:4px 11px;font-size:12.5px}
+.btn:hover{border-color:var(--accent)}
+input{font:inherit;color:var(--ink);background:var(--surface);border:2px solid var(--ink);border-radius:10px;padding:8px 10px;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tile{border-radius:20px;padding:16px 18px;display:grid;gap:4px;align-content:start}
+.tile .k{font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.tile .n{font-family:var(--f-display);font-size:clamp(52px,8vw,84px);line-height:.9;font-variant-numeric:tabular-nums}
+.tile .s{font-weight:700;font-size:13px}
+.t1{background:var(--poppy);color:#FFF5E8} .t2{background:var(--marigold);color:#163C29} .t3{background:var(--sky);color:#163C29} .t4{background:var(--forest);color:#FFF5E8}
+.chart svg{width:100%;height:auto;display:block}
+.chead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.chead h2{font-size:26px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;font-weight:700}
+.sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-1px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:620px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--surface-2);border-radius:6px;padding:3px 7px;display:inline-block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.new{background:var(--marigold);color:#163C29;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800;margin-left:6px}
+details summary{cursor:pointer;font-weight:800}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--forest);color:#FFF5E8;border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:600;max-width:240px}
+#tip b{color:var(--marigold)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--forest);color:#FFF5E8;border-radius:999px;padding:10px 18px;font-weight:700;font-size:14px;max-width:calc(100% - 32px)}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <div class="kick">ACL Battle Board · Host only</div>
+    <h1>Board <span>Stats</span></h1>
+  </header>
+
+  <div class="card" id="gate" hidden style="display:grid;gap:10px;max-width:560px;justify-self:center;width:100%">
+    <h2 style="font-size:24px">Enter your stats key</h2>
+    <p class="small muted" style="margin:0">This page only shows numbers to whoever has the key. It's remembered in this browser after the first time.</p>
+    <form class="row" id="keyForm"><input type="text" id="keyIn" autocomplete="off" placeholder="Stats key" aria-label="Stats key" style="flex:1 1 200px"><button class="btn primary">Open stats</button></form>
+    <p class="small" id="gateMsg" style="margin:0;font-weight:700"></p>
+  </div>
+
+  <main id="main" hidden style="display:grid;gap:16px">
+    <div class="row" style="justify-content:space-between"><span class="small muted" id="updated"></span><div class="row"><button class="btn sm" id="refresh">Refresh</button><button class="btn sm" id="forget">Forget key on this device</button></div></div>
+    <section class="tiles" id="tiles" aria-label="New unique users"></section>
+    <section class="card chart" style="display:grid;gap:10px">
+      <div class="chead"><h2>New users by hour · last 48 hours</h2><div class="legend"><span><span class="sw" style="background:var(--bar)"></span>Started rating</span><span><span class="sw" style="background:var(--bar2)"></span>Only looked</span></div></div>
+      <div id="hourly"></div>
+    </section>
+    <section class="card chart" style="display:grid;gap:10px">
+      <div class="chead"><h2>All-time growth</h2><span class="small muted">Total unique users by day</span></div>
+      <div id="daily"></div>
+    </section>
+    <section class="card" style="display:grid;gap:10px">
+      <div class="chead"><h2>Names and codes</h2><div class="row"><button class="btn primary sm" id="copyAll">Copy all codes</button></div></div>
+      <p class="small muted" style="margin:0">Newest first. Copy all codes and paste them into ACL Wrapped's People tab to update your analytics. The code is each person's latest ranking; it changes as they keep rating.</p>
+      <div class="tbl"><table><thead><tr><th>Name</th><th>First seen</th><th>Last active</th><th class="num">Rated</th><th class="num">Battles</th><th>Ranking code</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <details id="outBox"><summary id="outSum"></summary><p class="small muted">Left out of every number above because the name or board ID looks like a test run.</p><div class="tbl"><table><tbody id="outRows"></tbody></table></div></details>
+    </section>
+  </main>
+</div>
+<div id="tip" hidden></div>
+<script>
+const API=location.hostname==="acl2026battleboard.netlify.app"?"/api/stats":"https://acl2026battleboard.netlify.app/api/stats";
+const HOUR=3600e3;
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let KEY=null;try{KEY=localStorage.getItem("aclstats-key")}catch(e){}
+if(location.hash.length>1){KEY=decodeURIComponent(location.hash.slice(1));history.replaceState(null,"",location.pathname)}
+let DATA=null,TIMER=null;
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
+function showGate(msg){document.getElementById("gate").hidden=false;document.getElementById("main").hidden=true;document.getElementById("gateMsg").textContent=msg||""}
+async function load(){
+  if(!KEY)return showGate();
+  try{const r=await fetch(API,{headers:{"x-stats-key":KEY},cache:"no-store"});
+    if(r.status===401){try{localStorage.removeItem("aclstats-key")}catch(e){}KEY=null;return showGate("That key didn't work. Check it and try again.")}
+    if(!r.ok)throw new Error(r.status);
+    DATA=await r.json();try{localStorage.setItem("aclstats-key",KEY)}catch(e){}
+    document.getElementById("gate").hidden=true;document.getElementById("main").hidden=false;render()}
+  catch(e){document.getElementById("updated").textContent="Couldn't reach the stats service. It retries every minute."}}
+const fmt=ms=>new Date(ms).toLocaleString([], {weekday:"short",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"});
+const ago=ms=>{const m=Math.round(ms/60e3);return m<1?"just now":m<60?m+" min ago":m<1440?Math.round(m/60)+" h ago":Math.round(m/1440)+" d ago"};
+function render(){
+  const now=DATA.now,all=DATA.users.filter(u=>!u.test),out=DATA.users.filter(u=>u.test);
+  const win=h=>all.filter(u=>now-u.first<=h*HOUR),rated=l=>l.filter(u=>u.rated>0).length;
+  const T=[["Past hour",win(1),"t1"],["Past 6 hours",win(6),"t2"],["Past day",win(24),"t3"],["All time",all,"t4"]];
+  document.getElementById("tiles").innerHTML=T.map(([k,l,c])=>`<div class="tile ${c}"><div class="k">${k}</div><div class="n">${l.length}</div><div class="s">new unique user${l.length===1?"":"s"} · ${rated(l)} started rating</div></div>`).join("");
+  document.getElementById("updated").textContent=`Updated ${new Date(now).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})} · refreshes every minute`;
+  hourly(all,now);daily(all,now);roster(all,out,now)}
+function hourly(all,now){
+  const end=Math.ceil(now/HOUR)*HOUR,start=end-48*HOUR,b=Array.from({length:48},()=>[0,0]);
+  for(const u of all)if(u.first>=start&&u.first<end)b[Math.floor((u.first-start)/HOUR)][u.rated>0?0:1]++;
+  const W=900,H=240,pl=34,pr=8,pt=12,pb=34,mx=Math.max(2,...b.map(x=>x[0]+x[1]));const ticks=[0,Math.ceil(mx/2),mx];
+  const bw=(W-pl-pr)/48,ys=v=>pt+(1-v/mx)*(H-pt-pb);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="New users per hour over the last 48 hours">`;
+  s+=ticks.map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--grid)"/><text x="${pl-6}" y="${ys(v)+4}" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink-soft)">${v}</text>`).join("");
+  b.forEach(([r,l],i)=>{const x=pl+i*bw+1,w=bw-2,t0=start+i*HOUR,lab=new Date(t0).toLocaleString([], {weekday:"short",hour:"numeric"});
+    const tip=`<b>${lab}</b><br>${r} started rating · ${l} only looked`;
+    s+=`<rect x="${pl+i*bw}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent" data-tip="${esc(tip)}"/>`;
+    if(r)s+=`<rect x="${x}" y="${ys(r)}" width="${w}" height="${ys(0)-ys(r)}" rx="3" fill="var(--bar)" data-tip="${esc(tip)}"/>`;
+    if(l)s+=`<rect x="${x}" y="${ys(r+l)}" width="${w}" height="${ys(0)-ys(l)-(r?2:0)}" rx="3" fill="var(--bar2)" data-tip="${esc(tip)}"/>`;
+    const d=new Date(t0);if(d.getHours()%6===0)s+=`<text x="${x+w/2}" y="${H-pb+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink-soft)">${d.getHours()===0?d.toLocaleDateString([], {weekday:"short"}):d.toLocaleTimeString([], {hour:"numeric"})}</text>`});
+  document.getElementById("hourly").innerHTML=s+"</svg>"}
+function daily(all,now){
+  const el=document.getElementById("daily");if(!all.length){el.innerHTML=`<p class="small muted">No visitors yet. The first one shows up here within a minute of opening the board.</p>`;return}
+  const day=ms=>{const d=new Date(ms);d.setHours(0,0,0,0);return d.getTime()};
+  const d0=day(Math.min(...all.map(u=>u.first))),d1=day(now),days=[];for(let d=d0;d<=d1;d+=86400e3)days.push(day(d+3600e3));
+  const cum=days.map(d=>all.filter(u=>day(u.first)<=d).length),neu=days.map(d=>all.filter(u=>day(u.first)===d).length);
+  const W=900,H=230,pl=34,pr=8,pt=24,pb=30,mx=Math.max(2,...cum),bw=(W-pl-pr)/days.length,ys=v=>pt+(1-v/mx)*(H-pt-pb);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Total unique users by day">`;
+  s+=[0,Math.ceil(mx/2),mx].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--grid)"/><text x="${pl-6}" y="${ys(v)+4}" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink-soft)">${v}</text>`).join("");
+  days.forEach((d,i)=>{const x=pl+i*bw+2,w=Math.min(60,bw-4),tip=`<b>${new Date(d).toLocaleDateString([], {weekday:"short",month:"numeric",day:"numeric"})}</b><br>${cum[i]} total · ${neu[i]} new that day`;
+    s+=`<rect x="${x}" y="${ys(cum[i])}" width="${w}" height="${ys(0)-ys(cum[i])}" rx="4" fill="var(--bar)" data-tip="${esc(tip)}"/><text x="${x+w/2}" y="${ys(cum[i])-6}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${cum[i]}</text>`;
+    if(days.length<=14||i%Math.ceil(days.length/10)===0)s+=`<text x="${x+w/2}" y="${H-pb+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink-soft)">${new Date(d).toLocaleDateString([], {month:"numeric",day:"numeric"})}</text>`});
+  el.innerHTML=s+"</svg>"}
+function rowHTML(u,now){return `<tr><td><b>${esc(u.name||"No name yet")}</b>${now-u.first<=HOUR?`<span class="new">New</span>`:""}<br><span class="small muted">${esc(u.bid||u.d)}</span></td><td class="small">${fmt(u.first)}</td><td class="small">${ago(now-u.last)}</td><td class="num">${u.rated}</td><td class="num">${u.battles}</td><td>${u.code?`<span class="code" title="${esc(u.code)}">${esc(u.code.slice(0,22))}…</span> <button class="btn sm" data-copy="${esc(u.d)}">Copy</button>`:`<span class="small muted">Not rated yet</span>`}</td></tr>`}
+function roster(all,out,now){
+  const sorted=[...all].sort((a,b)=>b.first-a.first);
+  document.getElementById("rows").innerHTML=sorted.length?sorted.map(u=>rowHTML(u,now)).join(""):`<tr><td colspan="6" class="small muted">Nobody yet.</td></tr>`;
+  document.getElementById("outBox").hidden=!out.length;document.getElementById("outSum").textContent=`Left out as test runs (${out.length})`;
+  document.getElementById("outRows").innerHTML=out.map(u=>rowHTML(u,now)).join("");
+  document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const u=DATA.users.find(x=>x.d===b.dataset.copy);copy(u.code,`Copied ${u.name||"their"} code`)})}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(msg)}catch(_){toast("Copy didn't work here. Select the code and copy it by hand.")}ta.remove()}}
+document.getElementById("copyAll").onclick=()=>{const c=DATA.users.filter(u=>!u.test&&u.code).map(u=>u.code);if(!c.length)return toast("No codes yet");copy(c.join("\n"),`Copied ${c.length} code${c.length===1?"":"s"}`)};
+document.getElementById("keyForm").onsubmit=e=>{e.preventDefault();KEY=document.getElementById("keyIn").value.trim();if(KEY)load()};
+document.getElementById("refresh").onclick=load;
+document.getElementById("forget").onclick=()=>{try{localStorage.removeItem("aclstats-key")}catch(e){}KEY=null;showGate("Key forgotten on this device.")};
+const tip=document.getElementById("tip");
+document.addEventListener("pointerover",e=>{const t=e.target.closest("[data-tip]");if(!t){tip.hidden=true;return}tip.innerHTML=t.dataset.tip;tip.hidden=false;place(e)});
+document.addEventListener("pointermove",e=>{if(!tip.hidden)place(e)});
+function place(e){const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+"px";tip.style.top=Math.max(8,y)+"px"}
+load();TIMER=setInterval(()=>{if(KEY&&!document.hidden)load()},60e3);
+</script>
+</body>
+</html>
