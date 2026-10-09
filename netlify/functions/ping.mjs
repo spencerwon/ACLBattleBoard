@@ -10,8 +10,26 @@ export const TEST_WORD = /test|sample|demo|dummy|fake|placeholder|asdf|qwer/i;
 const clip = (s, n) => String(s ?? "").slice(0, n);
 const cors = (origin) => ALLOWED_ORIGINS.has(origin) ? { "access-control-allow-origin": origin, "vary": "origin" } : {};
 
+// Coarse device label from the browser's User-Agent, e.g. "iPhone · Safari". The raw User-Agent is never stored.
+export function deviceLabel(ua = "") {
+  const os = /iPad/.test(ua) || (/Macintosh/.test(ua) && /Mobile\//.test(ua)) ? "iPad"
+    : /iPhone|iPod/.test(ua) ? "iPhone"
+    : /Android/.test(ua) ? (/Mobile/.test(ua) ? "Android phone" : "Android tablet")
+    : /Windows/.test(ua) ? "Windows"
+    : /Macintosh|Mac OS X/.test(ua) ? "Mac"
+    : /CrOS/.test(ua) ? "Chromebook"
+    : /Linux/.test(ua) ? "Linux" : "Other";
+  const br = /SamsungBrowser/.test(ua) ? "Samsung Internet"
+    : /Edg\//.test(ua) ? "Edge"
+    : /OPR\/|Opera/.test(ua) ? "Opera"
+    : /Firefox\/|FxiOS/.test(ua) ? "Firefox"
+    : /CriOS|Chrome\//.test(ua) ? "Chrome"
+    : /Safari\//.test(ua) ? "Safari" : "Other";
+  return `${os} · ${br}`;
+}
+
 // Pure core so it can be tested without Netlify: returns [status, body].
-export async function record(body, { store, now = Date.now(), origin = "" }) {
+export async function record(body, { store, now = Date.now(), origin = "", ua = "" }) {
   const db = () => (typeof store === "function" ? store() : store); // opened only when something is saved
   let b;
   try { b = typeof body === "string" ? JSON.parse(body) : body; } catch { return [400, "bad json"]; }
@@ -37,6 +55,7 @@ export async function record(body, { store, now = Date.now(), origin = "" }) {
     battles: Math.max(0, Math.min(100000, +b.bt || 0)),
     host,
     visits: (prev?.visits || 0) + (b.v ? 1 : 0),
+    device: ua ? deviceLabel(ua) : prev?.device || "",
   };
   rec.test = TEST_WORD.test(rec.name) || TEST_WORD.test(rec.bid);
   await st.setJSON(b.d, rec);
@@ -49,7 +68,7 @@ export default async (req) => {
   if (req.method !== "POST") return new Response("POST only", { status: 405 });
   const text = await req.text();
   if (text.length > 40000) return new Response("too big", { status: 413 });
-  const [status, msg] = await record(text, { store: () => getStore({ name: "aclusers", consistency: "strong" }), origin });
+  const [status, msg] = await record(text, { store: () => getStore({ name: "aclusers", consistency: "strong" }), origin, ua: req.headers.get("user-agent") || "" });
   return new Response(status === 204 ? null : msg, { status, headers: cors(origin) }); // a 204 must have no body
 };
 
