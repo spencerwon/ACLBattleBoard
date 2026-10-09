@@ -257,7 +257,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
   <div class="card viewbanner" id="viewBanner" hidden></div>
   <div class="card welcome" id="welcome" hidden>
     <h2 style="font-size:24px">Start your board</h2>
-    <p class="small" style="margin:0">Your board lives in this browser and saves after every tap. Add your name so friends can tell your rankings apart.</p>
+    <p class="small" style="margin:0">Your board lives in this browser and saves after every tap. Add your name so friends can tell your rankings apart. Your name and rankings are also shared with Spencer, who runs this board, so he can compare everyone's picks.</p>
     <div class="row"><input type="text" id="welcomeName" placeholder="Your name" aria-label="Your name" style="flex:1 1 200px"><button class="btn primary" id="welcomeGo">Start rating</button></div>
   </div>
 
@@ -430,12 +430,25 @@ function migrate(x){
   return s}
 try{const x=migrate(JSON.parse(localStorage.getItem(LS)||"null"));if(x)S=x}catch(e){}
 let cloud=null,saveT=null;
-function save(){if(VIEW)return;S.u=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+/* ---------- host stats: anonymous browser ID + the board's name and ranking code, sent to Spencer's stats ---------- */
+const PING_URL="https://acl2026battleboard.netlify.app/api/ping";
+const PING_LIVE=HOSTED&&/^(acl2026battleboard\.netlify\.app|spencerwon\.github\.io)$/.test(location.hostname);
+let DEV=null;try{DEV=localStorage.getItem("acl26w2-device");if(!DEV){DEV="d_"+(crypto.randomUUID?crypto.randomUUID().replace(/-/g,""):(Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^a-z0-9]/g,""));localStorage.setItem("acl26w2-device",DEV)}}catch(e){}
+let pingT=null,pingLast="",pingVisit=true;
+function sendPing(){if(!PING_LIVE||!DEV)return;
+  // On a /b/<name> share link the screen shows someone else's board; report the visitor's own board (MY) and no code.
+  const B=VIEW?(MY||fresh("")):S,rated=Object.keys(B.t).length;
+  const body={d:DEV,n:B.name||"",r:rated,bt:B.h.length,c:rated&&!VIEW?makeCode():"",host:location.hostname,v:pingVisit?1:0};
+  const sig=JSON.stringify([body.n,body.r,body.bt,body.c]);if(sig===pingLast&&!pingVisit)return;pingLast=sig;pingVisit=false;
+  try{fetch(PING_URL,{method:"POST",headers:{"content-type":"text/plain"},body:JSON.stringify(body),keepalive:true,mode:location.origin===new URL(PING_URL).origin?"same-origin":"cors"}).catch(()=>{})}catch(e){}}
+function ping(){if(!PING_LIVE)return;clearTimeout(pingT);pingT=setTimeout(sendPing,5000)}
+window.addEventListener("pagehide",()=>{if(pingT){clearTimeout(pingT);pingT=null;sendPing()}});
+function save(){if(VIEW)return;S.u=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}ping();
   if(HOSTED){clearTimeout(cloudT);cloudT=setTimeout(cloudSync,1500)}
   if(cloud){clearTimeout(saveT);saveT=setTimeout(()=>cloud.set({j:JSON.stringify(S),u:S.u}).catch(()=>{}),700)}}
 window.addEventListener("pagehide",()=>{if(VIEW)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(HOSTED)cloudFlush()});
 async function initCloud(){
-  const note=document.getElementById("syncNote");note.textContent="Your board saves in this browser after every tap, so a refresh or a closed tab reopens exactly where you left off. The ranking code is your backup if the browser's data is ever cleared.";
+  const note=document.getElementById("syncNote");note.textContent="Your board saves in this browser after every tap, so a refresh or a closed tab reopens exactly where you left off. The ranking code is your backup if the browser's data is ever cleared. Your name, ranking code, a random ID for this browser and its device type (like iPhone · Safari) are shared with Spencer, who runs this board; nothing else about you is collected.";
   if(!CLOUD)return;
   try{
     if(!window.claude||!window.claude.use)return;
@@ -1025,6 +1038,7 @@ if(HOSTED){document.getElementById("friendLabel").textContent="Friend's share co
 if(HOSTED&&location.pathname.startsWith("/b/"))startView();else{afterLoad();if(HOSTED){pendingCompare();cloudSync()}}
 if(HOSTED)loadPreviews();
 initCloud();
+setTimeout(sendPing,1500);
 </script>
 
 </body></html>
