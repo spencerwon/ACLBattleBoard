@@ -51,11 +51,24 @@ input{font:inherit;color:var(--ink);background:var(--surface);border:2px solid v
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;font-weight:700}
 .sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-1px}
 .tbl{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:620px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:820px}
 th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--surface-2);border-radius:6px;padding:3px 7px;display:inline-block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--surface-2);border-radius:12px;padding:10px 12px;display:grid;gap:2px}
+.kpi b{font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;font-weight:700;color:var(--ink-soft)}
+.mix{display:grid;gap:5px}
+.mrow{display:grid;grid-template-columns:minmax(0,170px) 1fr 34px;gap:10px;align-items:center;font-size:13px;font-weight:700}
+.mrow .tr{height:10px;border-radius:9px;background:var(--surface-2);overflow:hidden}
+.mrow .tr i{display:block;height:100%;background:var(--bar2);border-radius:9px}
+.grp{background:var(--surface-2);border-radius:12px;padding:10px 12px;display:grid;gap:4px;font-size:13px}
+.grp b{font-size:14px}
+.dev{font-size:12px;font-weight:700;white-space:nowrap}
+.did{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-soft)}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .new{background:var(--marigold);color:#163C29;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800;margin-left:6px}
 details summary{cursor:pointer;font-weight:800}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--forest);color:#FFF5E8;border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:600;max-width:240px}
@@ -80,19 +93,28 @@ details summary{cursor:pointer;font-weight:800}
 
   <main id="main" hidden style="display:grid;gap:16px">
     <div class="row" style="justify-content:space-between"><span class="small muted" id="updated"></span><div class="row"><button class="btn sm" id="refresh">Refresh</button><button class="btn sm" id="forget">Forget key on this device</button></div></div>
-    <section class="tiles" id="tiles" aria-label="New unique users"></section>
+    <section class="tiles" id="tiles" aria-label="New unique devices"></section>
+    <section class="card" style="display:grid;gap:12px">
+      <div class="chead"><h2>Devices vs. people</h2><span class="small muted">All time · is it really this many people?</span></div>
+      <div class="kpis" id="kpis"></div>
+      <p class="small muted" style="margin:0">Each device makes its own random ID the first time it opens the board, so one person on a phone and a laptop counts as two devices. Devices are grouped as one person when they share a board ID (someone restored their code on another device) or the same name. Devices with no name yet can't be grouped.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+        <div style="display:grid;gap:8px;align-content:start"><b class="small" style="text-transform:uppercase;letter-spacing:.1em">Device mix</b><div class="mix" id="mix"></div></div>
+        <div style="display:grid;gap:8px;align-content:start"><b class="small" style="text-transform:uppercase;letter-spacing:.1em">Same person, multiple devices</b><div style="display:grid;gap:8px" id="groups"></div></div>
+      </div>
+    </section>
     <section class="card chart" style="display:grid;gap:10px">
-      <div class="chead"><h2>New users by hour · last 48 hours</h2><div class="legend"><span><span class="sw" style="background:var(--bar)"></span>Started rating</span><span><span class="sw" style="background:var(--bar2)"></span>Only looked</span></div></div>
+      <div class="chead"><h2>New devices by hour · last 48 hours</h2><div class="legend"><span><span class="sw" style="background:var(--bar)"></span>Started rating</span><span><span class="sw" style="background:var(--bar2)"></span>Only looked</span></div></div>
       <div id="hourly"></div>
     </section>
     <section class="card chart" style="display:grid;gap:10px">
-      <div class="chead"><h2>All-time growth</h2><span class="small muted">Total unique users by day</span></div>
+      <div class="chead"><h2>All-time growth</h2><span class="small muted">Total unique devices by day</span></div>
       <div id="daily"></div>
     </section>
     <section class="card" style="display:grid;gap:10px">
       <div class="chead"><h2>Names and codes</h2><div class="row"><button class="btn primary sm" id="copyAll">Copy all codes</button></div></div>
       <p class="small muted" style="margin:0">Newest first. Copy all codes and paste them into ACL Wrapped's People tab to update your analytics. The code is each person's latest ranking; it changes as they keep rating.</p>
-      <div class="tbl"><table><thead><tr><th>Name</th><th>First seen</th><th>Last active</th><th class="num">Rated</th><th class="num">Battles</th><th>Ranking code</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="tbl"><table><thead><tr><th>Name</th><th>Device</th><th>First seen</th><th>Last active</th><th class="num">Visits</th><th class="num">Rated</th><th class="num">Battles</th><th>Ranking code</th></tr></thead><tbody id="rows"></tbody></table></div>
       <details id="outBox"><summary id="outSum"></summary><p class="small muted">Left out of every number above because the name or board ID looks like a test run.</p><div class="tbl"><table><tbody id="outRows"></tbody></table></div></details>
     </section>
   </main>
@@ -121,7 +143,9 @@ function render(){
   const now=DATA.now,all=DATA.users.filter(u=>!u.test),out=DATA.users.filter(u=>u.test);
   const win=h=>all.filter(u=>now-u.first<=h*HOUR),rated=l=>l.filter(u=>u.rated>0).length;
   const T=[["Past hour",win(1),"t1"],["Past 6 hours",win(6),"t2"],["Past day",win(24),"t3"],["All time",all,"t4"]];
-  document.getElementById("tiles").innerHTML=T.map(([k,l,c])=>`<div class="tile ${c}"><div class="k">${k}</div><div class="n">${l.length}</div><div class="s">new unique user${l.length===1?"":"s"} · ${rated(l)} started rating</div></div>`).join("");
+  const P=people(all);
+  document.getElementById("tiles").innerHTML=T.map(([k,l,c])=>{const ppl=new Set(l.map(u=>P.of.get(u.d)).filter(Boolean)).size;return `<div class="tile ${c}"><div class="k">${k}</div><div class="n">${l.length}</div><div class="s">new device${l.length===1?"":"s"} · ${ppl} named ${ppl===1?"person":"people"} · ${rated(l)} started rating</div></div>`}).join("");
+  devices(all,P);
   document.getElementById("updated").textContent=`Updated ${new Date(now).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})} · refreshes every minute`;
   hourly(all,now);daily(all,now);roster(all,out,now)}
 function hourly(all,now){
@@ -144,16 +168,31 @@ function daily(all,now){
   const d0=day(Math.min(...all.map(u=>u.first))),d1=day(now),days=[];for(let d=d0;d<=d1;d+=86400e3)days.push(day(d+3600e3));
   const cum=days.map(d=>all.filter(u=>day(u.first)<=d).length),neu=days.map(d=>all.filter(u=>day(u.first)===d).length);
   const W=900,H=230,pl=34,pr=8,pt=24,pb=30,mx=Math.max(2,...cum),bw=(W-pl-pr)/days.length,ys=v=>pt+(1-v/mx)*(H-pt-pb);
-  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Total unique users by day">`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Total unique devices by day">`;
   s+=[0,Math.ceil(mx/2),mx].map(v=>`<line x1="${pl}" x2="${W-pr}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--grid)"/><text x="${pl-6}" y="${ys(v)+4}" text-anchor="end" font-size="11" font-weight="700" fill="var(--ink-soft)">${v}</text>`).join("");
   days.forEach((d,i)=>{const x=pl+i*bw+2,w=Math.min(60,bw-4),tip=`<b>${new Date(d).toLocaleDateString([], {weekday:"short",month:"numeric",day:"numeric"})}</b><br>${cum[i]} total · ${neu[i]} new that day`;
     s+=`<rect x="${x}" y="${ys(cum[i])}" width="${w}" height="${ys(0)-ys(cum[i])}" rx="4" fill="var(--bar)" data-tip="${esc(tip)}"/><text x="${x+w/2}" y="${ys(cum[i])-6}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--ink)">${cum[i]}</text>`;
     if(days.length<=14||i%Math.ceil(days.length/10)===0)s+=`<text x="${x+w/2}" y="${H-pb+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink-soft)">${new Date(d).toLocaleDateString([], {month:"numeric",day:"numeric"})}</text>`});
   el.innerHTML=s+"</svg>"}
-function rowHTML(u,now){return `<tr><td><b>${esc(u.name||"No name yet")}</b>${now-u.first<=HOUR?`<span class="new">New</span>`:""}<br><span class="small muted">${esc(u.bid||u.d)}</span></td><td class="small">${fmt(u.first)}</td><td class="small">${ago(now-u.last)}</td><td class="num">${u.rated}</td><td class="num">${u.battles}</td><td>${u.code?`<span class="code" title="${esc(u.code)}">${esc(u.code.slice(0,22))}…</span> <button class="btn sm" data-copy="${esc(u.d)}">Copy</button>`:`<span class="small muted">Not rated yet</span>`}</td></tr>`}
+/* Group devices into people: same board ID or same name (case/spacing ignored). Unnamed devices stay ungrouped. */
+function people(all){const par=new Map(),find=x=>{while(par.get(x)!==x){par.set(x,par.get(par.get(x)));x=par.get(x)}return x},join=(a,b)=>par.set(find(a),find(b));
+  const byKey=new Map();
+  for(const u of all){const keys=[u.bid&&"b:"+u.bid,u.name&&"n:"+u.name.trim().toLowerCase().replace(/\s+/g," ")].filter(Boolean);if(!keys.length)continue;par.set(u.d,u.d);
+    for(const k of keys){if(byKey.has(k))join(u.d,byKey.get(k));else byKey.set(k,u.d)}}
+  const of=new Map(),groups=new Map();for(const u of all)if(par.has(u.d)){const r=find(u.d);of.set(u.d,r);if(!groups.has(r))groups.set(r,[]);groups.get(r).push(u)}
+  return {of,groups,unnamed:all.filter(u=>!par.has(u.d))}}
+function devices(all,P){
+  const multi=[...P.groups.values()].filter(g=>g.length>1).sort((a,b)=>b.length-a.length);
+  const K=[[all.length,"unique devices"],[P.groups.size,"named people"],[P.unnamed.length,"devices with no name yet"],[multi.reduce((s,g)=>s+g.length,0),"devices shared by one person"]];
+  document.getElementById("kpis").innerHTML=K.map(([n,l])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join("");
+  const mix=new Map();for(const u of all){const k=u.device||"Unknown (visited before tracking)";mix.set(k,(mix.get(k)||0)+1)}
+  const rows=[...mix.entries()].sort((a,b)=>b[1]-a[1]),mx=Math.max(1,...rows.map(r=>r[1]));
+  document.getElementById("mix").innerHTML=rows.length?rows.map(([k,n])=>`<div class="mrow"><span>${esc(k)}</span><span class="tr"><i style="width:${n/mx*100}%"></i></span><span class="tnum" style="text-align:right">${n}</span></div>`).join(""):`<p class="small muted" style="margin:0">No devices yet.</p>`;
+  document.getElementById("groups").innerHTML=multi.length?multi.map(g=>`<div class="grp"><b>${esc(g.find(u=>u.name)?.name||g[0].bid)} · ${g.length} devices</b>${g.map(u=>`<span>${esc(u.device||"Unknown device")} <span class="did">${esc(u.d.slice(-6))}</span> · ${u.rated} rated · last ${ago(Date.now()-u.last)}</span>`).join("")}</div>`).join(""):`<p class="small muted" style="margin:0">None so far. Every named device belongs to a different person.</p>`}
+function rowHTML(u,now){return `<tr><td><b>${esc(u.name||"No name yet")}</b>${now-u.first<=HOUR?`<span class="new">New</span>`:""}<br><span class="small muted">${esc(u.bid||"No board ID yet")}</span></td><td><span class="dev">${esc(u.device||"Unknown")}</span><br><span class="did">ID …${esc(u.d.slice(-6))}</span></td><td class="small">${fmt(u.first)}</td><td class="small">${ago(now-u.last)}</td><td class="num">${u.visits||1}</td><td class="num">${u.rated}</td><td class="num">${u.battles}</td><td>${u.code?`<span class="code" title="${esc(u.code)}">${esc(u.code.slice(0,22))}…</span> <button class="btn sm" data-copy="${esc(u.d)}">Copy</button>`:`<span class="small muted">Not rated yet</span>`}</td></tr>`}
 function roster(all,out,now){
   const sorted=[...all].sort((a,b)=>b.first-a.first);
-  document.getElementById("rows").innerHTML=sorted.length?sorted.map(u=>rowHTML(u,now)).join(""):`<tr><td colspan="6" class="small muted">Nobody yet.</td></tr>`;
+  document.getElementById("rows").innerHTML=sorted.length?sorted.map(u=>rowHTML(u,now)).join(""):`<tr><td colspan="8" class="small muted">Nobody yet.</td></tr>`;
   document.getElementById("outBox").hidden=!out.length;document.getElementById("outSum").textContent=`Left out as test runs (${out.length})`;
   document.getElementById("outRows").innerHTML=out.map(u=>rowHTML(u,now)).join("");
   document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{const u=DATA.users.find(x=>x.d===b.dataset.copy);copy(u.code,`Copied ${u.name||"their"} code`)})}

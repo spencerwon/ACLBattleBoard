@@ -448,7 +448,7 @@ function save(){if(VIEW)return;S.u=Date.now();try{localStorage.setItem(LS,JSON.s
   if(cloud){clearTimeout(saveT);saveT=setTimeout(()=>cloud.set({j:JSON.stringify(S),u:S.u}).catch(()=>{}),700)}}
 window.addEventListener("pagehide",()=>{if(VIEW)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(HOSTED)cloudFlush()});
 async function initCloud(){
-  const note=document.getElementById("syncNote");note.textContent="Your board saves in this browser after every tap, so a refresh or a closed tab reopens exactly where you left off. The ranking code is your backup if the browser's data is ever cleared. Your name, ranking code and a random ID for this browser are shared with Spencer, who runs this board; nothing else about you is collected.";
+  const note=document.getElementById("syncNote");note.textContent="Your board saves in this browser after every tap, so a refresh or a closed tab reopens exactly where you left off. The ranking code is your backup if the browser's data is ever cleared. Your name, ranking code, a random ID for this browser and its device type (like iPhone · Safari) are shared with Spencer, who runs this board; nothing else about you is collected.";
   if(!CLOUD)return;
   try{
     if(!window.claude||!window.claude.use)return;
