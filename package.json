@@ -2,6 +2,7 @@
   "name": "acl-battle-board",
   "private": true,
   "type": "module",
+  "description": "Static ACL Battle Board plus small Netlify Functions: board saves and share links, and host-only visitor stats.",
   "dependencies": {
     "@netlify/blobs": "11.1.0"
   }
