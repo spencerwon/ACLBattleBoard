@@ -226,6 +226,7 @@ body.np-on .wrap{padding-bottom:110px}
 .coffee{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;gap:6px;background:#F7A8CF;color:#163C29;border:2px solid #163C29;border-radius:999px;padding:8px 16px;font-weight:800;font-size:13px;text-decoration:none;box-shadow:0 0 0 3px #FFF5E8,0 6px 14px -8px #163C2999;transition:box-shadow .2s ease,background-color .2s ease}
 .coffee:hover,.coffee:focus-visible{background:#FFF8FB;box-shadow:0 0 0 5px #FFFFFF,0 0 22px 8px #FFFFFFb3,0 12px 26px -10px #163C29aa}
 @media (max-width:760px){.wrap{padding-bottom:84px}}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head><body>
@@ -318,12 +319,12 @@ body.np-on .wrap{padding-bottom:110px}
       <div class="row" id="dayBtns" role="group" aria-label="Day">
         <button class="pill" data-day="Fri">Fri 10/9</button><button class="pill" data-day="Sat">Sat 10/10</button><button class="pill" data-day="Sun">Sun 10/11</button>
       </div>
-      <div class="row"><button class="btn" id="dlBtn">Download JPEG</button><button class="btn primary" id="shareBtn">Share</button></div>
     </div>
     <div class="legend"><span class="heat hot">❤️ Hot</span><span class="heat warm">👍 Warm</span><span class="heat cool">😐 Cool</span><span class="heat cold">👎 Cold</span><span class="heat unrated">Unrated</span><span class="chip">Ring = your plan</span></div>
     <div class="row" style="justify-content:space-between"><p class="note" style="margin:0;flex:1 1 260px">Tap any set to play its songs, rate it, or battle what it overlaps. Pinch or use − / + to zoom; Fit shows the whole day.</p>
       <div class="zoomctl" role="group" aria-label="Zoom"><button class="btn" id="zOut" aria-label="Zoom out">−</button><span id="zLab" class="tnum">100%</span><button class="btn" id="zIn" aria-label="Zoom in">+</button><button class="btn" id="zFit">Fit</button></div></div>
     <div class="sched-scroll" id="schedScroll"><div class="zoomsizer" id="zoomSizer"><div class="sched" id="sched"></div></div></div>
+    <div class="row" style="justify-content:center"><button class="btn" id="dlBtn">Download JPEG</button><button class="btn primary" id="shareBtn">Share</button></div>
     <div class="two">
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px">Your plan for <span id="planDay"></span></h3>
