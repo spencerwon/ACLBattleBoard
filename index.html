@@ -165,8 +165,12 @@ details.foot p{font-size:13px;max-width:70ch}
 .idchip{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--surface-2);padding:3px 8px;border-radius:6px}
 /* schedule */
 .legend{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.sched-scroll{overflow-x:auto;border-radius:var(--r);background:var(--grid-bg);padding:10px}
-.sched{position:relative;display:grid;grid-template-columns:54px repeat(7,minmax(100px,1fr));min-width:820px;column-gap:6px}
+.sched-scroll{overflow:auto;border-radius:var(--r);background:var(--grid-bg);padding:10px;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+.zoomsizer{position:relative}
+.zoomctl{display:flex;gap:6px;align-items:center}
+.zoomctl .btn{padding:6px 12px;min-width:40px}
+#zLab{font-weight:800;font-size:12px;min-width:44px;text-align:center}
+.sched{position:relative;display:grid;grid-template-columns:54px repeat(7,1fr);width:1000px;column-gap:6px;transform-origin:0 0}
 .sched .head{font-family:var(--f-display);text-transform:uppercase;font-size:15px;text-align:center;background:var(--grid-cell);color:var(--grid-ink);border-radius:6px;padding:6px 2px;line-height:1.05;display:grid;place-items:center;min-height:44px}
 .col{position:relative;background:#ffffff14;border-radius:6px}
 .times{position:relative}
@@ -304,8 +308,9 @@ details.foot p{font-size:13px;max-width:70ch}
       <div class="row"><button class="btn" id="dlBtn">Download JPEG</button><button class="btn primary" id="shareBtn">Share</button></div>
     </div>
     <div class="legend"><span class="heat hot">❤️ Hot</span><span class="heat warm">👍 Warm</span><span class="heat cool">😐 Cool</span><span class="heat cold">👎 Cold</span><span class="heat unrated">Unrated</span><span class="chip">Ring = your plan</span></div>
-    <p class="note" style="margin:0">Tap any set to play its songs, rate it, or battle it against whatever it overlaps.</p>
-    <div class="sched-scroll"><div class="sched" id="sched"></div></div>
+    <div class="row" style="justify-content:space-between"><p class="note" style="margin:0;flex:1 1 260px">Tap any set to play its songs, rate it, or battle what it overlaps. Pinch or use − / + to zoom; Fit shows the whole day.</p>
+      <div class="zoomctl" role="group" aria-label="Zoom"><button class="btn" id="zOut" aria-label="Zoom out">−</button><span id="zLab" class="tnum">100%</span><button class="btn" id="zIn" aria-label="Zoom in">+</button><button class="btn" id="zFit">Fit</button></div></div>
+    <div class="sched-scroll" id="schedScroll"><div class="zoomsizer" id="zoomSizer"><div class="sched" id="sched"></div></div></div>
     <div class="two">
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px">Your plan for <span id="planDay"></span></h3>
@@ -360,7 +365,7 @@ const rnd=arr=>arr[Math.floor(Math.random()*arr.length)];
 /* ---------- state: everything, including what's on screen, is saved after every action ---------- */
 const LS="acl26w2-"+MODE;
 const blankF=()=>({days:[],from:750,to:1320,gen:[],pop:[],q:""});
-const blankUI=()=>({tab:"rate",f:blankF(),card:null,lastCard:null,ins:null,pair:null,pairKind:null,follow:[],ctx:null,showUnr:false,day:"Fri",sort:"time",filtersOpen:false,h2h:true,svc:"apple"});
+const blankUI=()=>({tab:"rate",f:blankF(),card:null,lastCard:null,ins:null,pair:null,pairKind:null,follow:[],ctx:null,showUnr:false,day:"Fri",sort:"time",filtersOpen:false,h2h:true,svc:"apple",zoom:null});
 function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],ui:blankUI(),u:0}}
 let S=fresh(MODE==="me"?"":"");
 function makeBid(name){const slug=(name||"guest").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16)||"guest";return slug+"-"+Math.floor(Date.now()/1000)}
@@ -727,6 +732,7 @@ function renderSched(){
       html+=`<button class="set ${heatOf(a.id)} ${P.has(a.id)?"plan":""} ${P.size&&!P.has(a.id)&&!(C.tier[a.id]===0||C.tier[a.id]===1)?"dim":""}" style="top:${top}px;height:${h}px" data-id="${a.id}" aria-label="${esc(a.name)} ${fmt(a.s)} to ${fmt(a.e)}"><b>${esc(a.name)}</b>${C.tier[a.id]>=0?`<span class="sv">${iconOf(a.id)} ${scoreTxt(a.id)}</span>`:""}<small class="tnum">${fmt(a.s)}–${fmt(a.e)}</small></button>`}
     html+=`</div>`}
   const el=document.getElementById("sched");el.innerHTML=html;el.querySelectorAll(".set").forEach(b=>b.onclick=()=>showArtist(A[+b.dataset.id]));
+  requestAnimationFrame(()=>applyZoom(curZ()));
   document.getElementById("planDay").textContent=DAYS[day];const pl=plan(day);
   document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b><div class="small muted">${a.stage}</div></span><span class="heat ${heatOf(a.id)}">${iconOf(a.id)} ${scoreTxt(a.id)}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists and your plan appears here.</span></li>`;
   const cl=CLASH.filter(([x,y])=>A[x].day===day&&C.tier[x]>=0&&C.tier[x]<=1&&C.tier[y]>=0&&C.tier[y]<=1);
@@ -741,6 +747,30 @@ function showArtist(a){const host=document.getElementById("dialogHost");const ov
   const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
   bindRate(host,()=>showArtist(a));host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p));if(HOSTED)markPlaying();document.getElementById("closeDlg").focus()}
 
+
+
+/* ---------- schedule zoom: Fit shows the whole day; pinch, ctrl/trackpad-pinch or −/+ to zoom ---------- */
+const SCHED_W=1000;let zApplied=1;
+const schedScroll=document.getElementById("schedScroll");
+function fitZ(){return Math.max(.25,Math.min(1.6,(schedScroll.clientWidth-20)/SCHED_W))}
+function curZ(){return S.ui.zoom||fitZ()}
+function applyZoom(z,focus){z=Math.min(2.5,Math.max(.25,z));const el=document.getElementById("sched"),sz=document.getElementById("zoomSizer");
+  let fx=null,r=null;if(focus){r=schedScroll.getBoundingClientRect();fx=(schedScroll.scrollLeft+focus.x-r.left)/zApplied}
+  el.style.transform=`scale(${z})`;sz.style.width=(SCHED_W*z)+"px";sz.style.height=(el.offsetHeight*z)+"px";
+  if(focus)schedScroll.scrollLeft=fx*z-(focus.x-r.left);
+  zApplied=z;document.getElementById("zLab").textContent=Math.round(z*100)+"%"}
+function setZoom(z,focus){S.ui.zoom=z;applyZoom(z==null?fitZ():z,focus);save()}
+document.getElementById("zIn").onclick=()=>setZoom(Math.min(2.5,curZ()*1.25));
+document.getElementById("zOut").onclick=()=>setZoom(Math.max(.25,curZ()/1.25));
+document.getElementById("zFit").onclick=()=>{setZoom(null);schedScroll.scrollLeft=0};
+window.addEventListener("resize",()=>{if(S.ui.tab==="sched")applyZoom(curZ())});
+let pinch=null;const tdist=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+const tmid=e=>({x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2});
+schedScroll.addEventListener("touchstart",e=>{if(e.touches.length===2)pinch={d:tdist(e),z:zApplied}},{passive:true});
+schedScroll.addEventListener("touchmove",e=>{if(pinch&&e.touches.length===2){e.preventDefault();applyZoom(pinch.z*tdist(e)/pinch.d,tmid(e))}},{passive:false});
+schedScroll.addEventListener("touchend",e=>{if(pinch&&e.touches.length<2){pinch=null;S.ui.zoom=zApplied;document.getElementById("zLab").textContent=Math.round(zApplied*100)+"%";save()}});
+["gesturestart","gesturechange"].forEach(ev=>schedScroll.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+let wT=null;schedScroll.addEventListener("wheel",e=>{if(!e.ctrlKey)return;e.preventDefault();applyZoom(zApplied*Math.exp(-e.deltaY*.01),{x:e.clientX,y:e.clientY});S.ui.zoom=zApplied;document.getElementById("zLab").textContent=Math.round(zApplied*100)+"%";clearTimeout(wT);wT=setTimeout(save,300)},{passive:false});
 
 /* ---------- schedule image + sharing ---------- */
 function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
