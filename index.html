@@ -140,6 +140,8 @@ html,body{overflow-x:clip}
 .fighter .pick{font-size:18px;padding:12px;width:100%;font-family:var(--f-display);letter-spacing:.05em;text-transform:uppercase}
 .clashflag{background:var(--poppy);color:#FFF5E8;font-family:var(--f-body);font-weight:800;border-radius:10px;padding:6px 10px;font-size:12px;text-align:center;max-width:120px}
 .context{background:var(--forest);color:#FFF5E8;border-radius:12px;padding:10px 14px;font-weight:600;font-size:14px}
+.filternote{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#F4A12B33;border:2px solid var(--marigold);border-radius:12px;padding:6px 6px 6px 12px;font-size:13px}
+.filternote .btn{padding:5px 12px;font-size:13px}
 .context .up{color:#9BE7A8} .context .dn{color:#FFB4A6}
 .follow{background:var(--surface);border-radius:var(--r);padding:18px;display:grid;gap:12px;border:3px solid var(--marigold);max-width:640px;margin-inline:auto;width:100%}
 .follow h3{font-size:26px}
@@ -410,6 +412,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
       <button class="switch" id="h2hSwitch" role="switch" aria-checked="true"><i></i><span>Head-to-head placement</span></button>
     </div>
     <div id="context"></div>
+    <div id="queueLine" style="display:grid;gap:6px"></div>
     <div id="stage"></div>
     <div class="row" style="justify-content:center" id="stageBtns"></div>
   </section>
@@ -461,7 +464,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     </div>
     <details class="foot">
       <summary>How scoring works</summary>
-      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Once you've rated everyone in view, head-to-head battles set the order inside each band. Newly rated artists take turns, one battle each, so you don't face the same act over and over, and each needs only about 4 battles to find its spot in a band of 15 (a binary search). Cards come broad first: every genre early, best-known names first. “Not sure yet” sends an artist to the back of the line; skip it twice and it waits until the very end. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
+      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Once you've rated everyone in view, head-to-head battles set the order inside each band. Newly rated artists take turns, one battle each, so you don't face the same act over and over, and each needs only about 4 battles to find its spot in a band of 15 (a binary search). Cards come broad first: every genre early, best-known names first. “Not sure yet” sends an artist to the back of the line, behind every new artist and battle; skip it twice and it waits until the very end. Filters limit the line to the artists in view. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
       <p>With head-to-head placement switched off, a newly rated artist sits at the middle of its band at the band's centre score until you battle it.</p>
       <p>A lower-rated act can beat a higher-rated one in a set-clash battle without changing bands, because genre and mood don't always line up. You choose whether to move either act or keep both ratings.</p>
       <p id="syncNote"></p>
@@ -800,8 +803,8 @@ function insList(ins){return S.o[ins.ti].filter(i=>i!==ins.id&&!S.us.includes(i)
 /* Queue order, broad first so every answer adds new information:
    1) artists you haven't seen yet, alternating genres, best-known first
    2) placement battles for what you've rated (binary search inside each rating)
-   3) artists you skipped once ("Not sure yet"), oldest skip first
-   4) fine-tuning and set-clash battles, always the pair with the fewest battles so far
+   3) fine-tuning and set-clash battles, always the pair with the fewest battles so far
+   4) artists you skipped once ("Not sure yet"), oldest skip first
    5) placements you put off, then battles you skipped once.
    Anything skipped twice is parked; the finish screen offers it again. Nothing loops back straight away. */
 // Where an unplaced artist can go inside its rating, worked out from every battle it has had against placed artists in that rating.
@@ -855,9 +858,9 @@ function nextStep(){
   const take=list=>{const a=list.find(x=>x.id!==ui.lastCard)||list[0];ui.card=a.id;ui.pair=null;ui.pairKind=null};
   const fight=p=>{ui.pair=[p[0],p[1]];ui.pairKind=p[2];ui.card=null};
   if(Q.unseen.length)return take(Q.unseen);
-  if(Q.skip1.length)return take(Q.skip1);
   if(h&&nextPlacement(false))return;
   let p;if(h&&(p=pickBattle(false)))return fight(p);
+  if(Q.skip1.length)return take(Q.skip1);
   if(h&&nextPlacement(true))return;
   if(h&&(p=pickBattle(true)))return fight(p);
   ui.card=null;ui.pair=null;ui.pairKind=null}
@@ -906,6 +909,11 @@ function renderRate(){
   document.getElementById("meterText").textContent=`${rated}/${N} rated · ${S.h.length} battles${S.us.length?` · ${S.us.length} to place`:""}`;
   document.getElementById("h2hSwitch").setAttribute("aria-checked",h2hOn());
   document.getElementById("context").innerHTML=ui.ctx?`<div class="context">${ui.ctx}</div>`:"";
+  const Q=cardQueue(),fOn=filtersActive(),f=ui.f;
+  const fDesc=[f.days.length?f.days.join(", "):"",f.from>750||f.to<1320?`${fmtP(f.from)}–${fmtP(f.to)}`:"",f.gen.join(", "),f.pop.length?"popularity":"",f.q?`“${esc(f.q)}”`:""].filter(Boolean).join(" · ");
+  const line=[Q.unseen.length?`${Q.unseen.length} new artist${Q.unseen.length===1?"":"s"}`:"",S.us.length&&h2hOn()?`${S.us.length} to place`:"",Q.skip1.length+Q.parked.length?`${Q.skip1.length+Q.parked.length} you skipped (they come back last)`:""].filter(Boolean).join(" · ");
+  document.getElementById("queueLine").innerHTML=(fOn?`<div class="filternote"><span><b>Filters on:</b> ${fDesc||"some"} · only ${A.filter(passes).length} of ${N} artists in view</span><button class="btn ghost" id="qClear">Show everyone</button></div>`:"")+(line?`<p class="small muted" style="margin:0;text-align:center">Up next: ${line}</p>`:"");
+  const qc=document.getElementById("qClear");if(qc)qc.onclick=()=>{S.ui.f=blankF();onFilter()};
   if(ui.follow.length){const f=ui.follow[0],w=A[f.w],l=A[f.l],tw=TIERS[C.tier[f.w]],tl=TIERS[C.tier[f.l]];
     st.innerHTML=`<div class="follow flash"><span class="chip" style="justify-self:start">Upset</span><h3>${esc(w.name)} beat a higher-rated act</h3>
     <p class="small" style="margin:0">${esc(w.name)} is ${tw.icon} ${tw.label} (${scoreTxt(f.w)}) and ${esc(l.name)} is ${tl.icon} ${tl.label} (${scoreTxt(f.l)}). What should change?</p>
