@@ -191,6 +191,83 @@ details.foot p{font-size:13px;max-width:70ch}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:60;max-width:calc(100% - 32px);text-align:center}
 .note{font-size:12.5px;color:var(--ink-soft)}
 .welcome{display:grid;gap:10px;border:3px solid var(--marigold);margin-top:12px}
+/* map */
+.mapgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:16px;align-items:start}
+.mapcard{display:grid;gap:10px;padding:12px}
+@media (min-width:901px){.mapcard{position:sticky;top:64px}}
+.mapscroll{overflow:auto;border-radius:12px;background:#4C6F3C;-webkit-overflow-scrolling:touch}
+#mapSvg{display:block;width:100%;min-width:560px;height:auto;font-family:var(--f-body)}
+#mapSvg .water-lab{font-family:var(--f-body);font-weight:800;font-size:8px;letter-spacing:.14em;fill:#0E3F63}
+#mapSvg .spotic{text-anchor:middle}
+#mapSvg .medtxt{text-anchor:middle;font-size:7px;fill:#FFF5E8;font-weight:800}
+#mapSvg .spotlab{text-anchor:middle;font-size:6.5px;font-weight:800;fill:#163C29;opacity:.75;paint-order:stroke;stroke:#D4DDB2;stroke-width:2px}
+#mapSvg .spotlab.on{opacity:1;font-size:7.5px}
+#mapSvg .spot{opacity:.8} #mapSvg .spot.used{opacity:1}
+#mapSvg .gate rect{fill:#163C29;stroke:#FFF5E8;stroke-width:1} #mapSvg .gate text{fill:#FFF5E8;font-size:6.5px;font-weight:800;text-anchor:middle;letter-spacing:.05em}
+#mapSvg .gate.on rect{fill:#E5432B}
+#mapSvg .stlab{font-family:var(--f-display);font-size:12px;text-anchor:middle;letter-spacing:.03em}
+#mapSvg .stage{opacity:.8} #mapSvg .stage.on,#mapSvg .stage.oon{opacity:1}
+#mapSvg .route{fill:none;stroke:#163C29;stroke-width:3.2;stroke-linecap:round;opacity:.92}
+#mapSvg .route.tight{stroke:#E5432B;stroke-dasharray:6 4}
+#mapSvg .route.exit{stroke-dasharray:2 4;opacity:.7}
+#mapSvg .oroute{fill:none;stroke:#1F6FB8;stroke-width:2.2;stroke-dasharray:5 3;opacity:.85}
+#mapSvg .odot{fill:#1F6FB8;stroke:#FFF5E8;stroke-width:1.5}
+#mapSvg .bolt circle,#mapSvg .fork circle{fill:#E5432B;stroke:#FFF5E8;stroke-width:1.5}
+#mapSvg .bolt text,#mapSvg .fork text{font-size:8.5px;text-anchor:middle}
+#mapSvg .badge circle{stroke:#FFF5E8;stroke-width:1.6;fill:#C9BBAE} #mapSvg .badge text{font-family:var(--f-display);font-size:9.5px;text-anchor:middle;fill:#163C29}
+#mapSvg .badge.hot circle{fill:#E5432B} #mapSvg .badge.hot text,#mapSvg .badge.cold text{fill:#FFF5E8} #mapSvg .badge.warm circle{fill:#F4A12B} #mapSvg .badge.cool circle{fill:#5EC6F1} #mapSvg .badge.cold circle{fill:#2F79C2}
+#mapSvg .badge.meet circle{stroke:#1F6FB8;stroke-width:2.6}
+#mapSvg .meetic{font-size:8px;text-anchor:middle}
+#mapSvg .north{font-family:var(--f-display);font-size:13px;fill:#FFF5E8}
+#mapSvg [data-it]{cursor:pointer}
+#mapSvg.focus [data-it]:not(.hl){opacity:.18}
+#mapSvg .hl .route,#mapSvg path.route.hl{stroke-width:5}
+.maplegend{display:flex;gap:6px;flex-wrap:wrap}
+.phone-only{display:none}@media (max-width:640px){.phone-only{display:block}}
+.itin{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.itin li{display:grid;grid-template-columns:54px 1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:7px 10px;border-left:6px solid transparent;font-size:13.5px;cursor:pointer}
+.itin li .t{font-weight:800;font-size:12.5px}
+.itin li.k-set{border-left-color:var(--unrated)} .itin li.k-set.hot{border-left-color:var(--hot)} .itin li.k-set.warm{border-left-color:var(--warm)} .itin li.k-set.cool{border-left-color:var(--cool)}
+.itin li.k-food{background:#F4A12B2e} .itin li.k-water,.itin li.k-chill{background:#5EC6F12e}
+.itin li.k-decide,.itin li.k-tight,.itin li.k-warn{background:#E5432B1f;border-left-color:var(--poppy)}
+.itin li.mini{background:transparent;padding:1px 10px;font-size:12px;color:var(--ink-soft);cursor:default}
+.itin li.hl{outline:3px solid var(--ink);outline-offset:-1px}
+/* crew */
+.crewchips{display:flex;gap:8px;flex-wrap:wrap}
+.friend{display:inline-flex;align-items:stretch;border:2px solid var(--ink);border-radius:999px;overflow:hidden}
+.friend .fsel{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;font-weight:800;padding:4px 6px 4px 12px}
+.friend.on{background:var(--ink)} .friend.on .fsel,.friend.on .fx{color:var(--bg)}
+.friend .fx{border:0;background:transparent;padding:0 10px 0 6px;font-weight:800;opacity:.7}
+.friend .pct{font-size:12px}
+.matchup{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.ring{display:block;flex:none} .ringtxt{font-family:var(--f-display);fill:var(--ink)}
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.stat{background:var(--surface);border-radius:12px;padding:10px;text-align:center;display:grid;gap:2px}
+.cbox .stat{background:var(--surface-2)}
+.stat b{font-family:var(--f-display);font-weight:400;font-size:26px;line-height:1.05}
+.stat span{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--ink-soft)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
+.cbox{display:grid;gap:8px;align-content:start}
+.cbox h3{font-size:22px;display:inline}
+.cbox summary{cursor:pointer;list-style:none}.cbox summary::-webkit-details-marker{display:none}
+.cbox summary::after{content:" ▾";font-weight:800;color:var(--ink-soft)}.cbox[open] summary::after{content:""}
+.cbox[open]{display:grid}
+.vlist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.vlist li{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:8px;padding:6px 10px;font-size:13.5px;cursor:pointer}
+.vlist li:hover{box-shadow:0 0 0 2px var(--ink) inset}
+.vlist.num{counter-reset:n} .vlist.num li{grid-template-columns:22px 1fr auto} .vlist.num li::before{counter-increment:n;content:counter(n);font-family:var(--f-display);font-size:17px}
+.vs2{font-variant-numeric:tabular-nums;font-weight:800;font-size:12px;white-space:nowrap;text-align:right}
+.gb{display:grid;grid-template-columns:86px 1fr auto;gap:8px;align-items:center}
+.gbars{display:grid;gap:3px}
+.gbars i{display:block;height:7px;border-radius:9px;min-width:2px}
+.gbars i.me,.sw.me{background:var(--poppy)} .gbars i.th,.sw.th{background:var(--blue)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px}
+.matrix{border-collapse:separate;border-spacing:4px;font-size:13px}
+.matrix th{font-weight:800;padding:4px 6px;text-align:center}
+.matrix td{font-family:var(--f-display);font-size:17px;text-align:center;border-radius:8px;padding:6px 8px;min-width:56px;color:var(--on-heat)}
+.matrix td.hot{background:var(--hot);color:var(--on-hot)} .matrix td.warm{background:var(--warm)} .matrix td.cool{background:var(--cool)} .matrix td.cold{background:var(--cold);color:var(--on-hot)} .matrix td.unrated{background:var(--unrated)} .matrix td.self{background:transparent}
+@media (max-width:900px){.mapgrid{grid-template-columns:1fr}}
+@media (max-width:640px){.tab{font-size:15px;padding:5px 11px}.matchup{grid-template-columns:1fr;justify-items:center;text-align:center}.matchup .row{justify-content:center}}
 /* calm hover: soft cream halo, no colour shift */
 .btn,.tab,.pill,.applebar{transition:box-shadow .2s ease}
 .btn:hover,.tab:hover,.pill:hover,.applebar:hover{box-shadow:0 0 0 3px #FFF5E8b3,0 6px 16px -10px #163C2966}
@@ -251,6 +328,8 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     <button class="tab" role="tab" aria-selected="false" data-tab="rate">Rate &amp; Battle</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="rank">Rankings</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="sched">Heat Schedule</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="map">Map</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="crew">Crew</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="lineup">Lineup</button>
   </nav>
 
@@ -295,11 +374,9 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
           <div id="distChart"></div>
         </div>
         <div class="card" id="compareCard" style="display:grid;gap:10px">
-          <h3 style="font-size:22px">Compare with a friend</h3>
-          <label class="small" for="friendCode" style="font-weight:800" id="friendLabel">Paste a friend's ranking code</label>
-          <input type="text" id="friendCode" placeholder="ACL26…" autocomplete="off" autocapitalize="none">
-          <div class="row"><button class="btn primary" id="loadFriend">Compare</button><button class="btn ghost" id="clearFriend">Clear</button></div>
+          <h3 style="font-size:22px">Compare with friends</h3>
           <div id="friendOut"></div>
+          <div class="row"><button class="btn primary" id="toCrew">Open the Crew tab</button></div>
         </div>
         <div class="card" id="boardCard" style="display:grid;gap:10px">
           <h3 style="font-size:22px">Your board</h3>
@@ -364,6 +441,37 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
         <div id="clashes" style="display:grid;gap:6px"></div>
       </div>
     </div>
+  </section>
+
+  <section class="panel" id="p-map" hidden>
+    <div class="card row" style="justify-content:space-between">
+      <div class="row" id="mapDays" role="group" aria-label="Day"><button class="pill" data-day="Fri">Fri 10/9</button><button class="pill" data-day="Sat">Sat 10/10</button><button class="pill" data-day="Sun">Sun 10/11</button></div>
+      <div class="row" id="mapGates" role="group" aria-label="Entrance"><span class="small" style="font-weight:800">Enter at</span><button class="pill" data-gate="auto">Closest</button><button class="pill" data-gate="ladybird">Lady Bird</button><button class="pill" data-gate="west">West</button><button class="pill" data-gate="east">East</button></div>
+    </div>
+    <div class="mapgrid">
+      <div class="card mapcard">
+        <div class="mapscroll" id="mapWrap"></div>
+        <div class="maplegend small"><span class="chip">① your sets in order</span><span class="chip">⚡ decision point</span><span class="chip">🍴 food</span><span class="chip">💧 water</span><span class="chip">🌳 shade</span><span class="chip">✚ medical</span></div>
+        <p class="small muted phone-only" style="margin:0">Swipe the map sideways to see the whole park.</p>
+        <div id="mapOverlay"></div>
+      </div>
+      <div class="card" style="display:grid;gap:10px;align-content:start">
+        <h3 style="font-size:22px" id="itinHead">Your day</h3>
+        <div class="row" id="itinSum"></div>
+        <ol class="itin" id="itin"></ol>
+      </div>
+    </div>
+    <p class="note">Your route follows your plan from the Heat Schedule. Tap a step to find it on the map. Stage, food and water spots are traced from the official ACL 2026 festival map; walk times are estimates at festival-crowd pace (far ends of the park ≈ 20 min). Check the ACL app on the day for changes.</p>
+  </section>
+
+  <section class="panel" id="p-crew" hidden>
+    <div class="card" id="crewAdd" style="display:grid;gap:10px">
+      <h3 style="font-size:22px">Your crew</h3>
+      <div class="row"><input type="text" id="crewCode" placeholder="Friend's share code or link" aria-label="Friend's share code or link" autocomplete="off" autocapitalize="none" style="flex:1 1 220px"><button class="btn primary" id="crewAddBtn">Add friend</button></div>
+      <div class="crewchips" id="crewChips"></div>
+      <div id="crewMine"></div>
+    </div>
+    <div id="crewOut" style="display:grid;gap:16px"></div>
   </section>
 
   <section class="panel" id="p-lineup" hidden>
@@ -534,7 +642,8 @@ document.getElementById("filterCard").addEventListener("toggle",e=>{S.ui.filters
 /* ---------- tabs ---------- */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 function setTab(t){S.ui.tab=t;document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
-  ["rate","rank","sched","lineup"].forEach(k=>document.getElementById("p-"+k).hidden=k!==t);
+  ["rate","rank","sched","map","crew","lineup"].forEach(k=>document.getElementById("p-"+k).hidden=k!==t);
+  if(t==="crew")refreshCrew();
   document.getElementById("filterCard").hidden=!(t==="rate"||t==="lineup");
   save();renderAll()}
 
@@ -763,7 +872,7 @@ function renderRank(){
   document.getElementById("ranklist").innerHTML=html;
   const t=document.getElementById("unrToggle");if(t)t.onclick=()=>{S.ui.showUnr=!S.ui.showUnr;save();renderRank()};
   const nm=document.getElementById("myName");if(document.activeElement!==nm)nm.value=S.name||"";
-  renderDist();renderFriend()}
+  renderDist();renderCompareMini()}
 function renderDist(){
   const W=520,H=170,x=v=>24+(v/10)*(W-48);const cols=["var(--hot)","var(--warm)","var(--cool)","var(--cold)"];
   const pts=C.order.map(id=>({v:C.score[id],t:C.tier[id],nm:A[id].name}));
@@ -789,16 +898,6 @@ function readCode(txt){const o=JSON.parse(b64d(txt.trim().replace(/\s+/g,"").rep
   st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];return st}
 document.getElementById("copyCode").onclick=()=>{if(!Object.keys(S.t).length)return toast("Rate a few artists first");copy(makeCode(),"Ranking code copied")};
 let FRIEND=null;
-document.getElementById("loadFriend").onclick=()=>{const raw=document.getElementById("friendCode").value.trim();if(HOSTED&&raw&&!/^ACL26\./.test(raw))return compareShare(raw);try{const st=readCode(raw);
-  if(st.bid&&st.bid===S.bid)return toast("That's your own code. Paste a friend's.");FRIEND={name:st.name||"Friend",bid:st.bid,c:compute(st)};renderRank();toast("Loaded "+FRIEND.name+"'s board")}catch(e){toast("That code didn't read. Copy the whole thing, starting with ACL26.")}};
-document.getElementById("clearFriend").onclick=()=>{FRIEND=null;document.getElementById("friendCode").value="";renderRank()};
-function renderFriend(){const o=document.getElementById("friendOut");if(!FRIEND){o.innerHTML="";return}
-  const F=FRIEND.c;const both=A.filter(a=>C.tier[a.id]>=0&&C.tier[a.id]<=1&&F.tier[a.id]>=0&&F.tier[a.id]<=1).sort((x,y)=>(C.score[y.id]+F.score[y.id])-(C.score[x.id]+F.score[x.id]));
-  const split=A.filter(a=>C.tier[a.id]>=0&&F.tier[a.id]>=0&&Math.abs(C.score[a.id]-F.score[a.id])>=4).sort((x,y)=>Math.abs(C.score[y.id]-F.score[y.id])-Math.abs(C.score[x.id]-F.score[x.id])).slice(0,6);
-  o.innerHTML=`<div style="display:grid;gap:10px"><div><b>${esc(FRIEND.name)}</b> <span class="idchip">${esc(FRIEND.bid||"")}</span></div>
-  <div><b class="small">You both love or like (${both.length})</b><div class="row" style="margin-top:6px">${both.length?both.slice(0,16).map(a=>`<span class="chip">${esc(a.name)} · ${scoreTxt(a.id)} / ${F.score[a.id].toFixed(1)}</span>`).join(""):'<span class="small muted">No overlap yet.</span>'}</div></div>
-  ${split.length?`<div><b class="small">Biggest splits</b><div class="row" style="margin-top:6px">${split.map(a=>`<span class="chip">${esc(a.name)} · you ${scoreTxt(a.id)} / them ${F.score[a.id].toFixed(1)}</span>`).join("")}</div></div>`:""}
-  <div><b class="small">${esc(FRIEND.name)}'s top 10</b><ol class="small" style="margin:6px 0 0;padding-left:20px">${F.order.slice(0,10).map(id=>`<li>${TIERS[F.tier[id]].icon} ${F.score[id].toFixed(1)} ${esc(A[id].name)} <span class="muted">${A[id].day} ${fmt(A[id].s)}</span></li>`).join("")}</ol></div></div>`}
 document.getElementById("restoreBtn").onclick=()=>{document.getElementById("restoreBox").hidden=false};
 document.getElementById("restoreNo").onclick=()=>{document.getElementById("restoreBox").hidden=true};
 document.getElementById("restoreYes").onclick=()=>{try{const st=readCode(document.getElementById("restoreCode").value);checkpoint();st.ui=Object.assign(S.ui,{card:null,pair:null,pairKind:null,ins:null,follow:[],ctx:null});S=st;save();recompute();document.getElementById("restoreBox").hidden=true;renderAll();toast("Board restored: "+(S.name||"no name"))}catch(e){toast("That code didn't read. Copy the whole thing, starting with ACL26.")}};
@@ -808,11 +907,13 @@ document.getElementById("resetYes").onclick=()=>{checkpoint();const keep={name:S
 
 /* ---------- schedule ---------- */
 document.querySelectorAll("#dayBtns button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;save();renderSched()});
-function h2h(a,b){let wa=0,wb=0;for(const [x,y,r] of S.h){if(r!==0&&r!==1)continue;const w=r===0?x:y,l=r===0?y:x;if(w===a&&l===b)wa++;if(w===b&&l===a)wb++}return wa>wb?a:wb>wa?b:null}
+function h2h(a,b){return h2hIn(S.h,a,b)}
+function h2hIn(hist,a,b){let wa=0,wb=0;for(const [x,y,r] of (hist||[])){if(r!==0&&r!==1)continue;const w=r===0?x:y,l=r===0?y:x;if(w===a&&l===b)wa++;if(w===b&&l===a)wb++}return wa>wb?a:wb>wa?b:null}
 function prefer(a,b){const h=h2h(a,b);if(h!==null)return h;return C.pos[a]<=C.pos[b]?a:b}
-function plan(d){const sets=A.filter(a=>a.day===d&&C.tier[a.id]>=0&&C.tier[a.id]<3).sort((x,y)=>C.pos[x.id]-C.pos[y.id]);const pick=[];
+function plan(d){return planFor(d,C,S.h)}
+function planFor(d,cc,hist){const sets=A.filter(a=>a.day===d&&cc.tier[a.id]>=0&&cc.tier[a.id]<3).sort((x,y)=>cc.pos[x.id]-cc.pos[y.id]);const pick=[];
   for(const a of sets){const clash=pick.filter(p=>overlap(p,a)>15);
-    if(!clash.length)pick.push(a);else if(clash.length===1&&h2h(clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
+    if(!clash.length)pick.push(a);else if(clash.length===1&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
   return pick.sort((x,y)=>x.s-y.s)}
 function renderSched(){
   const day=S.ui.day||"Fri";document.querySelectorAll("#dayBtns button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
@@ -1004,10 +1105,6 @@ document.getElementById("openYes").onclick=async()=>{const code=document.getElem
 document.getElementById("cloudDel").onclick=()=>{document.getElementById("cloudDelConfirm").hidden=false};
 document.getElementById("cloudDelNo").onclick=()=>{document.getElementById("cloudDelConfirm").hidden=true};
 document.getElementById("cloudDelYes").onclick=async()=>{try{await api({action:"delete",edit:S.cloud.edit});S.cloud=null;S.cloudSig=null;S.cloudOff=true;persist();document.getElementById("cloudDelConfirm").hidden=true;renderRank();toast("Online copy deleted")}catch(e){toast("Couldn't delete right now. Try again.")}};
-async function compareShare(raw){const m=raw.match(/\/b\/([a-z0-9-]+)/i);const handle=(m?m[1]:raw).toLowerCase().replace(/[^a-z0-9-]/g,"");
-  if(S.cloud&&handle===S.cloud.share)return toast("That's your own share code. Paste a friend's.");
-  try{const r=await api(null,handle);FRIEND={name:r.name||handle,bid:handle,c:compute(fromServer(r.state,r.name))};renderRank();toast("Comparing with "+FRIEND.name)}
-  catch(e){toast(e.status===404?`No board called "${handle}". Check the spelling.`:"Couldn't reach the server. Try again.")}}
 function renderViewBanner(mode){const b=document.getElementById("viewBanner");b.hidden=false;
   const mine=MY&&MY.name;
   if(mode==="loading")b.innerHTML=`<b>Loading ${esc(VIEW.share)}'s board…</b>`;
@@ -1020,7 +1117,309 @@ async function startView(){const handle=decodeURIComponent(location.pathname.sli
   try{const r=await api(null,handle);const st=fromServer(r.state,r.name);st.ui=S.ui;S=st;VIEW.name=r.name;recompute();renderViewBanner("ok");setTab(S.ui.tab==="rate"?"rank":S.ui.tab)}
   catch(e){renderViewBanner("missing")}}
 function pendingCompare(){let h=null;try{h=sessionStorage.getItem("acl26-compare");sessionStorage.removeItem("acl26-compare")}catch(e){}
-  if(h){document.getElementById("friendCode").value=h;setTab("rank");compareShare(h)}}
+  if(h){setTab("crew");addFriend(h)}}
+
+/* ---------- people: whose board is on screen, who "you" are, and who to overlay ---------- */
+function subjectPerson(){return {name:VIEW?(VIEW.name||VIEW.share):(S.name||"You"),c:C,h:S.h,me:!VIEW}}
+function mePerson(){if(VIEW)return MY&&Object.keys(MY.t||{}).length?{name:MY.name||"You",c:compute(MY),h:MY.h,me:true}:null;return {name:S.name||"You",c:C,h:S.h,me:true}}
+function friendPerson(){return FRIEND?{name:FRIEND.name,c:FRIEND.c,h:FRIEND.st.h,share:FRIEND.share}:null}
+function mapOverlay(){return VIEW?mePerson():friendPerson()}
+const first=n=>String(n||"").trim().split(/\s+/)[0]||"Friend";
+
+/* ---------- crew: friends you compare with, kept in this browser (with a cached copy for bad festival signal) ---------- */
+let CREW={},crewFetched=0;
+function crewList(){if(!Array.isArray(S.ui.crew))S.ui.crew=[];return S.ui.crew}
+function hydrateCrew(){CREW={};if(VIEW){FRIEND=null;return}
+  for(const e of crewList()){try{const st=fromServer(e.st||{},e.name);CREW[e.k]={k:e.k,name:e.name||"Friend",st,c:compute(st),share:e.k.startsWith("s:")?e.k.slice(2):null,at:e.at}}catch(_){}}
+  if(!S.ui.crewSel||!CREW[S.ui.crewSel])S.ui.crewSel=(crewList().find(e=>CREW[e.k])||{}).k||null;
+  FRIEND=S.ui.crewSel?CREW[S.ui.crewSel]:null}
+async function addFriend(raw){raw=(raw||"").trim();if(VIEW)return;
+  if(!raw)return toast(HOSTED?"Paste a friend's share code or link":"Paste a friend's ranking code");
+  let e;
+  if(/^ACL26\./.test(raw)){let st;try{st=readCode(raw)}catch(_){return toast("That code didn't read. Copy the whole thing, starting with ACL26.")}
+    if(st.bid&&st.bid===S.bid)return toast("That's your own code. Paste a friend's.");
+    e={k:"c:"+(st.bid||("x"+Date.now())),name:st.name||"Friend",st:coreState(st)}}
+  else if(HOSTED){const m=raw.match(/\/b\/([a-z0-9-]+)/i);const h=(m?m[1]:raw).toLowerCase().replace(/[^a-z0-9-]/g,"");
+    if(!h)return toast("Paste a friend's share code or link");
+    if(S.cloud&&h===S.cloud.share)return toast("That's your own share code. Paste a friend's.");
+    try{const r=await api(null,h);e={k:"s:"+h,name:r.name||h,st:coreState(fromServer(r.state,r.name))}}
+    catch(err){return toast(err.status===404?`No board called "${h}". Check the spelling.`:"Couldn't reach the server. Try again.")}}
+  else return toast("That code didn't read. Copy the whole thing, starting with ACL26.");
+  const L=crewList();const i=L.findIndex(x=>x.k===e.k);e.at=Date.now();
+  if(i>=0)L[i]=e;else{if(L.length>=12)return toast("Your crew is full (12). Remove someone first.");L.push(e)}
+  S.ui.crewSel=e.k;save();hydrateCrew();const inp=document.getElementById("crewCode");if(inp)inp.value="";
+  toast((i>=0?"Updated ":"Added ")+e.name);renderAll()}
+function removeFriend(k){const L=crewList();const i=L.findIndex(x=>x.k===k);if(i<0)return;const nm=L[i].name;L.splice(i,1);if(S.ui.crewSel===k)S.ui.crewSel=null;save();hydrateCrew();renderAll();toast("Removed "+nm)}
+async function refreshCrew(force){if(!HOSTED||VIEW)return;if(!force&&Date.now()-crewFetched<60000)return;crewFetched=Date.now();
+  const L=crewList().filter(e=>e.k.startsWith("s:"));if(!L.length)return;let changed=false;
+  await Promise.all(L.map(async e=>{try{const r=await api(null,e.k.slice(2));const st=coreState(fromServer(r.state,r.name));
+    if(JSON.stringify(st)!==JSON.stringify(e.st)||(r.name&&r.name!==e.name)){e.st=st;e.name=r.name||e.name;e.at=Date.now();changed=true}}catch(_){}}));
+  if(changed){save();hydrateCrew();renderAll()}}
+
+/* ---------- comparison maths ---------- */
+// Compatibility = how close your scores are on artists you've both rated: identical = 100%, 1 point apart on average ≈ 75%, 3 apart ≈ 42%.
+function compatOf(p,q){const both=A.filter(a=>p.tier[a.id]>=0&&q.tier[a.id]>=0);if(both.length<3)return {pct:null,n:both.length,d:null};
+  const d=both.reduce((s,a)=>s+Math.abs(p.score[a.id]-q.score[a.id]),0)/both.length;return {pct:Math.round(100*Math.exp(-d/3.5)),n:both.length,d}}
+function compatLabel(p){return p==null?"Not enough overlap yet":p>=85?"Festival soulmates":p>=70?"Same wavelength":p>=55?"Good festival buddies":p>=40?"Split up, meet at the headliner":"Opposite ends of Zilker"}
+function compatHeat(p){return p==null?"unrated":p>=70?"hot":p>=55?"warm":p>=40?"cool":"cold"}
+function pairStats(P,Q){const p=P.c,q=Q.c;const cp=compatOf(p,q);
+  const both=A.filter(a=>p.tier[a.id]>=0&&q.tier[a.id]>=0);
+  const loves=both.filter(a=>p.tier[a.id]<=1&&q.tier[a.id]<=1).sort((x,y)=>Math.min(p.score[y.id],q.score[y.id])-Math.min(p.score[x.id],q.score[x.id])||Math.abs(p.score[x.id]-q.score[x.id])-Math.abs(p.score[y.id]-q.score[y.id]));
+  const bothLove=both.filter(a=>p.tier[a.id]===0&&q.tier[a.id]===0).length;
+  const splits=both.filter(a=>Math.abs(p.score[a.id]-q.score[a.id])>=2).sort((x,y)=>Math.abs(p.score[y.id]-q.score[y.id])-Math.abs(p.score[x.id]-q.score[x.id]));
+  const hated=both.filter(a=>p.tier[a.id]===3&&q.tier[a.id]===3).sort((x,y)=>(p.score[x.id]+q.score[x.id])-(p.score[y.id]+q.score[y.id]));
+  const top=both.map(a=>({a,v:(p.score[a.id]+q.score[a.id])/2})).sort((x,y)=>y.v-x.v);
+  const drag=(X,Y)=>A.filter(a=>X.c.tier[a.id]===0&&(Y.c.tier[a.id]<0||Y.c.tier[a.id]>=2)).sort((x,y)=>X.c.score[y.id]-X.c.score[x.id]);
+  const meet=[],split=[];
+  for(const d of ["Fri","Sat","Sun"]){const pp=planFor(d,p,P.h),qp=planFor(d,q,Q.h);const qs=new Set(qp.map(a=>a.id));
+    pp.forEach(a=>{if(qs.has(a.id))meet.push(a);else{const o=qp.find(b=>!pp.some(x=>x.id===b.id)&&overlap(a,b)>=20);if(o)split.push([a,o])}})}
+  return {...cp,both,loves,bothLove,splits,hated,top,dragMe:drag(Q,P),dragThem:drag(P,Q),meet,split}}
+function famAvg(c){return GENRES.map(g=>{const L=A.filter(a=>a.fam===g&&c.tier[a.id]>=0);return {g,n:L.length,v:L.length?L.reduce((s,a)=>s+c.score[a.id],0)/L.length:null}})}
+function lovePct(c){const r=A.filter(a=>c.tier[a.id]>=0);return r.length?Math.round(100*r.filter(a=>c.tier[a.id]===0).length/r.length):null}
+function undergroundOf(c){const L=A.filter(a=>c.tier[a.id]===0).map(a=>a.listeners||0).sort((x,y)=>x-y);return L.length?L[Math.floor(L.length/2)]:null}
+
+/* ---------- crew rendering ---------- */
+function ringHTML(pct,size){const r=48,circ=2*Math.PI*r,v=pct==null?0:pct/100;const col={hot:"var(--hot)",warm:"var(--warm)",cool:"var(--cool)",cold:"var(--cold)",unrated:"var(--unrated)"}[compatHeat(pct)];
+  return `<svg viewBox="0 0 120 120" class="ring" style="width:${size||128}px;height:${size||128}px" role="img" aria-label="${pct==null?"Not enough shared ratings yet":pct+"% compatible"}"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="13"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="13" stroke-linecap="round" stroke-dasharray="${(circ*v).toFixed(1)} ${circ.toFixed(1)}" transform="rotate(-90 60 60)"/><text x="60" y="${pct==null?66:70}" text-anchor="middle" class="ringtxt" font-size="${pct==null?18:32}">${pct==null?"—":pct+"%"}</text></svg>`}
+const sc1=v=>v==null?"–":v.toFixed(1);
+function vrow(a,right){return `<li data-a="${a.id}"><span><b>${esc(a.name)}</b> <span class="muted small">${a.day} ${fmt(a.s)} · ${a.stage==="American Express"?"AmEx":a.stage}</span></span><span class="vs2">${right}</span></li>`}
+function OPENB(){return (window.innerWidth>640||OPENB.n++<2)?" open":""}
+function pairHTML(P,Q){OPENB.n=0;const R=pairStats(P,Q);const pn=P.me?"You":first(P.name),qn=first(Q.name);
+  const two=(a)=>`${pn} ${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])} · ${esc(qn)} ${TIERS[Q.c.tier[a.id]].icon} ${sc1(Q.c.score[a.id])}`;
+  const listOr=(arr,fn,empty)=>arr.length?`<ul class="vlist">${arr.map(fn).join("")}</ul>`:`<p class="small muted" style="margin:0">${empty}</p>`;
+  const pf=famAvg(P.c),qf=famAvg(Q.c);
+  const gbars=GENRES.map((g,i)=>`<div class="gb"><span class="small" style="font-weight:800">${g}</span><span class="gbars"><i class="me" style="width:${pf[i].v==null?0:pf[i].v*10}%"></i><i class="th" style="width:${qf[i].v==null?0:qf[i].v*10}%"></i></span><span class="vs2">${sc1(pf[i].v)} · ${sc1(qf[i].v)}</span></div>`).join("");
+  const lp=[lovePct(P.c),lovePct(Q.c)],ug=[undergroundOf(P.c),undergroundOf(Q.c)];
+  const meetHTML=`<ul class="vlist">${R.meet.slice(0,8).map(a=>vrow(a,"🤝")).join("")}</ul>${R.meet.length>8?`<p class="small muted" style="margin:0">+${R.meet.length-8} more on the map</p>`:""}`;
+  const hatedFallback=()=>{const lo=c=>A.filter(a=>c.tier[a.id]>=0).sort((x,y)=>c.score[x.id]-c.score[y.id]).slice(0,3);
+    return `<p class="small muted" style="margin:0">No shared 👎 yet. Each of your lowest:</p><ul class="vlist">${lo(P.c).map(a=>vrow(a,`${pn} ${sc1(P.c.score[a.id])}`)).join("")}${lo(Q.c).map(a=>vrow(a,`${esc(qn)} ${sc1(Q.c.score[a.id])}`)).join("")}</ul>`};
+  return `<div class="card matchup">${ringHTML(R.pct)}
+    <div style="display:grid;gap:6px;min-width:0"><span class="chip" style="justify-self:start">${esc(P.me&&!VIEW?(P.name==="You"?"You":P.name+" (you)"):P.name)} × ${esc(Q.name)}</span>
+      <h2 style="font-size:clamp(26px,5vw,36px)">${compatLabel(R.pct)}</h2>
+      <p class="small muted" style="margin:0">${R.n<3?`Rate at least 3 of the same artists to get a score (${R.n} so far).`:`Based on ${R.n} artist${R.n===1?"":"s"} you've both rated · scores ${R.d.toFixed(1)} points apart on average.`}</p>
+      <div class="row"><button class="btn primary" id="shareMatch">Share this matchup</button><button class="btn" data-go="map">Both paths on the map</button>${Q.share&&!VIEW?`<a class="btn ghost" href="/b/${esc(Q.share)}" target="_blank" rel="noopener">Open ${esc(qn)}'s board</a>`:""}</div></div></div>
+  <div class="statrow">
+    <div class="stat"><b>${R.bothLove}</b><span>both ❤️</span></div><div class="stat"><b>${R.loves.length}</b><span>shared ❤️/👍</span></div>
+    <div class="stat"><b>${R.splits.length}</b><span>big splits</span></div><div class="stat"><b>${R.hated.length}</b><span>both 👎</span></div><div class="stat"><b>${R.meet.length}</b><span>meet-up sets</span></div></div>
+  <div class="cgrid">
+    <details class="card cbox"${OPENB()}><summary><h3>💞 Biggest similarities</h3></summary>${listOr(R.loves.slice(0,6),a=>vrow(a,two(a)),"No shared ❤️ or 👍 yet.")}</details>
+    <details class="card cbox"${OPENB()}><summary><h3>⚔️ Biggest disagreements</h3></summary>${listOr(R.splits.slice(0,6),a=>vrow(a,two(a)),"No 2-point splits yet. Suspiciously agreeable.")}</details>
+    <details class="card cbox"${OPENB()}><summary><h3>🏆 Top overall, together</h3></summary>${R.top.length?`<ol class="vlist num">${R.top.slice(0,8).map(({a,v})=>vrow(a,`avg ${v.toFixed(1)}`)).join("")}</ol>`:`<p class="small muted" style="margin:0">Rate some of the same artists first.</p>`}</details>
+    <details class="card cbox"${OPENB()}><summary><h3>👎 Most hated</h3></summary>${R.hated.length?`<ul class="vlist">${R.hated.slice(0,5).map(a=>vrow(a,two(a))).join("")}</ul>`:hatedFallback()}</details>
+    <details class="card cbox"${OPENB()}><summary><h3>🎧 Drag each other to</h3></summary><b class="small">${esc(qn)} would drag ${P.me?"you":esc(pn)} to</b>${listOr(R.dragMe.slice(0,4),a=>vrow(a,`${esc(qn)} ❤️ ${sc1(Q.c.score[a.id])} · ${pn} ${P.c.tier[a.id]<0?"unrated":TIERS[P.c.tier[a.id]].icon}`),"Nothing: you're on board with all their ❤️s.")}
+      <b class="small">${P.me?"You'd":esc(pn)+" would"} drag ${esc(qn)} to</b>${listOr(R.dragThem.slice(0,4),a=>vrow(a,`${pn} ❤️ ${sc1(P.c.score[a.id])} · ${esc(qn)} ${Q.c.tier[a.id]<0?"unrated":TIERS[Q.c.tier[a.id]].icon}`),"Nothing: they're on board with all your ❤️s.")}</details>
+    <details class="card cbox"${OPENB()}><summary><h3>🎸 Taste profile</h3></summary><div class="row small"><span class="chip"><i class="sw me"></i>${pn}</span><span class="chip"><i class="sw th"></i>${esc(qn)}</span><span class="muted">average score by genre</span></div><div style="display:grid;gap:6px">${gbars}</div>
+      <div class="statrow" style="margin-top:4px"><div class="stat"><b>${lp[0]==null?"–":lp[0]+"%"} · ${lp[1]==null?"–":lp[1]+"%"}</b><span>❤️ rate (lower = pickier)</span></div><div class="stat"><b>${fmtL(ug[0])} · ${fmtL(ug[1])}</b><span>median ❤️ reach (lower = more underground)</span></div></div></details>
+    <details class="card cbox"${OPENB()}><summary><h3>🤝 Where you'll meet up</h3></summary>${R.meet.length?meetHTML:`<p class="small muted" style="margin:0">None of your planned sets line up yet.</p>`}
+      ${R.split.length?`<b class="small">Where you split up</b><ul class="vlist">${R.split.slice(0,4).map(([a,b])=>`<li data-a="${a.id}"><span class="small"><b>${a.day} ${fmt(Math.max(a.s,b.s))}</b> · ${pn}: ${esc(a.name)} @ ${a.stage==="American Express"?"AmEx":a.stage} · ${esc(qn)}: ${esc(b.name)} @ ${b.stage==="American Express"?"AmEx":b.stage}</span><span></span></li>`).join("")}</ul>`:""}</details>
+  </div>
+  <details class="foot"><summary>How compatibility works</summary><p>Compatibility looks only at artists you've both rated and how far apart your scores are: identical boards score 100%, scores one point apart on average land near 75%, three points apart near 42%. Meet-ups and split-ups come from each person's plan on the Heat Schedule. Friends' boards refresh each time you open this tab; a copy stays in this browser so it still works with bad festival signal.</p></details>`}
+function matchupText(P,Q){const R=pairStats(P,Q);const pn=P.me?(S.name||MY&&MY.name||"Me"):P.name,qn=Q.name;
+  let s=`${pn} & ${qn}: ${R.pct==null?"still rating":R.pct+"% compatible"} on the ACL Battle Board 🎶 (${compatLabel(R.pct)})\n`;
+  if(R.loves.length)s+=`\n💞 We both love: ${R.loves.slice(0,4).map(a=>a.name).join(", ")}`;
+  if(R.splits.length){const a=R.splits[0];s+=`\n⚔️ Biggest fight: ${a.name} (${first(pn)} ${sc1(P.c.score[a.id])} vs ${first(qn)} ${sc1(Q.c.score[a.id])})`}
+  if(R.hated.length)s+=`\n👎 We both skip: ${R.hated.slice(0,3).map(a=>a.name).join(", ")}`;
+  if(R.meet.length)s+=`\n🤝 Meet up: ${R.meet.slice(0,4).map(a=>`${a.day} ${fmt(a.s)} ${a.name}`).join(" · ")}`;
+  s+=`\n\nMake your own: ${SITE_URL}`;if(HOSTED&&S.cloud&&!VIEW)s+=`\nCompare with me: ${SITE_URL}b/${S.cloud.share}`;return s}
+function crewHTML(P){OPENB.n=0;const ppl=[{...P,name:P.name==="You"?"You":P.name},...Object.values(CREW).map(f=>({name:f.name,c:f.c,h:f.st.h}))];const n=ppl.length;
+  const M=ppl.map(x=>ppl.map(y=>x===y?null:compatOf(x.c,y.c).pct));
+  let twins=null,odd=null;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(M[i][j]!=null&&(!twins||M[i][j]>twins[2]))twins=[i,j,M[i][j]];
+  const avgTo=ppl.map((_,i)=>{const v=M[i].filter(x=>x!=null);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null});
+  avgTo.forEach((v,i)=>{if(v!=null&&(!odd||v<odd[1]))odd=[i,v]});
+  const agg=A.map(a=>{const v=ppl.map(p=>p.c.tier[a.id]>=0?p.c.score[a.id]:null).filter(x=>x!=null);const m=v.length?v.reduce((s,x)=>s+x,0)/v.length:null;
+    const sd=v.length>1?Math.sqrt(v.reduce((s,x)=>s+(x-m)**2,0)/v.length):0;return {a,n:v.length,m,sd,lo:v.length?Math.min(...v):null,hi:v.length?Math.max(...v):null}}).filter(x=>x.n>=2);
+  const top=[...agg].sort((x,y)=>y.m-x.m||y.n-x.n).slice(0,8),hated=agg.filter(x=>x.m<4.1).sort((x,y)=>x.m-y.m).slice(0,5),div=[...agg].sort((x,y)=>y.sd-x.sd).filter(x=>x.sd>=1.5).slice(0,5);
+  const plans=ppl.map(p=>["Fri","Sat","Sun"].flatMap(d=>planFor(d,p.c,p.h).map(a=>a.id)));const cnt={};plans.forEach(pl=>pl.forEach(id=>cnt[id]=(cnt[id]||0)+1));
+  const meets=Object.entries(cnt).filter(([,c])=>c>=Math.max(2,Math.ceil(n/2))).map(([id,c])=>({a:A[+id],c})).sort((x,y)=>({Fri:0,Sat:1,Sun:2}[x.a.day]-{Fri:0,Sat:1,Sun:2}[y.a.day])||x.a.s-y.a.s);
+  const nm=i=>esc(i===0?"You":first(ppl[i].name));
+  return `<div class="card" style="display:grid;gap:12px"><h2 style="font-size:30px">The whole crew · ${n} people</h2>
+    <div class="statrow">${twins?`<div class="stat"><b>${twins[2]}%</b><span>taste twins: ${nm(twins[0])} & ${nm(twins[1])}</span></div>`:""}${odd&&n>2?`<div class="stat"><b>${Math.round(odd[1])}%</b><span>odd one out: ${nm(odd[0])}</span></div>`:""}<div class="stat"><b>${meets.length}</b><span>crew meet-up sets</span></div></div>
+    <div style="overflow-x:auto"><table class="matrix"><thead><tr><th></th>${ppl.map((_,i)=>`<th>${nm(i)}</th>`).join("")}</tr></thead><tbody>${ppl.map((_,i)=>`<tr><th>${nm(i)}</th>${ppl.map((_,j)=>i===j?`<td class="self">·</td>`:`<td class="${compatHeat(M[i][j])}">${M[i][j]==null?"–":M[i][j]+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="cgrid">
+      <details class="cbox"${OPENB()}><summary><h3>🏆 Crew top 8</h3></summary>${top.length?`<ol class="vlist num">${top.map(x=>vrow(x.a,`avg ${x.m.toFixed(1)} · ${x.n}/${n}`)).join("")}</ol>`:`<p class="small muted" style="margin:0">Needs artists rated by at least two of you.</p>`}</details>
+      <details class="cbox"${OPENB()}><summary><h3>🤝 Crew meet-ups</h3></summary>${meets.length?`<ul class="vlist">${[...meets].sort((x,y)=>y.c-x.c).slice(0,8).sort((x,y)=>({Fri:0,Sat:1,Sun:2}[x.a.day]-{Fri:0,Sat:1,Sun:2}[y.a.day])||x.a.s-y.a.s).map(x=>vrow(x.a,`${x.c} of ${n}`)).join("")}</ul>${meets.length>8?`<p class="small muted" style="margin:0">+${meets.length-8} more</p>`:""}`:`<p class="small muted" style="margin:0">No set is in most of your plans yet.</p>`}</details>
+      <details class="cbox"${OPENB()}><summary><h3>👎 Crew most hated</h3></summary>${hated.length?`<ul class="vlist">${hated.map(x=>vrow(x.a,`avg ${x.m.toFixed(1)} · ${x.n}/${n}`)).join("")}</ul>`:`<p class="small muted" style="margin:0">Nobody's ganging up on anyone yet.</p>`}</details>
+      <details class="cbox"${OPENB()}><summary><h3>🔥 Most divisive</h3></summary>${div.length?`<ul class="vlist">${div.map(x=>vrow(x.a,`${x.lo.toFixed(1)} to ${x.hi.toFixed(1)}`)).join("")}</ul>`:`<p class="small muted" style="margin:0">No big fights yet.</p>`}</details>
+    </div></div>`}
+function renderCrew(){const out=document.getElementById("crewOut"),add=document.getElementById("crewAdd");add.hidden=!!VIEW;
+  if(VIEW){const P=mePerson(),Q=subjectPerson();
+    out.innerHTML=P?pairHTML(P,Q):`<div class="card" style="display:grid;gap:10px;justify-items:start"><h3 style="font-size:24px">How do you match up with ${esc(Q.name)}?</h3><p class="small" style="margin:0">Rate artists on your own board and this tab shows your compatibility, shared loves, biggest fights, what you'd drag each other to, and where you'll meet up.</p><a class="btn primary" href="/" id="cmpMine2">Make my own board</a></div>`;
+    const c=document.getElementById("cmpMine2");if(c)c.onclick=()=>{try{sessionStorage.setItem("acl26-compare",VIEW.share)}catch(e){}};
+    bindCrewOut(out,P,Q);return}
+  const L=crewList();
+  document.getElementById("crewChips").innerHTML=L.length?L.map(e=>{const f=CREW[e.k];const cp=f?compatOf(C,f.c).pct:null;
+    return `<span class="friend${S.ui.crewSel===e.k?" on":""}"><button class="fsel" data-k="${esc(e.k)}" aria-pressed="${S.ui.crewSel===e.k}"><span>${esc(e.name)}</span><span class="pct heat ${compatHeat(cp)}">${cp==null?"–":cp+"%"}</span></button><button class="fx" data-x="${esc(e.k)}" aria-label="Remove ${esc(e.name)}">✕</button></span>`}).join(""):"";
+  document.querySelectorAll("#crewChips [data-k]").forEach(b=>b.onclick=()=>{S.ui.crewSel=b.dataset.k;save();hydrateCrew();renderCrew()});
+  document.querySelectorAll("#crewChips [data-x]").forEach(b=>b.onclick=()=>removeFriend(b.dataset.x));
+  const mine=HOSTED&&S.cloud?`<p class="small" style="margin:0">Your share code is <span class="idchip">${esc(S.cloud.share)}</span>. Send friends <b>${esc(SITE_URL.replace(/^https:\/\//,""))}b/${esc(S.cloud.share)}</b> so they can add you back.</p>`:"";
+  document.getElementById("crewMine").innerHTML=mine;
+  if(!FRIEND){out.innerHTML=`<div class="card" style="display:grid;gap:8px"><h3 style="font-size:24px">Add your first friend</h3><p class="small" style="margin:0">Paste a friend's ${HOSTED?"share code (like <b>spencer26</b>) or share link":"ranking code"} above. You'll get your compatibility %, biggest similarities and fights, both of your ❤️s and 👎s, what you'd drag each other to, and where your plans meet up. Add two or more friends for crew-wide rankings.</p></div>`;return}
+  const P=mePerson(),Q=friendPerson();out.innerHTML=pairHTML(P,Q)+(Object.keys(CREW).length>=2?crewHTML(P):"");bindCrewOut(out,P,Q)}
+function bindCrewOut(out,P,Q){
+  out.querySelectorAll("[data-a]").forEach(li=>li.onclick=()=>showArtist(A[+li.dataset.a]));
+  out.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.ui.mapFriend=true;setTab(b.dataset.go)});
+  const sm=document.getElementById("shareMatch");if(sm&&P&&Q)sm.onclick=()=>openMatchShare(P,Q)}
+function openMatchShare(P,Q){const host=document.getElementById("dialogHost");const txt=matchupText(P,Q);const canNative=!!navigator.share;
+  host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="Share this matchup"><div class="card sharebox"><h3 style="font-size:24px">Share this matchup</h3><textarea readonly aria-label="Message preview">${esc(txt)}</textarea>
+    <div class="acts"><a class="btn" href="sms:?&body=${encodeURIComponent(txt)}">Text</a><a class="btn" href="mailto:?subject=${encodeURIComponent("Our ACL matchup")}&body=${encodeURIComponent(txt)}">Email</a><button class="btn" id="msCopy">Copy</button>${canNative?`<button class="btn primary" id="msNative">More…</button>`:""}</div>
+    <button class="btn ghost" id="msClose">Close</button></div></div>`;
+  document.getElementById("msCopy").onclick=()=>copy(txt,"Copied. Paste it in the group chat.");
+  const nb=document.getElementById("msNative");if(nb)nb.onclick=async()=>{try{await navigator.share({title:"Our ACL matchup",text:txt})}catch(e){}};
+  document.getElementById("msClose").onclick=()=>host.innerHTML="";host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))host.innerHTML=""}}
+function renderCompareMini(){const o=document.getElementById("friendOut");if(!o)return;
+  if(!FRIEND){o.innerHTML=`<p class="small muted" style="margin:0">Add friends on the Crew tab to see compatibility, shared loves, fights and meet-ups.</p>`;return}
+  const cp=compatOf(C,FRIEND.c);o.innerHTML=`<div class="row" style="flex-wrap:nowrap">${ringHTML(cp.pct,72)}<div><b>${esc(FRIEND.name)}</b><div class="small">${compatLabel(cp.pct)}</div><div class="small muted">Ticks in the score spread are ${esc(first(FRIEND.name))}'s.</div></div></div>`}
+
+/* ---------- festival map: traced from the official ACL 2026 map (support.aclfestival.com) ---------- */
+const MAPV={x:250,y:96,w:550,h:378};
+const STAGEXY={"T-Mobile":{x:277,y:229,c:"#F27BB5",ink:"#163C29",lab:"T-MOBILE"},"Miller Lite":{x:372,y:141,c:"#F4A12B",ink:"#163C29",lab:"MILLER LITE"},"Tito's":{x:607,y:211,c:"#F26B21",ink:"#163C29",lab:"TITO'S"},"American Express":{x:728,y:287,c:"#1F4E8C",ink:"#FFF5E8",lab:"AMEX"},"Snapchat":{x:503,y:318,c:"#163C29",ink:"#FFF5E8",lab:"SNAPCHAT"},"BMI":{x:367,y:341,c:"#B5452F",ink:"#FFF5E8",lab:"BMI"},"Beatbox":{x:356,y:439,c:"#5EC6F1",ink:"#163C29",lab:"BEATBOX"}};
+const GATES=[{k:"ladybird",n:"Lady Bird gate",short:"Lady Bird",x:292,y:166},{k:"west",n:"Barton Springs West gate",short:"West",x:338,y:362},{k:"east",n:"Barton Springs East gate",short:"East",x:562,y:416}];
+const SPOTS=[
+  {k:"E1",t:"food",n:"ACL Eats",x:535,y:168,d:"the main food court on the lake path, 40+ Austin spots"},
+  {k:"E2",t:"food",n:"ACL Eats South",x:454,y:441,d:"the smaller south food court near BeatBox"},
+  {k:"SW",t:"food",snack:1,n:"ACL Sweets",x:578,y:334,d:"ice cream, sno-cones and fried treats by Austin Kiddie Limits"},
+  {k:"BT",t:"food",n:"The Big Tent",x:435,y:156,d:"a covered tent with seating, pizza and cocktails"},
+  {k:"BS",t:"food",n:"The Big Shade",x:410,y:300,d:"a shaded tent with bowls and corn dogs",chill:1},
+  {k:"GR",t:"food",snack:1,n:"The Grove",x:489,y:357,d:"craft beer, frosé and snacks"},
+  {k:"BX",t:"chill",n:"Bonus Tracks",x:489,y:385,d:"a shady hangout away from the stages",chill:1},
+  {k:"w1",t:"water",n:"the Lady Bird gate hydration station",x:330,y:159},{k:"w2",t:"water",n:"the hydration station by T-Mobile",x:282,y:197},
+  {k:"w3",t:"water",n:"the lake-path hydration station by ACL Eats",x:513,y:149},{k:"w4",t:"water",n:"the ACL Market hydration station",x:551,y:259},
+  {k:"w5",t:"water",n:"the hydration station by Tito's",x:623,y:239},{k:"w6",t:"water",n:"the Accessibility Center hydration station",x:392,y:352},
+  {k:"w7",t:"water",n:"the hydration station by VIP Grove East",x:608,y:327},{k:"w8",t:"water",n:"the hydration station by ACL Eats South",x:431,y:457},
+  {k:"w9",t:"water",n:"the Electrolit Hydration Lounge",x:446,y:232},
+  {k:"m1",t:"med",n:"Medical",x:312,y:224},{k:"m2",t:"med",n:"Medical",x:483,y:304},{k:"m3",t:"med",n:"Medical",x:348,y:417},{k:"m4",t:"med",n:"Medical",x:745,y:276}];
+const FOOD=SPOTS.filter(s=>s.t==="food"),MEALS=FOOD.filter(s=>!s.snack),WATER=SPOTS.filter(s=>s.t==="water"),CHILL=SPOTS.filter(s=>s.chill);
+const GROUNDS=[[300,158],[335,157],[372,152],[396,154],[430,148],[445,150],[480,151],[514,149],[548,170],[580,190],[612,206],[650,226],[700,252],[740,272],[762,288],[766,303],[756,318],[725,328],[680,352],[640,374],[612,390],[595,404],[592,432],[572,442],[566,458],[362,459],[342,440],[300,432],[278,426],[278,398],[287,390],[284,365],[276,340],[268,300],[266,268],[285,250],[296,232],[276,212],[279,175]];
+const LAKE=[[328,50],[453,113],[477,120],[599,185],[634,195],[722,246],[776,252],[790,288],[790,305],[778,325],[754,334],[629,413],[630,440],[799,334],[799,178],[770,169],[527,50]];
+const CREEK=[[616,449],[577,452],[541,466],[495,492],[462,503],[354,504],[310,517],[324,532],[474,522],[551,492]];
+const ST=name=>STAGEXY[name];
+// Walk minutes at festival-crowd pace (~60 m/min, 1.2× detour, +2 min to get out of a crowd). T-Mobile ↔ AmEx ≈ 19 min.
+const walkRaw=(p,q)=>p===q||(p.x===q.x&&p.y===q.y)?0:2+Math.hypot(p.x-q.x,p.y-q.y)*0.0374;
+const walkT=(p,q)=>Math.round(walkRaw(p,q));
+function nearest(list,p){return list.reduce((b,s)=>!b||walkRaw(p,s)<walkRaw(p,b)?s:b,null)}
+function bestStop(list,from,to,free,dwell){let best=null;for(const s of list){const det=walkRaw(from,s)+walkRaw(s,to)-walkRaw(from,to);if(det+dwell<=free&&(!best||det<best.det))best={s,det}}return best?{s:best.s,det:Math.max(1,Math.round(best.det))}:null}
+function pickGate(firstSet){const g=S.ui.gate&&GATES.find(x=>x.k===S.ui.gate);return g||nearest(GATES,ST(firstSet.stage))}
+const stShort=s=>s==="American Express"?"AmEx":s;
+function buildDay(day,P){
+  const pl=planFor(day,P.c,P.h);const items=[];const R={pl,items,walk:0,decide:0,food:0,tight:0};if(!pl.length)return R;
+  const add=o=>{o.i=items.length;items.push(o);return o};
+  const gate=pickGate(pl[0]);const w0=walkT(gate,ST(pl[0].stage));R.walk+=w0;R.gate=gate;
+  add({k:"gate",t:pl[0].s-w0-10,g:gate,wk:w0,to:pl[0].stage});
+  let lastWater=pl[0].s-w0;
+  pl.forEach((a,i)=>{
+    if(a.e-lastWater>150){const w=nearest(WATER,ST(a.stage));add({k:"water",warn:true,t:a.s,at:w,near:a.stage});lastWater=a.s}
+    const alts=A.filter(b=>b.day===day&&b.id!==a.id&&P.c.tier[b.id]>=0&&P.c.tier[b.id]<=1&&!pl.includes(b)&&overlap(a,b)>=20).sort((x,y)=>P.c.pos[x.id]-P.c.pos[y.id]).slice(0,2);
+    add({k:"set",a,t:a.s,n:i+1});
+    alts.forEach(b=>{R.decide++;add({k:"decide",a,b,t:Math.max(a.s,b.s),hw:h2hIn(P.h,a.id,b.id)})});
+    const nx=pl[i+1];if(!nx)return;
+    const from=ST(a.stage),to=ST(nx.stage),wk=walkT(from,to);R.walk+=wk;const free=nx.s-a.e-wk;
+    if(free<0){R.tight++;add({k:"tight",a,b:nx,t:a.e+free,short:-free,wk});return}
+    const food=free>=35?(bestStop(MEALS,from,to,free,25)||bestStop(FOOD,from,to,free,15)):null;
+    const water=free>=8?bestStop(WATER,from,to,free,3):null;
+    if(food){R.food++;add({k:"food",t:a.e,t2:nx.s-wk,free,at:food.s,det:food.det,water:water&&water.s,from:a.stage,to:nx.stage});lastWater=a.e}
+    else if(water){add({k:"water",t:a.e,free,at:water.s,det:water.det,from:a.stage,to:nx.stage});lastWater=a.e}
+    if(free>=60){const ch=bestStop(CHILL,from,to,free,20);if(ch&&(!food||ch.s.k!==food.s.k))add({k:"chill",t:a.e,free,at:ch.s,det:ch.det,from:a.stage,to:nx.stage})}
+    if(free>=(food?85:45)){const disc=A.filter(b=>b.day===day&&!pl.includes(b)&&(P.c.tier[b.id]<0||P.c.tier[b.id]===2)).map(b=>{const sp=ST(b.stage);const inT=a.e+walkT(from,sp),outT=nx.s-walkT(sp,to);const catchM=Math.min(b.e,outT)-Math.max(b.s,inT);return {b,catchM}}).filter(x=>x.catchM>=20).sort((x,y)=>(P.c.tier[x.b.id]<0?0:1)-(P.c.tier[y.b.id]<0?0:1)||(y.b.listeners||0)-(x.b.listeners||0))[0];
+      if(disc)add({k:"disc",t:Math.max(disc.b.s,a.e),b:disc.b,catchM:disc.catchM})}
+    add({k:"walk",t:nx.s-wk,from:a.stage,to:nx.stage,wk,free})});
+  const last=pl[pl.length-1];const eg=nearest(GATES,ST(last.stage));const we=walkT(ST(last.stage),eg);R.walk+=we;add({k:"exit",t:last.e,g:eg,wk:we,from:last.stage});
+  const meals=items.filter(x=>x.k==="food");meals.forEach(m=>m.label=m.t<15*60+30?"Lunch window":m.t<17*60?"Snack window":"Dinner window");
+  if(!meals.length){const low=[...pl].sort((x,y)=>P.c.score[x.id]-P.c.score[y.id])[0];const f=nearest(MEALS,ST(low.stage));R.nofood={a:low,f,wk:walkT(ST(low.stage),f)}}
+  return R}
+
+function mapItemText(it,P){const nm=a=>`<b>${esc(a.name)}</b>`;
+  switch(it.k){
+    case "gate":return {ic:"🎟️",tx:`Through the <b>${esc(it.g.n)}</b> by ${fmt(it.t)}. It's about ${it.wk} min to ${esc(stShort(it.to))}.`};
+    case "set":{const a=it.a;return null}
+    case "decide":{const b=it.b;return {ic:"⚡",tx:`<b>Decision point:</b> ${nm(b)} (${TIERS[P.c.tier[b.id]].icon} ${sc1(P.c.score[b.id])}) also plays ${fmt(b.s)}–${fmt(b.e)} at ${esc(stShort(b.stage))}. ${it.hw===it.a.id?"You picked "+esc(it.a.name)+" head to head.":it.hw===b.id?"You picked "+esc(b.name)+" head to head, but it clashes with more of your plan.":"Your ranking leans "+esc(it.a.name)+"."}`,btn:!VIEW&&P.me?`<button class="btn" data-p="${it.a.id},${b.id}">Battle</button>`:""}}
+    case "tight":return {ic:"⚡",tx:`<b>Tight squeeze:</b> it's ${it.wk} min from ${esc(stShort(it.a.stage))} to ${esc(stShort(it.b.stage))}. Leave ${nm(it.a)} at ${fmt(it.t)} (missing the last ${it.short} min) or walk in ${it.short} min late to ${nm(it.b)}.`};
+    case "food":return {ic:"🍔",tx:`<b>${it.label}</b> · ${fmt(it.t)}–${fmt(it.t2)} (${it.free} min free after walking). Eat at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}; it adds about ${it.det} min to your walk.${it.water?` Refill at ${esc(it.water.n)} on the way.`:""}`};
+    case "water":return it.warn?{ic:"💧",tx:`<b>Hydrate:</b> no real break for over 2½ hours. Top up at ${esc(it.at.n)} near ${esc(stShort(it.near))}, even if it costs a couple of minutes.`}:{ic:"💧",tx:`<b>Water break</b> · ${it.free} min free. Refill at ${esc(it.at.n)} (adds ${it.det} min).`};
+    case "chill":return {ic:"🌳",tx:`<b>Chill time</b> · ${it.free} min to spare. Sit in the shade at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}.`};
+    case "disc":return {ic:"🎧",tx:`<b>Fill the gap:</b> catch ${it.catchM}+ min of ${nm(it.b)} (${P.c.tier[it.b.id]<0?"unrated":"😐 "+sc1(P.c.score[it.b.id])} · ${esc(it.b.fam)}) at ${esc(stShort(it.b.stage))}, ${fmt(it.b.s)}–${fmt(it.b.e)}.`,btn:`<button class="btn ghost" data-a="${it.b.id}">Listen</button>`};
+    case "walk":return {ic:"🚶",tx:`${it.wk} min walk to ${esc(stShort(it.to))}${it.free>=8?``:it.free>=0?` · ${it.free} min to spare`:""}`,mini:true};
+    case "exit":return {ic:"🚪",tx:`Head out via the <b>${esc(it.g.n)}</b>, about ${it.wk} min from ${esc(stShort(it.from))}. Everyone leaves at once after the headliners.`};
+  }}
+function curveD(p,q,bend){const mx=(p.x+q.x)/2,my=(p.y+q.y)/2,dx=q.x-p.x,dy=q.y-p.y,L=Math.hypot(dx,dy)||1;const k=bend*Math.min(40,L*.18);const cx=mx-dy/L*k,cy=my+dx/L*k;
+  return {d:`M${p.x.toFixed(1)},${p.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${q.x.toFixed(1)},${q.y.toFixed(1)}`,mx:.25*p.x+.5*cx+.25*q.x,my:.25*p.y+.5*cy+.25*q.y}}
+const poly=pts=>"M"+pts.map(p=>p.join(",")).join(" L")+" Z";
+function routeSegs(R){const segs=[];let prev=null,prevName=null;
+  for(const it of R.items){
+    if(it.k==="gate"){prev=it.g;continue}
+    if(it.k==="set"){const p=ST(it.a.stage);if(prev&&(prev!==p))segs.push({p:prev,q:p,i:it.i,tight:false});prev=p;continue}
+    if(it.k==="food"||it.k==="water"&&!it.warn||it.k==="chill"){if(prev){segs.push({p:prev,q:it.at,i:it.i,stop:it.k});prev=it.at}continue}
+    if(it.k==="tight"){segs.push({p:ST(it.a.stage),q:ST(it.b.stage),i:it.i,tight:true});prev=ST(it.b.stage);continue}
+    if(it.k==="exit"){segs.push({p:ST(it.from),q:it.g,i:it.i,exit:true});continue}}
+  return segs}
+function renderMap(){
+  const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
+  const gk=S.ui.gate||"auto";document.querySelectorAll("#mapGates button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.gate===gk));
+  const P=subjectPerson();const R=buildDay(day,P);const O=mapOverlay();const showO=!!O&&S.ui.mapFriend===true;const RO=showO?buildDay(day,O):null;
+  const meetIds=new Set(RO?RO.pl.map(a=>a.id).filter(id=>R.pl.some(a=>a.id===id)):[]);
+  const used=new Set(R.items.filter(it=>it.at).map(it=>it.at.k).concat(R.items.filter(it=>it.water&&it.k==="food").map(it=>it.water.k)));
+  let s=`<svg id="mapSvg" viewBox="${MAPV.x} ${MAPV.y} ${MAPV.w} ${MAPV.h}" role="img" aria-label="Festival map with your ${DAYS[day]} route">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#163C29"/></marker>
+  <marker id="arrT" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E5432B"/></marker>
+  <marker id="arrO" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1F6FB8"/></marker></defs>
+  <rect x="${MAPV.x}" y="${MAPV.y}" width="${MAPV.w}" height="${MAPV.h}" fill="#4C6F3C"/>
+  <path d="${poly(LAKE)}" fill="#1D8AD0"/><path d="${poly(CREEK)}" fill="#1D8AD0"/>
+  <text x="664" y="170" class="water-lab" text-anchor="middle" transform="rotate(26 664 170)">LADY BIRD LAKE</text><text x="420" y="512" class="water-lab">BARTON SPRINGS</text>
+  <path d="${poly(GROUNDS)}" fill="#D4DDB2" stroke="#B9C795" stroke-width="2"/>
+  <g class="tree" transform="translate(455 276)"><circle r="11" fill="#2F5A2E"/><circle cx="-7" cy="3" r="6" fill="#3E6B37"/><circle cx="7" cy="3" r="6" fill="#3E6B37"/></g>`;
+  // amenities (the ones your day uses are bigger)
+  for(const sp of SPOTS){const u=used.has(sp.k);const r=sp.t==="water"?(u?8:5.5):sp.t==="med"?5:(u?10:7.5);
+    const fill=sp.t==="water"?"#5EC6F1":sp.t==="med"?"#E5432B":sp.t==="chill"?"#3E6B37":"#F4A12B";const ic=sp.t==="water"?"💧":sp.t==="med"?"✚":sp.t==="chill"?"🌳":"🍴";
+    const its=R.items.filter(it=>(it.at&&it.at.k===sp.k)||(it.water&&it.k==="food"&&it.water.k===sp.k)).map(it=>it.i);
+    s+=`<g class="spot ${u?"used":""}" ${its.length?`data-it="${its.join(" ")}"`:""}><circle cx="${sp.x}" cy="${sp.y}" r="${r}" fill="${fill}" stroke="#FFF5E8" stroke-width="${u?2.5:1.5}"/>${sp.t==="med"?`<text x="${sp.x}" y="${sp.y+2.6}" class="medtxt">✚</text>`:`<text x="${sp.x}" y="${sp.y+(u?3.4:2.6)}" class="spotic" font-size="${u?10:7}">${ic}</text>`}<title>${esc(sp.t==="water"?"Hydration station: "+sp.n.replace(/^the /,""):sp.n+(sp.d?": "+sp.d:""))}</title></g>`;
+    if(sp.t==="food"||sp.t==="chill")s+=`<text x="${sp.x}" y="${sp.y+r+8}" class="spotlab${u?" on":""}">${esc(sp.n.replace(/^The /,""))}</text>`}
+  for(const g of GATES){const on=R.gate===g||R.items.some(it=>it.k==="exit"&&it.g===g);s+=`<g class="gate${on?" on":""}"><rect x="${g.x-15}" y="${g.y-7}" width="30" height="14" rx="4"/><text x="${g.x}" y="${g.y+3.5}">${g.k==="ladybird"?"LB":g.k==="west"?"W":"E"} GATE</text><title>${esc(g.n)}</title></g>`}
+  // friend / viewer overlay route
+  if(RO&&RO.pl.length){routeSegs(RO).forEach((sg,j)=>{const c=curveD(sg.p,sg.q,j%2?-1.2:1.2);s+=`<path d="${c.d}" class="oroute" marker-end="url(#arrO)"/>`})}
+  // your route
+  const segs=routeSegs(R);
+  segs.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,j%2?1:-1);s+=`<path d="${c.d}" class="route${sg.tight?" tight":""}${sg.exit?" exit":""}" data-it="${sg.i}" marker-end="url(#${sg.tight?"arrT":"arr"})"/>`;if(sg.tight)s+=`<g class="bolt" data-it="${sg.i}"><circle cx="${c.mx}" cy="${c.my}" r="8"/><text x="${c.mx}" y="${c.my+3.6}">⚡</text></g>`});
+  // decision forks: dotted line to the set you're giving up
+  const forkN={};R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const w=g.lab.length*6.4+14;const k=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;const fx=g.x-w/2-2-(k-1)*15,fy=g.y-9-3;
+    s+=`<g data-it="${it.i}" class="fork"><circle cx="${fx}" cy="${fy}" r="7.5"/><text x="${fx}" y="${fy+3.3}">⚡</text><title>${fmt(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title></g>`});
+  // stages + order badges
+  for(const [name,g] of Object.entries(STAGEXY)){const w=g.lab.length*6.4+14,h=18;const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];
+    s+=`<g class="stage${visits.length?" on":ovis.length?" oon":""}" ${visits.length?`data-it="${visits.map(v=>v.i).join(" ")}"`:""}><rect x="${g.x-w/2}" y="${g.y-h/2}" width="${w}" height="${h}" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.5:1.2}"/><text x="${g.x}" y="${g.y+4.6}" fill="${g.ink}" class="stlab">${g.lab}</text><title>${esc(name)}${visits.length?": "+visits.map(v=>fmt(v.a.s)+" "+v.a.name).join(", "):""}</title></g>`;
+    visits.forEach((v,k)=>{const bx=g.x+w/2+2+k*15,by=g.y-h/2-3;const meet=meetIds.has(v.a.id);s+=`<g class="badge ${heatOf2(P,v.a.id)}${meet?" meet":""}" data-it="${v.i}"><circle cx="${bx}" cy="${by}" r="7.5"/><text x="${bx}" y="${by+3.4}">${v.n}</text><title>${v.n}. ${fmt(v.a.s)} ${esc(v.a.name)}${meet?" · meet-up":""}</title></g>`;if(meet)s+=`<text x="${bx}" y="${by-10}" class="meetic">🤝</text>`});
+    if(RO&&!visits.length&&ovis.length)s+=`<circle cx="${g.x+w/2+4}" cy="${g.y-h/2-2}" r="4" class="odot"><title>${esc(O.name)}: ${ovis.map(a=>fmt(a.s)+" "+a.name).join(", ")}</title></circle>`}
+  s+=`<text x="${MAPV.x+8}" y="${MAPV.y+16}" class="north">N ↑</text></svg>`;
+  const mw=document.getElementById("mapWrap");const sl=mw.scrollLeft;mw.innerHTML=s;
+  requestAnimationFrame(()=>{if(mw.scrollWidth>mw.clientWidth+4)mw.scrollLeft=mapScrolled?sl:(mw.scrollWidth-mw.clientWidth)/2});
+  // overlay toggle + legend
+  document.getElementById("mapOverlay").innerHTML=O?`<button class="switch" id="mapFriendSw" role="switch" aria-checked="${showO}"><i></i><span>Show ${VIEW?"my":esc(first(O.name))+"'s"} path${RO&&meetIds.size?` · ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""}</span></button>`:(VIEW?"":`<span class="small muted">Add a friend on the Crew tab to see their path here too.</span>`);
+  const sw=document.getElementById("mapFriendSw");if(sw)sw.onclick=()=>{S.ui.mapFriend=!showO;save();renderMap()};
+  // itinerary
+  const head=VIEW?`${esc(P.name)}'s ${DAYS[day]}`:`Your ${DAYS[day]}`;document.getElementById("itinHead").innerHTML=head;
+  document.getElementById("itinSum").innerHTML=R.pl.length?`<span class="chip">${R.pl.length} set${R.pl.length===1?"":"s"}</span><span class="chip">🚶 ~${R.walk} min walking</span><span class="chip">⚡ ${R.decide+R.tight} decision point${R.decide+R.tight===1?"":"s"}</span><span class="chip">🍔 ${R.food} food window${R.food===1?"":"s"}</span>${meetIds.size?`<span class="chip">🤝 ${meetIds.size} with ${esc(first(O.name))}</span>`:""}`:"";
+  let L="";
+  if(!R.pl.length)L=`<li class="mini"><span></span><span>${VIEW?"Nothing planned this day yet.":`Rate some ${DAYS[day].split(",")[0]} artists ❤️ or 👍 and your route, decision points and breaks appear here.`}</span><span></span></li>`;
+  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk} min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
+  for(const it of R.items){
+    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmt(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${meet?` <span class="chip">🤝 ${esc(first(O.name))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · until ${fmt(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
+    const m=mapItemText(it,P);if(!m)continue;
+    L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmt(it.t)}`}</span><span>${m.tx}</span><span>${m.btn||""}</span></li>`}
+  const ol=document.getElementById("itin");ol.innerHTML=L;
+  ol.querySelectorAll("[data-p]").forEach(b=>b.onclick=e=>{e.stopPropagation();goBattle(b.dataset.p)});
+  ol.querySelectorAll("button[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation();showArtist(A[+b.dataset.a])});
+  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>focusIt(li.dataset.it));
+  document.querySelectorAll("#mapSvg [data-it]").forEach(g=>g.addEventListener("click",()=>focusIt(g.getAttribute("data-it").split(" ")[0])));
+  if(mapFocus!=null)focusIt(mapFocus,true)}
+function heatOf2(P,id){return P.c.tier[id]<0?"unrated":TIERS[P.c.tier[id]].heat}
+let mapFocus=null,mapScrolled=false;document.getElementById("mapWrap").addEventListener("scroll",()=>{mapScrolled=true},{passive:true});
+function focusIt(i,keep){const svg=document.getElementById("mapSvg");if(!svg)return;if(!keep&&mapFocus===i){mapFocus=null}else mapFocus=i;
+  svg.classList.toggle("focus",mapFocus!=null);
+  svg.querySelectorAll("[data-it]").forEach(g=>g.classList.toggle("hl",mapFocus!=null&&g.getAttribute("data-it").split(" ").includes(String(mapFocus))));
+  document.querySelectorAll("#itin li[data-it]").forEach(li=>li.classList.toggle("hl",mapFocus!=null&&li.dataset.it===String(mapFocus)));
+  if(mapFocus!=null&&!svg.querySelector(".hl"))svg.classList.remove("focus")}
+document.querySelectorAll("#mapDays button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;mapFocus=null;save();renderMap()});
+document.querySelectorAll("#mapGates button").forEach(b=>b.onclick=()=>{S.ui.gate=b.dataset.gate==="auto"?null:b.dataset.gate;save();renderMap()});
+document.getElementById("crewAddBtn").onclick=()=>addFriend(document.getElementById("crewCode").value);
+document.getElementById("crewCode").addEventListener("keydown",e=>{if(e.key==="Enter")addFriend(e.target.value)});
+document.getElementById("toCrew").onclick=()=>setTab("crew");
 
 /* ---------- utils & boot ---------- */
 function toast(m){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
@@ -1031,11 +1430,11 @@ function copy(txt,msg){const fallback=()=>{const host=document.getElementById("d
 function renderWelcome(){document.getElementById("welcome").hidden=!!S.name||!!VIEW}
 document.getElementById("welcomeGo").onclick=()=>{const v=document.getElementById("welcomeName").value.trim();if(!v)return toast("Add a name first");S.name=v.slice(0,40);ensureBid();save();renderWelcome();setTab("rate")};
 document.getElementById("welcomeName").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("welcomeGo").click()});
-function renderAll(){renderWelcome();updateFcount();const t=S.ui.tab;if(t==="lineup")renderLineup();if(t==="rate")renderRate();if(t==="rank")renderRank();if(t==="sched")renderSched()}
-function afterLoad(){recompute();renderService();if(S.name)ensureBid();buildFilters();document.getElementById("filterCard").open=!!S.ui.filtersOpen;
-  let t=S.ui.tab||"rate";if(location.hash&&["rate","rank","sched","lineup"].includes(location.hash.slice(1)))t=location.hash.slice(1);setTab(t)}
-if(HOSTED){document.getElementById("friendLabel").textContent="Friend's share code or link";document.getElementById("friendCode").placeholder="e.g. spencer26";}
-if(HOSTED&&location.pathname.startsWith("/b/"))startView();else{afterLoad();if(HOSTED){pendingCompare();cloudSync()}}
+function renderAll(){renderWelcome();updateFcount();const t=S.ui.tab;if(t==="lineup")renderLineup();if(t==="rate")renderRate();if(t==="rank")renderRank();if(t==="sched")renderSched();if(t==="map")renderMap();if(t==="crew")renderCrew()}
+function afterLoad(){recompute();hydrateCrew();renderService();if(S.name)ensureBid();buildFilters();document.getElementById("filterCard").open=!!S.ui.filtersOpen;
+  let t=S.ui.tab||"rate";if(location.hash&&["rate","rank","sched","map","crew","lineup"].includes(location.hash.slice(1)))t=location.hash.slice(1);setTab(t)}
+if(!HOSTED){document.getElementById("crewCode").placeholder="Paste a friend's ranking code (ACL26…)";document.getElementById("crewCode").setAttribute("aria-label","Friend's ranking code")}
+if(HOSTED&&location.pathname.startsWith("/b/"))startView();else{afterLoad();if(HOSTED){pendingCompare();cloudSync();setTimeout(()=>refreshCrew(true),2500)}}
 if(HOSTED)loadPreviews();
 initCloud();
 setTimeout(sendPing,1500);
