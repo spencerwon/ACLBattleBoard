@@ -195,33 +195,45 @@ details.foot p{font-size:13px;max-width:70ch}
 .mapgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:16px;align-items:start}
 .mapcard{display:grid;gap:10px;padding:12px}
 @media (min-width:901px){.mapcard{position:sticky;top:64px}}
-.mapscroll{overflow:auto;border-radius:12px;background:#4C6F3C;-webkit-overflow-scrolling:touch}
-#mapSvg{display:block;width:100%;min-width:560px;height:auto;font-family:var(--f-body)}
-#mapSvg .water-lab{font-family:var(--f-body);font-weight:800;font-size:8px;letter-spacing:.14em;fill:#0E3F63}
-#mapSvg .spotic{text-anchor:middle}
-#mapSvg .medtxt{text-anchor:middle;font-size:7px;fill:#FFF5E8;font-weight:800}
-#mapSvg .spotlab{text-anchor:middle;font-size:6.5px;font-weight:800;fill:#163C29;opacity:.75;paint-order:stroke;stroke:#D4DDB2;stroke-width:2px}
-#mapSvg .spotlab.on{opacity:1;font-size:7.5px}
+.mapframe{position:relative}
+.mapscroll{position:relative;overflow:hidden;border-radius:12px;background:#4C6F3C;aspect-ratio:4/3;max-height:72vh;width:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.mapscroll:active{cursor:grabbing}
+#mapSvg{display:block;width:100%;height:100%;font-family:var(--f-body)}
+.mapctl{position:absolute;right:8px;top:8px;display:grid;gap:5px;z-index:2}
+.mapctl2{position:absolute;left:8px;bottom:8px;display:flex;gap:5px;z-index:2}
+.mbtn{border:2px solid #163C29;background:#FFF5E8;color:#163C29;border-radius:9px;min-width:32px;height:32px;font-weight:800;font-size:17px;line-height:1;padding:0 6px;box-shadow:0 4px 10px -6px #163C2999}
+.mbtn.wide{font-size:11.5px;height:28px;border-radius:999px;padding:0 10px}
+@media (max-width:640px){.mbtn{min-width:30px;height:30px}.mbtn.wide{height:26px;font-size:11px;padding:0 9px}}
+.mbtn[aria-pressed="true"]{background:#163C29;color:#FFF5E8}
+.mbtn:disabled{opacity:.45}
+#mapSvg .rd{fill:none;stroke:#E4D6A6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+#mapSvg .mlab{text-anchor:middle;font-weight:800;letter-spacing:.12em;paint-order:stroke;stroke-linejoin:round}
+#mapSvg .mlab.rd{fill:#5C5636;stroke:#E4D6A6;stroke-width:.5px;opacity:1}
+#mapSvg .mlab.wt{fill:#CFEAFB;font-style:italic;letter-spacing:.2em}
+#mapSvg .mlab.lm{fill:#163C29;opacity:.75;letter-spacing:.14em;stroke:#D4DDB2;stroke-width:2px}
+#mapSvg .trail{fill:none;stroke:#FFF5E8;opacity:.55;stroke-linecap:round} #mapSvg .rail{fill:none;stroke:#8B5A3C;opacity:.7}
+#mapSvg .ic,#mapSvg .medtxt{text-anchor:middle} #mapSvg .medtxt{fill:#FFF5E8;font-weight:800;font-size:7px}
+#mapSvg .spotlab{text-anchor:middle;font-size:8px;font-weight:800;fill:#163C29;opacity:.8;paint-order:stroke;stroke:#D4DDB2;stroke-width:2.5px}
+#mapSvg .spotlab.on{opacity:1;font-size:9px}
 #mapSvg .spot{opacity:.8} #mapSvg .spot.used{opacity:1}
-#mapSvg .gate rect{fill:#163C29;stroke:#FFF5E8;stroke-width:1} #mapSvg .gate text{fill:#FFF5E8;font-size:6.5px;font-weight:800;text-anchor:middle;letter-spacing:.05em}
-#mapSvg .gate.on rect{fill:#E5432B}
-#mapSvg .stlab{font-family:var(--f-display);font-size:12px;text-anchor:middle;letter-spacing:.03em}
-#mapSvg .stage{opacity:.8} #mapSvg .stage.on,#mapSvg .stage.oon{opacity:1}
-#mapSvg .route{fill:none;stroke:#163C29;stroke-width:3.2;stroke-linecap:round;opacity:.92}
-#mapSvg .route.tight{stroke:#E5432B;stroke-dasharray:6 4}
-#mapSvg .route.exit{stroke-dasharray:2 4;opacity:.7}
-#mapSvg .oroute{fill:none;stroke:#1F6FB8;stroke-width:2.2;stroke-dasharray:5 3;opacity:.85}
-#mapSvg .odot{fill:#1F6FB8;stroke:#FFF5E8;stroke-width:1.5}
-#mapSvg .bolt circle,#mapSvg .fork circle{fill:#E5432B;stroke:#FFF5E8;stroke-width:1.5}
-#mapSvg .bolt text,#mapSvg .fork text{font-size:8.5px;text-anchor:middle}
-#mapSvg .badge circle{stroke:#FFF5E8;stroke-width:1.6;fill:#C9BBAE} #mapSvg .badge text{font-family:var(--f-display);font-size:9.5px;text-anchor:middle;fill:#163C29}
-#mapSvg .badge.hot circle{fill:#E5432B} #mapSvg .badge.hot text,#mapSvg .badge.cold text{fill:#FFF5E8} #mapSvg .badge.warm circle{fill:#F4A12B} #mapSvg .badge.cool circle{fill:#5EC6F1} #mapSvg .badge.cold circle{fill:#2F79C2}
-#mapSvg .badge.meet circle{stroke:#1F6FB8;stroke-width:2.6}
-#mapSvg .meetic{font-size:8px;text-anchor:middle}
-#mapSvg .north{font-family:var(--f-display);font-size:13px;fill:#FFF5E8}
+#mapSvg .gate rect{fill:#163C29;stroke:#FFF5E8;stroke-width:1} #mapSvg .gate text{fill:#FFF5E8;font-size:7.5px;font-weight:800;text-anchor:middle;letter-spacing:.05em}
+#mapSvg .gate.on rect{fill:#1F6FB8}
+#mapSvg .stlab{font-family:var(--f-display);font-size:13px;text-anchor:middle;letter-spacing:.03em}
+#mapSvg .stage{opacity:.85} #mapSvg .stage.on,#mapSvg .stage.oon{opacity:1}
+#mapSvg .halo{fill:none;stroke:#FFF5E8;stroke-linecap:round;opacity:.55}
+#mapSvg .dots{fill:none;stroke-linecap:round}
+#mapSvg .mins{font-size:9.5px;font-weight:800;text-anchor:middle}
+#mapSvg .pilltxt{font-size:9px;font-weight:800;text-anchor:middle;fill:#FFF5E8;letter-spacing:.04em}
+#mapSvg .tagbg{fill:#FFF5E8;stroke:#1F6FB8;stroke-width:1.4} #mapSvg .tagbg.meet{stroke:#C2459A;stroke-width:2}
+#mapSvg .tagn{fill:#C9BBAE;stroke:#FFF5E8;stroke-width:1} #mapSvg .tagn.hot{fill:#E5432B} #mapSvg .tagn.warm{fill:#F4A12B} #mapSvg .tagn.cool{fill:#5EC6F1} #mapSvg .tagn.cold{fill:#2F79C2}
+#mapSvg .tagnt{font-family:var(--f-display);font-size:10.5px;text-anchor:middle;fill:#163C29} #mapSvg .tagnt.hot,#mapSvg .tagnt.cold{fill:#FFF5E8}
+#mapSvg .tagtt{font-size:10px;font-weight:800;fill:#163C29}
+#mapSvg .xmark{font-family:var(--f-display);font-size:20px;fill:#E5432B;text-anchor:middle;paint-order:stroke;stroke:#FFF5E8;stroke-width:3px}
+#mapSvg .boltic{font-size:9px;text-anchor:middle}
+#mapSvg .compass{font-family:var(--f-display);font-size:8px;text-anchor:middle;fill:#163C29}
+#mapSvg .osm{font-size:8px;fill:#FFF5E8;opacity:.8}
 #mapSvg [data-it]{cursor:pointer}
-#mapSvg.focus [data-it]:not(.hl){opacity:.18}
-#mapSvg .hl .route,#mapSvg path.route.hl{stroke-width:5}
+#mapSvg.focus [data-it]:not(.hl){opacity:.2}
 .maplegend{display:flex;gap:6px;flex-wrap:wrap}
 .phone-only{display:none}@media (max-width:640px){.phone-only{display:block}}
 .itin{list-style:none;margin:0;padding:0;display:grid;gap:5px}
@@ -450,9 +462,9 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     </div>
     <div class="mapgrid">
       <div class="card mapcard">
-        <div class="mapscroll" id="mapWrap"></div>
-        <div class="maplegend small"><span class="chip">① your sets in order</span><span class="chip">⚡ decision point</span><span class="chip">🍴 food</span><span class="chip">💧 water</span><span class="chip">🌳 shade</span><span class="chip">✚ medical</span></div>
-        <p class="small muted phone-only" style="margin:0">Swipe the map sideways to see the whole park.</p>
+        <div class="mapframe"><div class="mapscroll" id="mapWrap" aria-label="Festival map. Drag to move, pinch or use the buttons to zoom."></div><div class="mapctl"><button class="mbtn" id="mZin" aria-label="Zoom in">+</button><button class="mbtn" id="mZout" aria-label="Zoom out">−</button></div><div class="mapctl2" role="group" aria-label="Map view"><button class="mbtn wide" id="mFit" aria-label="Show the whole park">Whole park</button><button class="mbtn wide" id="mRoute" aria-label="Zoom to my route">My route</button></div></div>
+        <div class="maplegend small"><span class="chip"><span style="color:#1F6FB8;letter-spacing:2px;font-weight:800">•••▸</span> your path</span><span class="chip">① 2:00 sets in order</span><span class="chip">5+ min walk</span><span class="chip" style="color:#E5432B">✕ top set</span><span class="chip">⚡ decision</span><span class="chip">🍴 food</span><span class="chip">💧 water</span><span class="chip">🌳 shade</span><span class="chip">✚ medical</span></div>
+        <p class="small muted" style="margin:0">Drag to move · pinch, ⌘/Ctrl-scroll or +/− to zoom · tap a step on the right (below on phones) to find it.</p>
         <div id="mapOverlay"></div>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
@@ -461,7 +473,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
         <ol class="itin" id="itin"></ol>
       </div>
     </div>
-    <p class="note">Your route follows your plan from the Heat Schedule. Tap a step to find it on the map. Stage, food and water spots are traced from the official ACL 2026 festival map; walk times are estimates at festival-crowd pace (far ends of the park ≈ 20 min). Check the ACL app on the day for changes.</p>
+    <p class="note">Your route follows your plan from the Heat Schedule. Tap a step to find it on the map. Park, lake, creek and roads are real geography from OpenStreetMap; stages, food, water and gates are placed by lining the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL 2026 map</a> up with those roads, so treat spots as within a few dozen metres. Walk times are minimums at a brisk pace with no crowds (far ends of the park ≈ 10 min); crowds can easily double them, so leave early for sets you can't miss. Check the ACL app on the day for changes.</p>
   </section>
 
   <section class="panel" id="p-crew" hidden>
@@ -1270,31 +1282,31 @@ function renderCompareMini(){const o=document.getElementById("friendOut");if(!o)
   if(!FRIEND){o.innerHTML=`<p class="small muted" style="margin:0">Add friends on the Crew tab to see compatibility, shared loves, fights and meet-ups.</p>`;return}
   const cp=compatOf(C,FRIEND.c);o.innerHTML=`<div class="row" style="flex-wrap:nowrap">${ringHTML(cp.pct,72)}<div><b>${esc(FRIEND.name)}</b><div class="small">${compatLabel(cp.pct)}</div><div class="small muted">Ticks in the score spread are ${esc(first(FRIEND.name))}'s.</div></div></div>`}
 
-/* ---------- festival map: traced from the official ACL 2026 map (support.aclfestival.com) ---------- */
-const MAPV={x:250,y:96,w:550,h:378};
-const STAGEXY={"T-Mobile":{x:277,y:229,c:"#F27BB5",ink:"#163C29",lab:"T-MOBILE"},"Miller Lite":{x:372,y:141,c:"#F4A12B",ink:"#163C29",lab:"MILLER LITE"},"Tito's":{x:607,y:211,c:"#F26B21",ink:"#163C29",lab:"TITO'S"},"American Express":{x:728,y:287,c:"#1F4E8C",ink:"#FFF5E8",lab:"AMEX"},"Snapchat":{x:503,y:318,c:"#163C29",ink:"#FFF5E8",lab:"SNAPCHAT"},"BMI":{x:367,y:341,c:"#B5452F",ink:"#FFF5E8",lab:"BMI"},"Beatbox":{x:356,y:439,c:"#5EC6F1",ink:"#163C29",lab:"BEATBOX"}};
-const GATES=[{k:"ladybird",n:"Lady Bird gate",short:"Lady Bird",x:292,y:166},{k:"west",n:"Barton Springs West gate",short:"West",x:338,y:362},{k:"east",n:"Barton Springs East gate",short:"East",x:562,y:416}];
+/* ---------- festival map: real Zilker geography from OpenStreetMap (© OpenStreetMap contributors, ODbL);
+   stages, food, water and gates placed by lining the official ACL 2026 map up with real roads. Units are metres (x east, y south). ---------- */
+const MAPG={"water":"M161,-416 206,-390 346,-339 415,-297 430,-294 471,-269 531,-252 587,-228 645,-209 685,-189 748,-152 785,-137 798,-121 850,-82 849,-74 753,-4 726,7 670,42 659,45 596,95 493,149 446,183 380,210 349,226 283,248 257,252 226,248 165,253 140,261 119,253 105,254 -36,291 -80,310 -117,313 -189,314 -263,302 -355,314 -420,312 -420,326 -355,328 -263,316 -190,328 -176,328 -169,331 -160,328 -154,332 -142,333 -135,337 -124,337 -115,331 -106,331 -102,336 -90,331 -75,335 -46,325 -31,311 -23,314 111,296 109,283 111,296 163,281 202,278 274,280 283,273 327,259 345,249 446,214 521,169 552,162 618,123 738,59 899,-32 918,-40 963,-27 978,-26 1009,-12 1017,0 1044,11 1083,37 1105,44 1120,55 1120,-111 1073,-135 1049,-141 1049,-148 810,-279 786,-295 787,-317 784,-315 780,-296 777,-293 755,-288 740,-288 717,-297 521,-358 466,-392 437,-414 436,-411 430,-415 410,-430 400,-445 373,-459 349,-477 319,-489 291,-507 277,-506 271,-509 266,-516 260,-543 230,-560 17,-560 28,-541 128,-441Z","grounds":"M556,42 660,36 672,31 725,-1 787,-42 796,-50 801,-62 803,-91 799,-108 778,-130 744,-145 698,-172 595,-214 534,-219 521,-223 454,-266 348,-323 324,-327 266,-328 207,-341 163,-342 31,-313 -6,-294 -12,-287 -22,-271 -50,-169 -54,-104 -48,-68 -45,-59 -36,-50 6,-21 25,20 33,59 18,69 21,115 134,154 168,192 354,214 377,203 442,176 471,155 469,115 493,86Z","lawn":"M205,42 289,50 298,45 313,16 335,5 380,8 426,-1 516,-4 526,-3 563,13 653,7 668,0 771,-67 773,-93 762,-105 724,-129 587,-185 529,-189 508,-195 440,-240 343,-293 321,-297 262,-298 203,-311 166,-312 43,-286 27,-279 12,-270 4,-256 -20,-164 -24,-108 -19,-75 83,-3 111,12 144,26Z","rock":"M216,-161 208,-164 206,-164 205,-162 206,-160 220,-153 229,-145 249,-137 259,-130 269,-129 269,-132 260,-135 248,-144 232,-149Z","major":"M530,192 431,269 405,305 340,417 320,439 240,500 M-27,-99 -29,-120 -23,-170 2,-265 4,-285 -4,-329 -19,-374 -44,-412 -80,-453 -163,-516 -210,-560 M-27,-99 -37,-89 -50,-82 M-22,-63 -27,-99 M-8,75 32,-26 M-416,-278 -420,-279 M-420,-278 -416,-278 M71,0 -130,-137 -196,-178 -360,-257 -416,-278 M277,60 267,55 203,47 160,37 71,0 M71,0 80,11 99,22 157,48 227,61 265,63 277,60 M277,60 306,62 338,69 406,98 431,113 530,192 M882,500 837,470 815,451 731,359 672,302 543,196 530,192 M530,192 535,205 621,277 743,390 823,474 856,500","minor":"M1120,336 1093,313 766,132 M157,48 145,58 127,66 17,173 -8,205 -22,213 -75,230 -131,235 -165,246 -213,248 -255,247 -261,244 -265,240 -270,208 -246,164 -235,154 -214,141 -170,116 -135,102 -123,85 M766,132 649,305 M609,266 553,326 543,351 524,341 512,343 507,346 491,382 433,462 412,500 M34,-287 2,-265 M34,-287 22,-288 4,-300 M306,62 311,29 316,19 335,8 393,12 412,6 514,0 532,4 555,15 567,17 651,11 676,0 771,-63 776,-71 776,-95 766,-107 728,-132 594,-186 570,-190 530,-192 505,-200 406,-263 345,-295 323,-300 263,-300 207,-313 179,-315 147,-312 34,-287 M97,72 17,86 1,81 -8,75 -17,80 -98,93 -155,73 -285,47 -311,35 -399,39 -420,36 M356,153 190,168 160,140 112,81 97,72 M127,66 97,72","hwy":"M-298,-560 -342,-506 -420,-430 M-420,-394 -323,-486 -260,-560","trail":"M-37,-560 38,-502 80,-453 136,-406 216,-358 259,-345 334,-310 354,-309 376,-302 396,-290 M612,127 595,94 M706,83 623,130 M595,94 591,86 M1120,70 1090,50 1074,42 1030,31 985,7 959,-2 931,-21 910,-23 901,-22 M791,-110 816,-87 826,-75 824,-67 819,-61 793,-41 M758,-17 718,7 653,42 636,56 597,82 M789,-301 779,-301 M839,-277 789,-301 M424,-462 408,-461 395,-458 M419,-434 395,-458 354,-487 300,-515 282,-529 266,-549 246,-560 M1042,-168 1012,-178 949,-218 848,-274 M848,-274 839,-277 M616,135 612,127 M779,-301 751,-295 718,-303 688,-320 629,-337 586,-357 555,-364 532,-372 513,-384 483,-393 465,-403 M465,-403 441,-422 419,-434 M623,130 616,135 M597,82 591,86 M793,-41 758,-17 M736,66 706,83 M901,-22 823,17 736,66 M399,-288 431,-264 473,-243 651,-181 775,-123 791,-110 M396,-290 399,-288","rail":"M128,218 63,195 M63,195 49,191 31,193 18,197 9,203 M9,203 5,208 3,220 4,224 9,229 52,228 103,224 128,218 198,209 321,199 401,179 411,175 421,165 427,162 456,157 464,152 602,55 736,-32 763,-46 M763,-46 801,-66 806,-76 802,-85 792,-88 784,-84 777,-60 763,-46","labels":[{"t":"BARTON SPRINGS RD","x":-229,"y":-194,"a":26,"c":"rd"},{"t":"STRATFORD DR","x":-71,"y":-443,"a":47,"c":"rd"},{"t":"AZIE MORTON RD","x":389,"y":333,"a":-60,"c":"rd"},{"t":"ANDREW ZILKER RD","x":-243,"y":55,"a":11,"c":"rd"},{"t":"TOOMEY RD","x":906,"y":209,"a":29,"c":"rd"},{"t":"LADY BIRD LAKE","x":475,"y":-383,"a":24,"c":"wt"},{"t":"BARTON CREEK","x":239,"y":258,"a":-8,"c":"wt"},{"t":"BARTON SPRINGS POOL","x":-40,"y":296,"a":-6,"c":"wt"},{"t":"LOU NEFF POINT","x":800,"y":-58,"a":0,"c":"lm"},{"t":"ROCK ISLAND","x":238,"y":-122,"a":-12,"c":"lm"}],"stages":{"T-Mobile":[22,-162],"Miller Lite":[165,-298],"Tito's":[535,-196],"American Express":[718,-98],"Snapchat":[372,-22],"BMI":[176,6],"Beatbox":[156,155]},"pts":{"E1":[425,-258],"E2":[301,184],"SW":[460,9],"BT":[265,-312],"BS":[255,-23],"GR":[345,62],"BX":[342,93],"w1":[104,-296],"w2":[0,-215],"w3":[385,-300],"w4":[456,-84],"w5":[561,-134],"w6":[216,34],"w7":[504,-10],"w8":[272,207],"w9":[329,-96],"gLB":[2,-265],"gW":[125,38],"gE":[452,150],"m1":[60,-150],"m2":[355,-13],"m3":[142,117],"m4":[742,-118]},"gb":[-54,-342,803,214]};
+const SXY=(n,c,ink,lab)=>({x:MAPG.stages[n][0],y:MAPG.stages[n][1],c,ink,lab});
+const STAGEXY={"T-Mobile":SXY("T-Mobile","#F27BB5","#163C29","T-MOBILE"),"Miller Lite":SXY("Miller Lite","#F4A12B","#163C29","MILLER LITE"),"Tito's":SXY("Tito's","#F26B21","#163C29","TITO'S"),"American Express":SXY("American Express","#1F4E8C","#FFF5E8","AMEX"),"Snapchat":SXY("Snapchat","#163C29","#FFF5E8","SNAPCHAT"),"BMI":SXY("BMI","#B5452F","#FFF5E8","BMI"),"Beatbox":SXY("Beatbox","#5EC6F1","#163C29","BEATBOX")};
+const PT=k=>({x:MAPG.pts[k][0],y:MAPG.pts[k][1]});
+const GATES=[{k:"ladybird",n:"Lady Bird gate",lab:"LADY BIRD GATE",...PT("gLB")},{k:"west",n:"Barton Springs West gate",lab:"WEST GATE",...PT("gW")},{k:"east",n:"Barton Springs East gate",lab:"EAST GATE",...PT("gE")}];
 const SPOTS=[
-  {k:"E1",t:"food",n:"ACL Eats",x:535,y:168,d:"the main food court on the lake path, 40+ Austin spots"},
-  {k:"E2",t:"food",n:"ACL Eats South",x:454,y:441,d:"the smaller south food court near BeatBox"},
-  {k:"SW",t:"food",snack:1,n:"ACL Sweets",x:578,y:334,d:"ice cream, sno-cones and fried treats by Austin Kiddie Limits"},
-  {k:"BT",t:"food",n:"The Big Tent",x:435,y:156,d:"a covered tent with seating, pizza and cocktails"},
-  {k:"BS",t:"food",n:"The Big Shade",x:410,y:300,d:"a shaded tent with bowls and corn dogs",chill:1},
-  {k:"GR",t:"food",snack:1,n:"The Grove",x:489,y:357,d:"craft beer, frosé and snacks"},
-  {k:"BX",t:"chill",n:"Bonus Tracks",x:489,y:385,d:"a shady hangout away from the stages",chill:1},
-  {k:"w1",t:"water",n:"the Lady Bird gate hydration station",x:330,y:159},{k:"w2",t:"water",n:"the hydration station by T-Mobile",x:282,y:197},
-  {k:"w3",t:"water",n:"the lake-path hydration station by ACL Eats",x:513,y:149},{k:"w4",t:"water",n:"the ACL Market hydration station",x:551,y:259},
-  {k:"w5",t:"water",n:"the hydration station by Tito's",x:623,y:239},{k:"w6",t:"water",n:"the Accessibility Center hydration station",x:392,y:352},
-  {k:"w7",t:"water",n:"the hydration station by VIP Grove East",x:608,y:327},{k:"w8",t:"water",n:"the hydration station by ACL Eats South",x:431,y:457},
-  {k:"w9",t:"water",n:"the Electrolit Hydration Lounge",x:446,y:232},
-  {k:"m1",t:"med",n:"Medical",x:312,y:224},{k:"m2",t:"med",n:"Medical",x:483,y:304},{k:"m3",t:"med",n:"Medical",x:348,y:417},{k:"m4",t:"med",n:"Medical",x:745,y:276}];
+  {k:"E1",t:"food",n:"ACL Eats",d:"the main food court on the lake path, 40+ Austin spots"},
+  {k:"E2",t:"food",n:"ACL Eats South",d:"the smaller south food court near BeatBox"},
+  {k:"SW",t:"food",snack:1,n:"ACL Sweets",d:"ice cream, sno-cones and fried treats by Austin Kiddie Limits"},
+  {k:"BT",t:"food",n:"The Big Tent",d:"a covered tent with seating, pizza and cocktails"},
+  {k:"BS",t:"food",n:"The Big Shade",d:"a shaded tent with bowls and corn dogs",chill:1},
+  {k:"GR",t:"food",snack:1,n:"The Grove",d:"craft beer, frosé and snacks"},
+  {k:"BX",t:"chill",n:"Bonus Tracks",d:"a shady hangout away from the stages",chill:1},
+  {k:"w1",t:"water",n:"the Lady Bird gate hydration station"},{k:"w2",t:"water",n:"the hydration station by T-Mobile"},
+  {k:"w3",t:"water",n:"the lake-path hydration station by ACL Eats"},{k:"w4",t:"water",n:"the ACL Market hydration station"},
+  {k:"w5",t:"water",n:"the hydration station by Tito's"},{k:"w6",t:"water",n:"the Accessibility Center hydration station"},
+  {k:"w7",t:"water",n:"the hydration station by VIP Grove East"},{k:"w8",t:"water",n:"the hydration station by ACL Eats South"},
+  {k:"w9",t:"water",n:"the Electrolit Hydration Lounge"},
+  {k:"m1",t:"med",n:"Medical"},{k:"m2",t:"med",n:"Medical"},{k:"m3",t:"med",n:"Medical"},{k:"m4",t:"med",n:"Medical"}].map(s=>({...s,...PT(s.k)}));
 const FOOD=SPOTS.filter(s=>s.t==="food"),MEALS=FOOD.filter(s=>!s.snack),WATER=SPOTS.filter(s=>s.t==="water"),CHILL=SPOTS.filter(s=>s.chill);
-const GROUNDS=[[300,158],[335,157],[372,152],[396,154],[430,148],[445,150],[480,151],[514,149],[548,170],[580,190],[612,206],[650,226],[700,252],[740,272],[762,288],[766,303],[756,318],[725,328],[680,352],[640,374],[612,390],[595,404],[592,432],[572,442],[566,458],[362,459],[342,440],[300,432],[278,426],[278,398],[287,390],[284,365],[276,340],[268,300],[266,268],[285,250],[296,232],[276,212],[279,175]];
-const LAKE=[[328,50],[453,113],[477,120],[599,185],[634,195],[722,246],[776,252],[790,288],[790,305],[778,325],[754,334],[629,413],[630,440],[799,334],[799,178],[770,169],[527,50]];
-const CREEK=[[616,449],[577,452],[541,466],[495,492],[462,503],[354,504],[310,517],[324,532],[474,522],[551,492]];
 const ST=name=>STAGEXY[name];
-// Walk minutes at festival-crowd pace (~60 m/min, 1.2× detour, +2 min to get out of a crowd). T-Mobile ↔ AmEx ≈ 19 min.
-const walkRaw=(p,q)=>p===q||(p.x===q.x&&p.y===q.y)?0:2+Math.hypot(p.x-q.x,p.y-q.y)*0.0374;
+// Minimum walk minutes: straight-line metres × 1.15 for paths, at a brisk 80 m/min, no crowd allowance (crowds only add time). T-Mobile ↔ AmEx ≈ 10 min.
+const walkRaw=(p,q)=>p===q||(p.x===q.x&&p.y===q.y)?0:Math.max(1,Math.hypot(p.x-q.x,p.y-q.y)*0.0144);
 const walkT=(p,q)=>Math.round(walkRaw(p,q));
 function nearest(list,p){return list.reduce((b,s)=>!b||walkRaw(p,s)<walkRaw(p,b)?s:b,null)}
 function bestStop(list,from,to,free,dwell){let best=null;for(const s of list){const det=walkRaw(from,s)+walkRaw(s,to)-walkRaw(from,to);if(det+dwell<=free&&(!best||det<best.det))best={s,det}}return best?{s:best.s,det:Math.max(1,Math.round(best.det))}:null}
@@ -1329,92 +1341,157 @@ function buildDay(day,P){
 
 function mapItemText(it,P){const nm=a=>`<b>${esc(a.name)}</b>`;
   switch(it.k){
-    case "gate":return {ic:"🎟️",tx:`Through the <b>${esc(it.g.n)}</b> by ${fmt(it.t)}. It's about ${it.wk} min to ${esc(stShort(it.to))}.`};
+    case "gate":return {ic:"🎟️",tx:`Through the <b>${esc(it.g.n)}</b> by ${fmt(it.t)}. It's at least ${it.wk} min to ${esc(stShort(it.to))}.`};
     case "set":{const a=it.a;return null}
     case "decide":{const b=it.b;return {ic:"⚡",tx:`<b>Decision point:</b> ${nm(b)} (${TIERS[P.c.tier[b.id]].icon} ${sc1(P.c.score[b.id])}) also plays ${fmt(b.s)}–${fmt(b.e)} at ${esc(stShort(b.stage))}. ${it.hw===it.a.id?"You picked "+esc(it.a.name)+" head to head.":it.hw===b.id?"You picked "+esc(b.name)+" head to head, but it clashes with more of your plan.":"Your ranking leans "+esc(it.a.name)+"."}`,btn:!VIEW&&P.me?`<button class="btn" data-p="${it.a.id},${b.id}">Battle</button>`:""}}
-    case "tight":return {ic:"⚡",tx:`<b>Tight squeeze:</b> it's ${it.wk} min from ${esc(stShort(it.a.stage))} to ${esc(stShort(it.b.stage))}. Leave ${nm(it.a)} at ${fmt(it.t)} (missing the last ${it.short} min) or walk in ${it.short} min late to ${nm(it.b)}.`};
-    case "food":return {ic:"🍔",tx:`<b>${it.label}</b> · ${fmt(it.t)}–${fmt(it.t2)} (${it.free} min free after walking). Eat at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}; it adds about ${it.det} min to your walk.${it.water?` Refill at ${esc(it.water.n)} on the way.`:""}`};
-    case "water":return it.warn?{ic:"💧",tx:`<b>Hydrate:</b> no real break for over 2½ hours. Top up at ${esc(it.at.n)} near ${esc(stShort(it.near))}, even if it costs a couple of minutes.`}:{ic:"💧",tx:`<b>Water break</b> · ${it.free} min free. Refill at ${esc(it.at.n)} (adds ${it.det} min).`};
+    case "tight":return {ic:"⚡",tx:`<b>Tight squeeze:</b> it's at least ${it.wk} min from ${esc(stShort(it.a.stage))} to ${esc(stShort(it.b.stage))}. Leave ${nm(it.a)} at ${fmt(it.t)} (missing the last ${it.short} min) or walk in ${it.short} min late to ${nm(it.b)}.`};
+    case "food":return {ic:"🍔",tx:`<b>${it.label}</b> · ${fmt(it.t)}–${fmt(it.t2)} (up to ${it.free} min free after walking). Eat at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}; it adds ${it.det}+ min to your walk.${it.water?` Refill at ${esc(it.water.n)} on the way.`:""}`};
+    case "water":return it.warn?{ic:"💧",tx:`<b>Hydrate:</b> no real break for over 2½ hours. Top up at ${esc(it.at.n)} near ${esc(stShort(it.near))}, even if it costs a couple of minutes.`}:{ic:"💧",tx:`<b>Water break</b> · ${it.free} min free. Refill at ${esc(it.at.n)} (adds ${it.det}+ min).`};
     case "chill":return {ic:"🌳",tx:`<b>Chill time</b> · ${it.free} min to spare. Sit in the shade at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}.`};
     case "disc":return {ic:"🎧",tx:`<b>Fill the gap:</b> catch ${it.catchM}+ min of ${nm(it.b)} (${P.c.tier[it.b.id]<0?"unrated":"😐 "+sc1(P.c.score[it.b.id])} · ${esc(it.b.fam)}) at ${esc(stShort(it.b.stage))}, ${fmt(it.b.s)}–${fmt(it.b.e)}.`,btn:`<button class="btn ghost" data-a="${it.b.id}">Listen</button>`};
-    case "walk":return {ic:"🚶",tx:`${it.wk} min walk to ${esc(stShort(it.to))}${it.free>=8?``:it.free>=0?` · ${it.free} min to spare`:""}`,mini:true};
-    case "exit":return {ic:"🚪",tx:`Head out via the <b>${esc(it.g.n)}</b>, about ${it.wk} min from ${esc(stShort(it.from))}. Everyone leaves at once after the headliners.`};
+    case "walk":return {ic:"🚶",tx:`${it.wk}+ min walk to ${esc(stShort(it.to))}${it.free>=8?``:it.free>=0?` · ${it.free} min to spare`:""}`,mini:true};
+    case "exit":return {ic:"🚪",tx:`Head out via the <b>${esc(it.g.n)}</b>, at least ${it.wk} min from ${esc(stShort(it.from))}. Everyone leaves at once after the headliners.`};
   }}
-function curveD(p,q,bend){const mx=(p.x+q.x)/2,my=(p.y+q.y)/2,dx=q.x-p.x,dy=q.y-p.y,L=Math.hypot(dx,dy)||1;const k=bend*Math.min(40,L*.18);const cx=mx-dy/L*k,cy=my+dx/L*k;
-  return {d:`M${p.x.toFixed(1)},${p.y.toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${q.x.toFixed(1)},${q.y.toFixed(1)}`,mx:.25*p.x+.5*cx+.25*q.x,my:.25*p.y+.5*cy+.25*q.y}}
-const poly=pts=>"M"+pts.map(p=>p.join(",")).join(" L")+" Z";
-function routeSegs(R){const segs=[];let prev=null,prevName=null;
+function curveD(p,q,bend){const mx=(p.x+q.x)/2,my=(p.y+q.y)/2,dx=q.x-p.x,dy=q.y-p.y,L=Math.hypot(dx,dy)||1;const k=bend*Math.min(45,L*.16);const c={x:mx-dy/L*k,y:my+dx/L*k};
+  return {d:`M${p.x.toFixed(1)},${p.y.toFixed(1)} Q${c.x.toFixed(1)},${c.y.toFixed(1)} ${q.x.toFixed(1)},${q.y.toFixed(1)}`,c,L}}
+function bez(p,c,q,t){const a=(1-t)*(1-t),b=2*(1-t)*t,d=t*t;return {x:a*p.x+b*c.x+d*q.x,y:a*p.y+b*c.y+d*q.y,ang:Math.atan2(2*(1-t)*(c.y-p.y)+2*t*(q.y-c.y),2*(1-t)*(c.x-p.x)+2*t*(q.x-c.x))*180/Math.PI}}
+function routeSegs(R){const segs=[];let prev=null;
   for(const it of R.items){
     if(it.k==="gate"){prev=it.g;continue}
-    if(it.k==="set"){const p=ST(it.a.stage);if(prev&&(prev!==p))segs.push({p:prev,q:p,i:it.i,tight:false});prev=p;continue}
+    if(it.k==="set"){const p=ST(it.a.stage);if(prev&&prev!==p)segs.push({p:prev,q:p,i:it.i,start:GATES.includes(prev)});prev=p;continue}
     if(it.k==="food"||it.k==="water"&&!it.warn||it.k==="chill"){if(prev){segs.push({p:prev,q:it.at,i:it.i,stop:it.k});prev=it.at}continue}
     if(it.k==="tight"){segs.push({p:ST(it.a.stage),q:ST(it.b.stage),i:it.i,tight:true});prev=ST(it.b.stage);continue}
     if(it.k==="exit"){segs.push({p:ST(it.from),q:it.g,i:it.i,exit:true});continue}}
-  return segs}
+  segs.forEach(sg=>sg.m=walkT(sg.p,sg.q));return segs}
+
+/* ---------- map view: whole park by default; pinch / drag / ⌘-scroll / buttons to zoom and move ---------- */
+let MV=null,MVfit="park",MDATA=null,mapFocus=null,mpT=null;
+const mapEl=()=>document.getElementById("mapWrap");
+function mapSize(){const el=mapEl();return {W:el.clientWidth||640,H:el.clientHeight||480}}
+const PARKB=[MAPG.gb[0]-20,MAPG.gb[1]-25,MAPG.gb[2]+20,MAPG.gb[3]+20];
+function fitBox(b,pad,minW){const {W,H}=mapSize();const ar=W/H,cx=(b[0]+b[2])/2,cy=(b[1]+b[3])/2;let w=Math.max(minW||0,b[2]-b[0]+2*pad),h=b[3]-b[1]+2*pad;
+  if(w/h<ar)w=h*ar;else h=w/ar;return {x:cx-w/2,y:cy-h/2,w,h}}
+function bboxOf(pts){if(!pts.length)return null;return [Math.min(...pts.map(p=>p.x)),Math.min(...pts.map(p=>p.y)),Math.max(...pts.map(p=>p.x)),Math.max(...pts.map(p=>p.y))]}
+function routeBox(){const D=MDATA;if(!D||!D.segs.length)return null;return bboxOf(D.segs.flatMap(s=>[s.p,s.q]))}
+// fit a box of metres into the map, leaving pad pixels [left,top,right,bottom] for labels, time tags and the buttons
+function fitPx(b,pad,minW){const {W,H}=mapSize();const iw=Math.max(60,W-pad[0]-pad[2]),ih=Math.max(60,H-pad[1]-pad[3]);const bw=Math.max(minW||0,b[2]-b[0]),bh=b[3]-b[1];
+  const k=Math.max(bw/iw,bh/ih);const cx=(b[0]+b[2])/2,cy=(b[1]+b[3])/2;const x=cx-(pad[0]+iw/2)*k,y=cy-(pad[1]+ih/2)*k;return {x,y,w:W*k,h:H*k}}
+const narrowMap=()=>mapSize().W<520;
+function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[46,40,86,40]:[70,50,130,50],260):fitPx(PARKB,[4,4,4,4])}else MV=fitPx(PARKB,[4,4,4,4])}
+function setMV(v,now){const {W,H}=mapSize();const w=Math.min(1900,Math.max(110,v.w)),h=w*H/W,cx=v.x+v.w/2,cy=v.y+v.h/2;MV={x:cx-w/2,y:cy-h/2,w,h};
+  const svg=document.getElementById("mapSvg");if(svg)svg.setAttribute("viewBox",`${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}`);
+  clearTimeout(mpT);if(now)drawMap();else mpT=setTimeout(drawMap,140)}
+function zoomAt(f,cx,cy){const r=mapEl().getBoundingClientRect();const fx=cx==null?.5:(cx-r.left)/r.width,fy=cy==null?.5:(cy-r.top)/r.height;
+  const mx=MV.x+fx*MV.w,my=MV.y+fy*MV.h;const nw=Math.min(1900,Math.max(110,MV.w/f)),nh=nw*MV.h/MV.w;MVfit=null;setMV({x:mx-fx*nw,y:my-fy*nh,w:nw,h:nh})}
+
+function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSize();const k0=MV.w/W,k=k0*(narrowMap()?.8:1),u=v=>+(v*k).toFixed(2);
+  const {R,RO,P,O,meetIds,used,segs,osegs,top}=D;const day=S.ui.day||"Fri";
+  const px=(x,y,inner,cls,it)=>`<g${cls?` class="${cls}"`:""}${it!=null?` data-it="${it}"`:""} transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${k.toFixed(4)})">${inner}</g>`;
+  let s=`<svg id="mapSvg" viewBox="${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of Zilker Park with ${esc(P.name)}'s ${DAYS[day]} route">
+  <rect x="-3000" y="-3000" width="6000" height="6000" fill="#4C6F3C"/><path d="${MAPG.lawn}" fill="#5B7D48"/>
+  <path d="${MAPG.grounds}" fill="#D4DDB2" stroke="#B9C795" stroke-width="${u(2)}"/>
+  <path d="${MAPG.hwy}" class="rd" stroke-width="16"/><path d="${MAPG.major}" class="rd" stroke-width="10"/><path d="${MAPG.minor}" class="rd" stroke-width="6"/>
+  <path d="${MAPG.trail}" class="trail" stroke-width="${u(1.4)}" stroke-dasharray="${u(4)} ${u(3)}"/><path d="${MAPG.rail}" class="rail" stroke-width="${u(2)}" stroke-dasharray="${u(1.2)} ${u(2.2)}"/>
+  <path d="${MAPG.water}" fill="#1D8AD0" fill-rule="evenodd"/><path d="${MAPG.rock}" fill="#77705F" stroke="#5C5636" stroke-width="${u(1)}"/>`;
+  MAPG.labels.forEach(l=>{s+=`<text class="mlab ${l.c}" transform="translate(${l.x} ${l.y}) rotate(${l.a})" font-size="${u(l.c==="wt"?10:l.c==="lm"?8.5:8)}" dy="${u(3)}">${l.t}</text>`});
+  // amenities (bigger when your day uses them)
+  const showLab=k0<1.3;
+  for(const sp of SPOTS){const on=used.has(sp.k);const r=sp.t==="water"?(on?8:5.5):sp.t==="med"?5.5:(on?10:7.5);
+    const fill=sp.t==="water"?"#5EC6F1":sp.t==="med"?"#E5432B":sp.t==="chill"?"#3E6B37":"#F4A12B";const ic=sp.t==="water"?"💧":sp.t==="med"?"✚":sp.t==="chill"?"🌳":"🍴";
+    const its=R.items.filter(it=>(it.at&&it.at.k===sp.k)||(it.water&&it.k==="food"&&it.water.k===sp.k)).map(it=>it.i);
+    const lab=(sp.t==="food"||sp.t==="chill")&&(showLab||on)?`<text y="${r+10}" class="spotlab${on?" on":""}">${esc(sp.n.replace(/^The /,""))}</text>`:"";
+    s+=px(sp.x,sp.y,`<circle r="${r}" fill="${fill}" stroke="#FFF5E8" stroke-width="${on?2.2:1.3}"/><text y="${on?3.6:2.7}" font-size="${on?10:7.5}" class="${sp.t==="med"?"medtxt":"ic"}">${ic}</text>${lab}<title>${esc(sp.t==="water"?"Hydration station: "+sp.n.replace(/^the /,""):sp.n+(sp.d?": "+sp.d:""))}</title>`,`spot${on?" used":""}`,its.length?its.join(" "):null)}
+  for(const g of GATES){const on=R.gate===g||R.items.some(it=>it.k==="exit"&&it.g===g);const w=g.lab.length*5.3+12;
+    s+=px(g.x,g.y,`<rect x="${-w/2}" y="-7" width="${w}" height="14" rx="4"/><text y="3">${g.lab}</text><title>${esc(g.n)}</title>`,`gate${on?" on":""}`)}
+  // treasure-map route: friend first (pink dots), then yours (blue dots), each with direction arrows and walk minutes
+  const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,(j%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
+    let g=`<path d="${c.d}" class="halo" stroke-width="${u(cls==="mine"?7:5)}"/><path d="${c.d}" class="dots" stroke="${tcol}" stroke-width="${u(cls==="mine"?3.8:3)}" stroke-dasharray="0.01 ${u(cls==="mine"?8:7)}"/>`;
+    const ts=Lpx>240?[.3,.7]:[.5];ts.forEach(t=>{const b=bez(sg.p,c.c,sg.q,t);g+=px(b.x,b.y,`<path d="M-4.5,-4.5 L4,0 L-4.5,4.5 Z" fill="${tcol}" stroke="#FFF5E8" stroke-width="1" transform="rotate(${b.ang.toFixed(0)})"/>`)});
+    if(withPills&&Lpx>56){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
+    s+=`<g class="seg ${cls}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
+  if(RO&&osegs.length)drawSegs(osegs,"#C2459A","theirs",-1.25,false);
+  drawSegs(segs,"#1F6FB8","mine",1,true);
+  // start / exit pins
+  if(R.gate){const g=R.gate;const t=`START ${fmt(R.items[0].t)}`;const w=t.length*5.9+14;s+=px(g.x,g.y,`<g transform="translate(0 -19)"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="#1F6FB8" stroke="#FFF5E8" stroke-width="1.2"/><text y="3.6" class="pilltxt">${t}</text></g>`,"startpin")}
+  // decisions: ⚡ beside the stage you'd be giving up
+  const forkN={};
+  // stages + numbered time tags
+  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];const lw=g.lab.length*6.7+14;
+    s+=px(g.x,g.y,`<rect x="${-lw/2}" y="-9.5" width="${lw}" height="19" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.4:1.2}"/><text y="4.6" fill="${g.ink}" class="stlab">${g.lab}</text><title>${esc(name)}${visits.length?": "+visits.map(v=>fmt(v.a.s)+" "+v.a.name).join(", "):""}</title>`,`stage${visits.length?" on":ovis.length?" oon":""}`,visits.length?visits.map(v=>v.i).join(" "):null);
+    if(top&&top.stage===name)s+=px(g.x,g.y,`<text y="27" class="xmark">✕</text><title>X marks your top set: ${esc(top.name)}</title>`);
+    visits.forEach((v,j)=>{const meet=meetIds.has(v.a.id);const tw=56+(meet?16:0);
+      s+=px(g.x,g.y,`<g transform="translate(${lw/2+4} ${-9.5+j*20})"><rect width="${tw}" height="18" rx="9" class="tagbg${meet?" meet":""}"/><circle cx="9" cy="9" r="7.2" class="tagn ${heatOf2(P,v.a.id)}"/><text x="9" y="12.4" class="tagnt ${heatOf2(P,v.a.id)}">${v.n}</text><text x="20" y="12.6" class="tagtt">${fmt(v.a.s)}</text>${meet?`<text x="${tw-9}" y="12.6" class="tagtt" text-anchor="middle">🤝</text>`:""}</g><title>${v.n}. ${fmt(v.a.s)}–${fmt(v.a.e)} ${esc(v.a.name)}${meet?" · meet-up":""}</title>`,"tag",v.i)});
+    if(RO&&!visits.length&&ovis.length)s+=px(g.x,g.y,`<circle cx="${lw/2+6}" cy="-8" r="4.5" fill="#C2459A" stroke="#FFF5E8" stroke-width="1.4"/><title>${esc(O.name)}: ${ovis.map(a=>fmt(a.s)+" "+a.name).join(", ")}</title>`)}
+  R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const lw=g.lab.length*6.7+14;const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
+    s+=px(g.x,g.y,`<g transform="translate(${-lw/2-11-(n-1)*18} 0)"><circle r="8" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.4" class="boltic">⚡</text></g><title>${fmt(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.i)});
+  // compass + attribution stay put in the corners
+  s+=px(MV.x+k0*24,MV.y+k0*26,`<circle r="17" fill="#FFF5E8" opacity=".92"/><path d="M0,-12 L5,4 L0,1 L-5,4 Z" fill="#E5432B"/><text y="13.5" class="compass">N</text>`);
+  s+=px(MV.x+MV.w-k0*6,MV.y+MV.h-k0*6,`<text class="osm" text-anchor="end">© OpenStreetMap contributors</text>`);
+  s+=`</svg>`;
+  mapEl().innerHTML=s;
+  if(mapFocus!=null)markFocus()}
+
 function renderMap(){
   const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
   const gk=S.ui.gate||"auto";document.querySelectorAll("#mapGates button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.gate===gk));
   const P=subjectPerson();const R=buildDay(day,P);const O=mapOverlay();const showO=!!O&&S.ui.mapFriend===true;const RO=showO?buildDay(day,O):null;
   const meetIds=new Set(RO?RO.pl.map(a=>a.id).filter(id=>R.pl.some(a=>a.id===id)):[]);
   const used=new Set(R.items.filter(it=>it.at).map(it=>it.at.k).concat(R.items.filter(it=>it.water&&it.k==="food").map(it=>it.water.k)));
-  let s=`<svg id="mapSvg" viewBox="${MAPV.x} ${MAPV.y} ${MAPV.w} ${MAPV.h}" role="img" aria-label="Festival map with your ${DAYS[day]} route">
-  <defs><marker id="arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#163C29"/></marker>
-  <marker id="arrT" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E5432B"/></marker>
-  <marker id="arrO" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1F6FB8"/></marker></defs>
-  <rect x="${MAPV.x}" y="${MAPV.y}" width="${MAPV.w}" height="${MAPV.h}" fill="#4C6F3C"/>
-  <path d="${poly(LAKE)}" fill="#1D8AD0"/><path d="${poly(CREEK)}" fill="#1D8AD0"/>
-  <text x="664" y="170" class="water-lab" text-anchor="middle" transform="rotate(26 664 170)">LADY BIRD LAKE</text><text x="420" y="512" class="water-lab">BARTON SPRINGS</text>
-  <path d="${poly(GROUNDS)}" fill="#D4DDB2" stroke="#B9C795" stroke-width="2"/>
-  <g class="tree" transform="translate(455 276)"><circle r="11" fill="#2F5A2E"/><circle cx="-7" cy="3" r="6" fill="#3E6B37"/><circle cx="7" cy="3" r="6" fill="#3E6B37"/></g>`;
-  // amenities (the ones your day uses are bigger)
-  for(const sp of SPOTS){const u=used.has(sp.k);const r=sp.t==="water"?(u?8:5.5):sp.t==="med"?5:(u?10:7.5);
-    const fill=sp.t==="water"?"#5EC6F1":sp.t==="med"?"#E5432B":sp.t==="chill"?"#3E6B37":"#F4A12B";const ic=sp.t==="water"?"💧":sp.t==="med"?"✚":sp.t==="chill"?"🌳":"🍴";
-    const its=R.items.filter(it=>(it.at&&it.at.k===sp.k)||(it.water&&it.k==="food"&&it.water.k===sp.k)).map(it=>it.i);
-    s+=`<g class="spot ${u?"used":""}" ${its.length?`data-it="${its.join(" ")}"`:""}><circle cx="${sp.x}" cy="${sp.y}" r="${r}" fill="${fill}" stroke="#FFF5E8" stroke-width="${u?2.5:1.5}"/>${sp.t==="med"?`<text x="${sp.x}" y="${sp.y+2.6}" class="medtxt">✚</text>`:`<text x="${sp.x}" y="${sp.y+(u?3.4:2.6)}" class="spotic" font-size="${u?10:7}">${ic}</text>`}<title>${esc(sp.t==="water"?"Hydration station: "+sp.n.replace(/^the /,""):sp.n+(sp.d?": "+sp.d:""))}</title></g>`;
-    if(sp.t==="food"||sp.t==="chill")s+=`<text x="${sp.x}" y="${sp.y+r+8}" class="spotlab${u?" on":""}">${esc(sp.n.replace(/^The /,""))}</text>`}
-  for(const g of GATES){const on=R.gate===g||R.items.some(it=>it.k==="exit"&&it.g===g);s+=`<g class="gate${on?" on":""}"><rect x="${g.x-15}" y="${g.y-7}" width="30" height="14" rx="4"/><text x="${g.x}" y="${g.y+3.5}">${g.k==="ladybird"?"LB":g.k==="west"?"W":"E"} GATE</text><title>${esc(g.n)}</title></g>`}
-  // friend / viewer overlay route
-  if(RO&&RO.pl.length){routeSegs(RO).forEach((sg,j)=>{const c=curveD(sg.p,sg.q,j%2?-1.2:1.2);s+=`<path d="${c.d}" class="oroute" marker-end="url(#arrO)"/>`})}
-  // your route
-  const segs=routeSegs(R);
-  segs.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,j%2?1:-1);s+=`<path d="${c.d}" class="route${sg.tight?" tight":""}${sg.exit?" exit":""}" data-it="${sg.i}" marker-end="url(#${sg.tight?"arrT":"arr"})"/>`;if(sg.tight)s+=`<g class="bolt" data-it="${sg.i}"><circle cx="${c.mx}" cy="${c.my}" r="8"/><text x="${c.mx}" y="${c.my+3.6}">⚡</text></g>`});
-  // decision forks: dotted line to the set you're giving up
-  const forkN={};R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const w=g.lab.length*6.4+14;const k=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;const fx=g.x-w/2-2-(k-1)*15,fy=g.y-9-3;
-    s+=`<g data-it="${it.i}" class="fork"><circle cx="${fx}" cy="${fy}" r="7.5"/><text x="${fx}" y="${fy+3.3}">⚡</text><title>${fmt(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title></g>`});
-  // stages + order badges
-  for(const [name,g] of Object.entries(STAGEXY)){const w=g.lab.length*6.4+14,h=18;const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];
-    s+=`<g class="stage${visits.length?" on":ovis.length?" oon":""}" ${visits.length?`data-it="${visits.map(v=>v.i).join(" ")}"`:""}><rect x="${g.x-w/2}" y="${g.y-h/2}" width="${w}" height="${h}" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.5:1.2}"/><text x="${g.x}" y="${g.y+4.6}" fill="${g.ink}" class="stlab">${g.lab}</text><title>${esc(name)}${visits.length?": "+visits.map(v=>fmt(v.a.s)+" "+v.a.name).join(", "):""}</title></g>`;
-    visits.forEach((v,k)=>{const bx=g.x+w/2+2+k*15,by=g.y-h/2-3;const meet=meetIds.has(v.a.id);s+=`<g class="badge ${heatOf2(P,v.a.id)}${meet?" meet":""}" data-it="${v.i}"><circle cx="${bx}" cy="${by}" r="7.5"/><text x="${bx}" y="${by+3.4}">${v.n}</text><title>${v.n}. ${fmt(v.a.s)} ${esc(v.a.name)}${meet?" · meet-up":""}</title></g>`;if(meet)s+=`<text x="${bx}" y="${by-10}" class="meetic">🤝</text>`});
-    if(RO&&!visits.length&&ovis.length)s+=`<circle cx="${g.x+w/2+4}" cy="${g.y-h/2-2}" r="4" class="odot"><title>${esc(O.name)}: ${ovis.map(a=>fmt(a.s)+" "+a.name).join(", ")}</title></circle>`}
-  s+=`<text x="${MAPV.x+8}" y="${MAPV.y+16}" class="north">N ↑</text></svg>`;
-  const mw=document.getElementById("mapWrap");const sl=mw.scrollLeft;mw.innerHTML=s;
-  requestAnimationFrame(()=>{if(mw.scrollWidth>mw.clientWidth+4)mw.scrollLeft=mapScrolled?sl:(mw.scrollWidth-mw.clientWidth)/2});
-  // overlay toggle + legend
-  document.getElementById("mapOverlay").innerHTML=O?`<button class="switch" id="mapFriendSw" role="switch" aria-checked="${showO}"><i></i><span>Show ${VIEW?"my":esc(first(O.name))+"'s"} path${RO&&meetIds.size?` · ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""}</span></button>`:(VIEW?"":`<span class="small muted">Add a friend on the Crew tab to see their path here too.</span>`);
+  const segs=routeSegs(R),osegs=RO&&RO.pl.length?routeSegs(RO):[];
+  const top=R.pl.length?[...R.pl].sort((x,y)=>P.c.score[y.id]-P.c.score[x.id])[0]:null;
+  const itPts={};const addP=(i,...ps)=>{(itPts[i]=itPts[i]||[]).push(...ps)};
+  segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.i,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
+  if(MDATA&&MDATA.day!==day){MVfit="park";mapFocus=null}
+  MDATA={R,RO,P,O,meetIds,used,segs,osegs,top,itPts,day};
+  if(!MV||MVfit)applyFit();
+  drawMap();
+  document.getElementById("mFit").setAttribute("aria-pressed",MVfit==="park");document.getElementById("mRoute").setAttribute("aria-pressed",MVfit==="route");document.getElementById("mRoute").disabled=!segs.length;
+  // overlay toggle
+  document.getElementById("mapOverlay").innerHTML=O?`<button class="switch" id="mapFriendSw" role="switch" aria-checked="${showO}"><i></i><span>Show ${VIEW?"my":esc(first(O.name))+"'s"} path in pink${RO&&meetIds.size?` · ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""}</span></button>`:(VIEW?"":`<span class="small muted">Add a friend on the Crew tab to see their path here too.</span>`);
   const sw=document.getElementById("mapFriendSw");if(sw)sw.onclick=()=>{S.ui.mapFriend=!showO;save();renderMap()};
   // itinerary
   const head=VIEW?`${esc(P.name)}'s ${DAYS[day]}`:`Your ${DAYS[day]}`;document.getElementById("itinHead").innerHTML=head;
-  document.getElementById("itinSum").innerHTML=R.pl.length?`<span class="chip">${R.pl.length} set${R.pl.length===1?"":"s"}</span><span class="chip">🚶 ~${R.walk} min walking</span><span class="chip">⚡ ${R.decide+R.tight} decision point${R.decide+R.tight===1?"":"s"}</span><span class="chip">🍔 ${R.food} food window${R.food===1?"":"s"}</span>${meetIds.size?`<span class="chip">🤝 ${meetIds.size} with ${esc(first(O.name))}</span>`:""}`:"";
+  document.getElementById("itinSum").innerHTML=R.pl.length?`<span class="chip">${R.pl.length} set${R.pl.length===1?"":"s"}</span><span class="chip">🚶 ${R.walk}+ min walking</span><span class="chip">⚡ ${R.decide+R.tight} decision point${R.decide+R.tight===1?"":"s"}</span><span class="chip">🍔 ${R.food} food window${R.food===1?"":"s"}</span>${meetIds.size?`<span class="chip">🤝 ${meetIds.size} with ${esc(first(O.name))}</span>`:""}`:"";
   let L="";
   if(!R.pl.length)L=`<li class="mini"><span></span><span>${VIEW?"Nothing planned this day yet.":`Rate some ${DAYS[day].split(",")[0]} artists ❤️ or 👍 and your route, decision points and breaks appear here.`}</span><span></span></li>`;
-  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk} min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
+  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
   for(const it of R.items){
-    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmt(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${meet?` <span class="chip">🤝 ${esc(first(O.name))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · until ${fmt(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
+    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmt(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc(first(O.name))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · until ${fmt(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
     const m=mapItemText(it,P);if(!m)continue;
     L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmt(it.t)}`}</span><span>${m.tx}</span><span>${m.btn||""}</span></li>`}
   const ol=document.getElementById("itin");ol.innerHTML=L;
   ol.querySelectorAll("[data-p]").forEach(b=>b.onclick=e=>{e.stopPropagation();goBattle(b.dataset.p)});
   ol.querySelectorAll("button[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation();showArtist(A[+b.dataset.a])});
-  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>focusIt(li.dataset.it));
-  document.querySelectorAll("#mapSvg [data-it]").forEach(g=>g.addEventListener("click",()=>focusIt(g.getAttribute("data-it").split(" ")[0])));
-  if(mapFocus!=null)focusIt(mapFocus,true)}
+  ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>focusIt(li.dataset.it,true));
+  markFocus()}
 function heatOf2(P,id){return P.c.tier[id]<0?"unrated":TIERS[P.c.tier[id]].heat}
-let mapFocus=null,mapScrolled=false;document.getElementById("mapWrap").addEventListener("scroll",()=>{mapScrolled=true},{passive:true});
-function focusIt(i,keep){const svg=document.getElementById("mapSvg");if(!svg)return;if(!keep&&mapFocus===i){mapFocus=null}else mapFocus=i;
+function markFocus(){const svg=document.getElementById("mapSvg");if(!svg)return;
   svg.classList.toggle("focus",mapFocus!=null);
   svg.querySelectorAll("[data-it]").forEach(g=>g.classList.toggle("hl",mapFocus!=null&&g.getAttribute("data-it").split(" ").includes(String(mapFocus))));
   document.querySelectorAll("#itin li[data-it]").forEach(li=>li.classList.toggle("hl",mapFocus!=null&&li.dataset.it===String(mapFocus)));
   if(mapFocus!=null&&!svg.querySelector(".hl"))svg.classList.remove("focus")}
+function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;markFocus();return}mapFocus=i;
+  const pts=MDATA&&MDATA.itPts[i];
+  if(fromList&&pts&&pts.length){const b=bboxOf(pts);const v=fitBox(b,90,360);if(v.w<MV.w||b[0]<MV.x||b[2]>MV.x+MV.w||b[1]<MV.y||b[3]>MV.y+MV.h){MVfit=null;MV=v;drawMap();document.getElementById("mFit").setAttribute("aria-pressed","false");document.getElementById("mRoute").setAttribute("aria-pressed","false")}}
+  markFocus();if(fromList&&window.innerWidth<=900){const c=document.querySelector(".mapcard"),t=document.querySelector(".tabs");window.scrollTo({top:c.getBoundingClientRect().top+window.scrollY-(t?t.offsetHeight:0)-8,behavior:"smooth"})}}
+(function bindMap(){const el=mapEl();const ptrs=new Map();let drag=null,pinch=null;
+  const mid=()=>{const v=[...ptrs.values()];return {x:(v[0].x+v[1].x)/2,y:(v[0].y+v[1].y)/2,d:Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y)}};
+  el.addEventListener("pointerdown",e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(ptrs.size===1)drag={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,moved:false};else if(ptrs.size===2){pinch=mid();if(drag)drag.moved=true;try{[...ptrs.keys()].forEach(id=>el.setPointerCapture(id))}catch(_){}}});
+  el.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId)||!MV)return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});const r=el.getBoundingClientRect();
+    if(ptrs.size===2&&pinch){const m=mid();const f=m.d/(pinch.d||1);MV.x-=(m.x-pinch.x)*MV.w/r.width;MV.y-=(m.y-pinch.y)*MV.h/r.height;pinch=m;zoomAt(f,m.x,m.y);return}
+    if(ptrs.size===1&&drag){if(!drag.moved&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>5){drag.moved=true;MVfit=null;try{el.setPointerCapture(e.pointerId)}catch(_){}}
+      if(drag.moved){MV.x-=(e.clientX-drag.x)*MV.w/r.width;MV.y-=(e.clientY-drag.y)*MV.h/r.height;setMV(MV)}drag.x=e.clientX;drag.y=e.clientY}});
+  const end=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(!ptrs.size){if(drag&&drag.moved){el.dataset.dragged="1";setTimeout(()=>delete el.dataset.dragged,50)}drag=null;["mFit","mRoute"].forEach(id=>document.getElementById(id).setAttribute("aria-pressed",MVfit===(id==="mFit"?"park":"route")))}};
+  el.addEventListener("pointerup",end);el.addEventListener("pointercancel",end);
+  el.addEventListener("click",e=>{if(el.dataset.dragged)return;const t=e.target.closest("[data-it]");if(t)focusIt(t.getAttribute("data-it").split(" ")[0],false)});
+  el.addEventListener("wheel",e=>{if(!(e.ctrlKey||e.metaKey)||!MV)return;e.preventDefault();zoomAt(Math.exp(-e.deltaY*.01),e.clientX,e.clientY)},{passive:false});
+  el.addEventListener("dblclick",e=>{e.preventDefault();if(MV)zoomAt(1.8,e.clientX,e.clientY)});
+  ["gesturestart","gesturechange"].forEach(ev=>el.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+  document.getElementById("mZin").onclick=()=>zoomAt(1.4);document.getElementById("mZout").onclick=()=>zoomAt(1/1.4);
+  document.getElementById("mFit").onclick=()=>{MVfit="park";applyFit();renderMap()};
+  document.getElementById("mRoute").onclick=()=>{MVfit="route";applyFit();renderMap()};
+  let rzT=null;window.addEventListener("resize",()=>{if(S.ui.tab!=="map"||!MV)return;clearTimeout(rzT);rzT=setTimeout(()=>{if(MVfit)applyFit();else setMV(MV,true);drawMap()},120)})})();
 document.querySelectorAll("#mapDays button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;mapFocus=null;save();renderMap()});
 document.querySelectorAll("#mapGates button").forEach(b=>b.onclick=()=>{S.ui.gate=b.dataset.gate==="auto"?null:b.dataset.gate;save();renderMap()});
 document.getElementById("crewAddBtn").onclick=()=>addFriend(document.getElementById("crewCode").value);
