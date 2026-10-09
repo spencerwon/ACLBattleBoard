@@ -12,6 +12,7 @@ const cors = (origin) => ALLOWED_ORIGINS.has(origin) ? { "access-control-allow-o
 
 // Pure core so it can be tested without Netlify: returns [status, body].
 export async function record(body, { store, now = Date.now(), origin = "" }) {
+  const db = () => (typeof store === "function" ? store() : store); // opened only when something is saved
   let b;
   try { b = typeof body === "string" ? JSON.parse(body) : body; } catch { return [400, "bad json"]; }
   if (!b || !/^d_[A-Za-z0-9]{10,40}$/.test(b.d || "")) return [400, "bad id"];
@@ -23,7 +24,8 @@ export async function record(body, { store, now = Date.now(), origin = "" }) {
   if (code) { try { bid = clip(JSON.parse(Buffer.from(code.slice(6).replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8")).b, 80); } catch { /* keep going without it */ } }
   if (/^sample-/.test(bid)) return [204, ""]; // made-up demo boards from ACL Wrapped
   const name = clip(b.n, 60).trim();
-  const prev = (await store.get(b.d, { type: "json" })) || null;
+  const st = db();
+  const prev = (await st.get(b.d, { type: "json" })) || null;
   const rec = {
     d: b.d,
     first: prev?.first || now,
@@ -37,18 +39,18 @@ export async function record(body, { store, now = Date.now(), origin = "" }) {
     visits: (prev?.visits || 0) + (b.v ? 1 : 0),
   };
   rec.test = TEST_WORD.test(rec.name) || TEST_WORD.test(rec.bid);
-  await store.setJSON(b.d, rec);
+  await st.setJSON(b.d, rec);
   return [204, ""];
 }
 
 export default async (req) => {
   const origin = req.headers.get("origin") || "";
-  if (req.method === "OPTIONS") return new Response("", { status: 204, headers: { ...cors(origin), "access-control-allow-methods": "POST", "access-control-allow-headers": "content-type" } });
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...cors(origin), "access-control-allow-methods": "POST", "access-control-allow-headers": "content-type" } });
   if (req.method !== "POST") return new Response("POST only", { status: 405 });
   const text = await req.text();
   if (text.length > 40000) return new Response("too big", { status: 413 });
-  const [status, msg] = await record(text, { store: getStore({ name: "aclusers", consistency: "strong" }), origin });
-  return new Response(msg, { status, headers: cors(origin) });
+  const [status, msg] = await record(text, { store: () => getStore({ name: "aclusers", consistency: "strong" }), origin });
+  return new Response(status === 204 ? null : msg, { status, headers: cors(origin) }); // a 204 must have no body
 };
 
 export const config = { path: "/api/ping" };
