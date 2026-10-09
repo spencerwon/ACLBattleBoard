@@ -190,6 +190,12 @@ details.foot p{font-size:13px;max-width:70ch}
 .btn,.tab,.pill,.applebar{transition:box-shadow .2s ease}
 .btn:hover,.tab:hover,.pill:hover,.applebar:hover{box-shadow:0 0 0 3px #FFF5E8b3,0 6px 16px -10px #163C2966}
 .btn:focus-visible,.tab:focus-visible,.pill:focus-visible,.applebar:focus-visible{outline:none;box-shadow:0 0 0 3px #FFF5E8,0 0 0 5px #163C29}
+.sharebox{display:grid;gap:10px;max-width:480px;width:100%}
+.sharebox textarea{min-height:170px;font-size:13px;font-family:var(--f-body)}
+.sharebox .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}
+.sharebox .acts .btn{text-align:center;text-decoration:none}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:700}
+.imgprev{max-width:100%;border-radius:10px;display:block}
 @media (max-width:760px){
   .arena{grid-template-columns:1fr}
   .vs{font-size:32px}
@@ -295,8 +301,9 @@ details.foot p{font-size:13px;max-width:70ch}
       <div class="row" id="dayBtns" role="group" aria-label="Day">
         <button class="pill" data-day="Fri">Fri 10/9</button><button class="pill" data-day="Sat">Sat 10/10</button><button class="pill" data-day="Sun">Sun 10/11</button>
       </div>
-      <div class="legend"><span class="heat hot">❤️ Hot</span><span class="heat warm">👍 Warm</span><span class="heat cool">😐 Cool</span><span class="heat cold">👎 Cold</span><span class="heat unrated">Unrated</span><span class="chip">Ring = your plan</span></div>
+      <div class="row"><button class="btn" id="dlBtn">Download JPEG</button><button class="btn primary" id="shareBtn">Share</button></div>
     </div>
+    <div class="legend"><span class="heat hot">❤️ Hot</span><span class="heat warm">👍 Warm</span><span class="heat cool">😐 Cool</span><span class="heat cold">👎 Cold</span><span class="heat unrated">Unrated</span><span class="chip">Ring = your plan</span></div>
     <p class="note" style="margin:0">Tap any set to play its songs, rate it, or battle it against whatever it overlaps.</p>
     <div class="sched-scroll"><div class="sched" id="sched"></div></div>
     <div class="two">
@@ -345,6 +352,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const amSearch=(artist,title)=>"https://music.apple.com/us/search?term="+encodeURIComponent(artist+(title?" "+title:""));
 const spSearch=(artist,title)=>"https://open.spotify.com/search/"+encodeURIComponent(artist+(title?" "+title:""));
 const PLAYLIST_URL="https://music.apple.com/us/playlist/acl2026full/pl.u-leylM7YHjLy2oR5";
+const SITE_URL="https://acl2026battleboard.netlify.app/";
 const fmtL=n=>!n?"—":n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+"M":n>=1e3?Math.round(n/1e3)+"K":String(n);
 const overlap=(a,b)=>a.day===b.day?Math.max(0,Math.min(a.e,b.e)-Math.max(a.s,b.s)):0;
 const rnd=arr=>arr[Math.floor(Math.random()*arr.length)];
@@ -732,6 +740,86 @@ function showArtist(a){const host=document.getElementById("dialogHost");const ov
   <div class="row" style="justify-content:center"><button class="btn" id="closeDlg">Close</button></div></div></div>`;
   const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
   bindRate(host,()=>showArtist(a));host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p));if(HOSTED)markPlaying();document.getElementById("closeDlg").focus()}
+
+
+/* ---------- schedule image + sharing ---------- */
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function wrapLines(ctx,text,maxW,maxLines){const words=text.split(/\s+/);const lines=[];let cur="";
+  for(const w of words){const test=cur?cur+" "+w:w;if(ctx.measureText(test).width<=maxW||!cur)cur=test;else{lines.push(cur);cur=w}}if(cur)lines.push(cur);
+  if(lines.length>maxLines){const keep=lines.slice(0,maxLines);let last=keep[maxLines-1];while(ctx.measureText(last+"…").width>maxW&&last.length>1)last=last.slice(0,-1);keep[maxLines-1]=last+"…";return keep}return lines}
+async function drawSchedule(day){
+  try{await Promise.all([document.fonts.load('80px "Anton"'),document.fonts.load('800 20px "Archivo"'),document.fonts.load('600 20px "Archivo"')])}catch(e){}
+  const W=1600,M=48,TC=72,GAP=10,T0=750,T1=1320,PX=2,top=250,headH=56,bodyTop=top+headH+12,bodyH=(T1-T0)*PX,H=bodyTop+bodyH+150;
+  const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+  const F={pink:"#EC86BC",forest:"#163C29",cream:"#FFF5E8",poppy:"#E5432B",hot:"#E5432B",warm:"#F4A12B",cool:"#5EC6F1",cold:"#2F79C2",un:"#C9BBAE",grid:"#2F79C2",cell:"#8ED6F5"};
+  const DISP='"Anton","Impact","Arial Narrow",sans-serif',BODY='"Archivo","Helvetica Neue",Arial,sans-serif';
+  x.fillStyle=F.pink;x.fillRect(0,0,W,H);
+  x.textAlign="center";x.fillStyle=F.forest;x.font=`800 18px ${BODY}`;x.letterSpacing="4px";x.fillText("AUSTIN CITY LIMITS · 25 YEARS · WEEKEND TWO",W/2,58);x.letterSpacing="0px";
+  x.font=`88px ${DISP}`;const parts=["ACL ","BATTLE"," BOARD"];const tw=parts.reduce((s,p)=>s+x.measureText(p).width,0);let px0=W/2-tw/2;x.textAlign="left";
+  parts.forEach((p,i)=>{x.fillStyle=i===1?F.poppy:F.forest;x.fillText(p,px0,150);px0+=x.measureText(p).width});
+  x.textAlign="center";x.fillStyle=F.forest;x.font=`700 28px ${BODY}`;x.fillText(`${S.name?S.name+"'s":"My"} heat schedule · ${DAYS[day]}`,W/2,202);
+  rr(x,M,top-14,W-2*M,H-top-110,22);x.fillStyle=F.grid;x.fill();
+  const colW=(W-2*M-24-TC-GAP*6)/7,gx=M+12+TC;
+  STAGES.forEach((s,i)=>{const cx=gx+i*(colW+GAP);rr(x,cx,top,colW,headH,10);x.fillStyle=F.cell;x.fill();x.fillStyle="#0E2A1C";x.font=`24px ${DISP}`;x.textAlign="center";x.fillText((s==="American Express"?"AMEX":s.toUpperCase()),cx+colW/2,top+37);
+    rr(x,cx,bodyTop,colW,bodyH,10);x.fillStyle="rgba(255,255,255,.09)";x.fill()});
+  x.textAlign="right";x.fillStyle=F.cream;x.font=`22px ${DISP}`;for(let tm=780;tm<=T1;tm+=60)x.fillText(fmt(tm),gx-12,bodyTop+(tm-T0)*PX+8);
+  const P=new Set(plan(day).map(a=>a.id));
+  for(const a of A.filter(a=>a.day===day)){const i=STAGES.indexOf(a.stage);const bx=gx+i*(colW+GAP)+4,by=bodyTop+(a.s-T0)*PX+2,bw=colW-8,bh=(a.e-a.s)*PX-5;const h=heatOf(a.id);
+    const fill={hot:F.hot,warm:F.warm,cool:F.cool,cold:F.cold,unrated:F.un}[h];const ink=(h==="hot"||h==="cold")?F.cream:F.forest;
+    if(P.has(a.id)){rr(x,bx-7,by-7,bw+14,bh+14,14);x.fillStyle=F.forest;x.fill();rr(x,bx-4,by-4,bw+8,bh+8,12);x.fillStyle=F.cream;x.fill()}
+    rr(x,bx,by,bw,bh,9);x.fillStyle=fill;x.globalAlpha=(P.size&&!P.has(a.id)&&!(C.tier[a.id]===0||C.tier[a.id]===1))?.6:1;x.fill();
+    x.fillStyle=ink;x.textAlign="center";const extra=(C.tier[a.id]>=0?1:0);
+    // pick the largest layout that fits inside the block
+    let fs=23,lh=26,maxL=bh>130?3:2,showTime=true,lines,blockH;
+    for(const opt of [[23,26,maxL,true],[19,21,2,true],[19,21,1,true],[19,21,1,false]]){[fs,lh,maxL,showTime]=opt;x.font=`${fs}px ${DISP}`;lines=wrapLines(x,a.name.toUpperCase(),bw-14,maxL);blockH=lines.length*lh+(extra?26:0)+(showTime?20:0);if(blockH<=bh-10)break}
+    let ty=by+bh/2-blockH/2+lh-4;
+    lines.forEach(l=>{x.fillText(l,bx+bw/2,ty);ty+=lh});
+    if(extra){x.font=`22px ${DISP}`;x.fillText(`${iconOf(a.id)} ${scoreTxt(a.id)}`,bx+bw/2,ty+2);ty+=26}
+    if(showTime){x.font=`700 15px ${BODY}`;x.fillText(`${fmt(a.s)}–${fmt(a.e)}`,bx+bw/2,ty+2)}x.globalAlpha=1}
+  const fy=H-62;x.textAlign="left";let lx=M;x.font=`800 17px ${BODY}`;
+  [["❤️ HOT",F.hot,F.cream],["👍 WARM",F.warm,F.forest],["😐 COOL",F.cool,F.forest],["👎 COLD",F.cold,F.cream],["RING = MY PLAN",F.cream,F.forest]].forEach(([lab,bg,fg])=>{const w=x.measureText(lab).width+30;rr(x,lx,fy-24,w,36,18);x.fillStyle=bg;x.fill();x.fillStyle=fg;x.fillText(lab,lx+15,fy);lx+=w+10});
+  x.textAlign="right";x.fillStyle=F.forest;x.font=`800 20px ${BODY}`;x.fillText("Make your own → "+SITE_URL.replace(/^https:\/\//,"").replace(/\/$/,""),W-M,fy);
+  return c}
+const slugName=()=>(S.name||"my").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"my";
+async function downloadJPEG(){const day=S.ui.day||"Fri";const btn=document.getElementById("dlBtn");btn.disabled=true;
+  try{const c=await drawSchedule(day);const fn=`acl-heat-schedule-${day.toLowerCase()}-${slugName()}.jpg`;const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.92));
+    if(HOSTED){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);toast("Saved "+fn);return}
+    let d=null;try{d=window.claude&&window.claude.use?await window.claude.use("downloads"):null}catch(e){}
+    if(d){try{await d.save({filename:fn,data:blob});return}catch(e){if(e&&e.code==="declined")return}}
+    showImage(c.toDataURL("image/jpeg",.92))}
+  finally{btn.disabled=false}}
+function showImage(src){const host=document.getElementById("dialogHost");
+  host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="Schedule image"><div class="card sharebox"><b>Your schedule image</b><img class="imgprev" src="${src}" alt="Heat schedule image"><p class="small muted" style="margin:0">Press and hold (phone) or right-click (computer) the image and choose Save Image.</p><button class="btn" id="imgClose">Done</button></div></div>`;
+  document.getElementById("imgClose").onclick=()=>host.innerHTML="";host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))host.innerHTML=""}}
+function shareText(scope,withCode){const days=scope==="all"?["Fri","Sat","Sun"]:[S.ui.day||"Fri"];
+  let s=`${S.name?S.name+"'s":"My"} ACL Weekend Two picks 🎶\n`;
+  days.forEach(d=>{const pl=plan(d);s+=`\n${DAYS[d]}\n`+(pl.length?pl.map(a=>`• ${fmt(a.s)} ${a.name} — ${iconOf(a.id)} ${scoreTxt(a.id)} (${a.stage==="American Express"?"AmEx":a.stage})`).join("\n"):"• still rating this day")+"\n"});
+  s+=`\nMake your own board: ${SITE_URL}`;
+  if(withCode&&Object.keys(S.t).length)s+=`\n\nCompare with me: paste this on the Rankings tab →\n${makeCode()}`;
+  return s}
+function openShare(){const host=document.getElementById("dialogHost");let scope="day",withCode=false;const canNative=!!navigator.share;
+  const subject=`${S.name?S.name+"'s":"My"} ACL Weekend Two picks`;
+  host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="Share your schedule"><div class="card sharebox">
+    <h3 style="font-size:24px">Share your picks</h3>
+    <div class="row" role="group" aria-label="What to share"><button class="pill" data-scope="day" aria-pressed="true">${DAYS[S.ui.day||"Fri"]}</button><button class="pill" data-scope="all" aria-pressed="false">Whole weekend</button></div>
+    <label class="check"><input type="checkbox" id="withCode"> Include my ranking code so friends can compare</label>
+    <textarea id="shareTxt" readonly aria-label="Message preview"></textarea>
+    <div class="acts"><a class="btn" id="shSms" href="#">Text</a><a class="btn" id="shMail" href="#">Email</a><button class="btn" id="shCopy">Copy</button>${canNative?`<button class="btn primary" id="shNative">More…</button>`:""}</div>
+    <p class="small muted" style="margin:0">${canNative?"More… opens your phone's share sheet and attaches the schedule image.":"Text and Email open your messaging apps with this message filled in."}</p>
+    <button class="btn ghost" id="shClose">Close</button></div></div>`;
+  const upd=()=>{const txt=shareText(scope,withCode);document.getElementById("shareTxt").value=txt;
+    document.getElementById("shSms").href="sms:?&body="+encodeURIComponent(txt);document.getElementById("shMail").href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(txt);
+    host.querySelectorAll("[data-scope]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.scope===scope))};
+  host.querySelectorAll("[data-scope]").forEach(b=>b.onclick=()=>{scope=b.dataset.scope;upd()});
+  document.getElementById("withCode").onchange=e=>{withCode=e.target.checked;upd()};
+  document.getElementById("shCopy").onclick=()=>copy(document.getElementById("shareTxt").value,"Copied. Paste it anywhere.");
+  const nb=document.getElementById("shNative");if(nb)nb.onclick=async()=>{const txt=shareText(scope,withCode);let files=[];
+    try{const c=await drawSchedule(S.ui.day||"Fri");const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.92));const f=new File([blob],`acl-heat-schedule-${(S.ui.day||"fri").toLowerCase()}.jpg`,{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]}))files=[f]}catch(e){}
+    try{await navigator.share(files.length?{title:subject,text:txt,files}:{title:subject,text:txt})}catch(e){}};
+  document.getElementById("shClose").onclick=()=>host.innerHTML="";host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))host.innerHTML=""};
+  upd()}
+document.getElementById("dlBtn").onclick=downloadJPEG;
+document.getElementById("shareBtn").onclick=openShare;
 
 /* ---------- utils & boot ---------- */
 function toast(m){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
