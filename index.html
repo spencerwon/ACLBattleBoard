@@ -463,7 +463,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     <div class="mapgrid">
       <div class="card mapcard">
         <div class="mapframe"><div class="mapscroll" id="mapWrap" aria-label="Festival map. Drag to move, pinch or use the buttons to zoom."></div><div class="mapctl"><button class="mbtn" id="mZin" aria-label="Zoom in">+</button><button class="mbtn" id="mZout" aria-label="Zoom out">−</button></div><div class="mapctl2" role="group" aria-label="Map view"><button class="mbtn wide" id="mFit" aria-label="Show the whole park">Whole park</button><button class="mbtn wide" id="mRoute" aria-label="Zoom to my route">My route</button></div></div>
-        <div class="maplegend small"><span class="chip"><span style="color:#1F6FB8;letter-spacing:2px;font-weight:800">•••▸</span> your path</span><span class="chip">① 2:00 sets in order</span><span class="chip">12 min walk</span><span class="chip" style="color:#E5432B">✕ top set</span><span class="chip">⚡ decision</span><span class="chip">🍴 food</span><span class="chip">💧 water</span><span class="chip">🌳 shade</span><span class="chip">✚ medical</span></div>
+        <div class="maplegend small"><span class="chip"><span style="color:#1F6FB8;letter-spacing:2px;font-weight:800">•••▸</span> your path</span><span class="chip">① 2:00 sets in order</span><span class="chip">5+ min walk</span><span class="chip" style="color:#E5432B">✕ top set</span><span class="chip">⚡ decision</span><span class="chip">🍴 food</span><span class="chip">💧 water</span><span class="chip">🌳 shade</span><span class="chip">✚ medical</span></div>
         <p class="small muted" style="margin:0">Drag to move · pinch, ⌘/Ctrl-scroll or +/− to zoom · tap a step on the right (below on phones) to find it.</p>
         <div id="mapOverlay"></div>
       </div>
@@ -473,7 +473,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
         <ol class="itin" id="itin"></ol>
       </div>
     </div>
-    <p class="note">Your route follows your plan from the Heat Schedule. Tap a step to find it on the map. Park, lake, creek and roads are real geography from OpenStreetMap; stages, food, water and gates are placed by lining the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL 2026 map</a> up with those roads, so treat spots as within a few dozen metres. Walk times are estimates at festival-crowd pace (far ends of the park ≈ 20 min). Check the ACL app on the day for changes.</p>
+    <p class="note">Your route follows your plan from the Heat Schedule. Tap a step to find it on the map. Park, lake, creek and roads are real geography from OpenStreetMap; stages, food, water and gates are placed by lining the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL 2026 map</a> up with those roads, so treat spots as within a few dozen metres. Walk times are minimums at a brisk pace with no crowds (far ends of the park ≈ 10 min); crowds can easily double them, so leave early for sets you can't miss. Check the ACL app on the day for changes.</p>
   </section>
 
   <section class="panel" id="p-crew" hidden>
@@ -1305,8 +1305,8 @@ const SPOTS=[
   {k:"m1",t:"med",n:"Medical"},{k:"m2",t:"med",n:"Medical"},{k:"m3",t:"med",n:"Medical"},{k:"m4",t:"med",n:"Medical"}].map(s=>({...s,...PT(s.k)}));
 const FOOD=SPOTS.filter(s=>s.t==="food"),MEALS=FOOD.filter(s=>!s.snack),WATER=SPOTS.filter(s=>s.t==="water"),CHILL=SPOTS.filter(s=>s.chill);
 const ST=name=>STAGEXY[name];
-// Walk minutes at festival-crowd pace: straight-line metres × 1.3 for paths and crowds, at ~50 m/min, +2 min to get out of a crowd. T-Mobile ↔ AmEx ≈ 19 min.
-const walkRaw=(p,q)=>p===q||(p.x===q.x&&p.y===q.y)?0:2+Math.hypot(p.x-q.x,p.y-q.y)*0.026;
+// Minimum walk minutes: straight-line metres × 1.15 for paths, at a brisk 80 m/min, no crowd allowance (crowds only add time). T-Mobile ↔ AmEx ≈ 10 min.
+const walkRaw=(p,q)=>p===q||(p.x===q.x&&p.y===q.y)?0:Math.max(1,Math.hypot(p.x-q.x,p.y-q.y)*0.0144);
 const walkT=(p,q)=>Math.round(walkRaw(p,q));
 function nearest(list,p){return list.reduce((b,s)=>!b||walkRaw(p,s)<walkRaw(p,b)?s:b,null)}
 function bestStop(list,from,to,free,dwell){let best=null;for(const s of list){const det=walkRaw(from,s)+walkRaw(s,to)-walkRaw(from,to);if(det+dwell<=free&&(!best||det<best.det))best={s,det}}return best?{s:best.s,det:Math.max(1,Math.round(best.det))}:null}
@@ -1341,16 +1341,16 @@ function buildDay(day,P){
 
 function mapItemText(it,P){const nm=a=>`<b>${esc(a.name)}</b>`;
   switch(it.k){
-    case "gate":return {ic:"🎟️",tx:`Through the <b>${esc(it.g.n)}</b> by ${fmt(it.t)}. It's about ${it.wk} min to ${esc(stShort(it.to))}.`};
+    case "gate":return {ic:"🎟️",tx:`Through the <b>${esc(it.g.n)}</b> by ${fmt(it.t)}. It's at least ${it.wk} min to ${esc(stShort(it.to))}.`};
     case "set":{const a=it.a;return null}
     case "decide":{const b=it.b;return {ic:"⚡",tx:`<b>Decision point:</b> ${nm(b)} (${TIERS[P.c.tier[b.id]].icon} ${sc1(P.c.score[b.id])}) also plays ${fmt(b.s)}–${fmt(b.e)} at ${esc(stShort(b.stage))}. ${it.hw===it.a.id?"You picked "+esc(it.a.name)+" head to head.":it.hw===b.id?"You picked "+esc(b.name)+" head to head, but it clashes with more of your plan.":"Your ranking leans "+esc(it.a.name)+"."}`,btn:!VIEW&&P.me?`<button class="btn" data-p="${it.a.id},${b.id}">Battle</button>`:""}}
-    case "tight":return {ic:"⚡",tx:`<b>Tight squeeze:</b> it's ${it.wk} min from ${esc(stShort(it.a.stage))} to ${esc(stShort(it.b.stage))}. Leave ${nm(it.a)} at ${fmt(it.t)} (missing the last ${it.short} min) or walk in ${it.short} min late to ${nm(it.b)}.`};
-    case "food":return {ic:"🍔",tx:`<b>${it.label}</b> · ${fmt(it.t)}–${fmt(it.t2)} (${it.free} min free after walking). Eat at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}; it adds about ${it.det} min to your walk.${it.water?` Refill at ${esc(it.water.n)} on the way.`:""}`};
-    case "water":return it.warn?{ic:"💧",tx:`<b>Hydrate:</b> no real break for over 2½ hours. Top up at ${esc(it.at.n)} near ${esc(stShort(it.near))}, even if it costs a couple of minutes.`}:{ic:"💧",tx:`<b>Water break</b> · ${it.free} min free. Refill at ${esc(it.at.n)} (adds ${it.det} min).`};
+    case "tight":return {ic:"⚡",tx:`<b>Tight squeeze:</b> it's at least ${it.wk} min from ${esc(stShort(it.a.stage))} to ${esc(stShort(it.b.stage))}. Leave ${nm(it.a)} at ${fmt(it.t)} (missing the last ${it.short} min) or walk in ${it.short} min late to ${nm(it.b)}.`};
+    case "food":return {ic:"🍔",tx:`<b>${it.label}</b> · ${fmt(it.t)}–${fmt(it.t2)} (up to ${it.free} min free after walking). Eat at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}; it adds ${it.det}+ min to your walk.${it.water?` Refill at ${esc(it.water.n)} on the way.`:""}`};
+    case "water":return it.warn?{ic:"💧",tx:`<b>Hydrate:</b> no real break for over 2½ hours. Top up at ${esc(it.at.n)} near ${esc(stShort(it.near))}, even if it costs a couple of minutes.`}:{ic:"💧",tx:`<b>Water break</b> · ${it.free} min free. Refill at ${esc(it.at.n)} (adds ${it.det}+ min).`};
     case "chill":return {ic:"🌳",tx:`<b>Chill time</b> · ${it.free} min to spare. Sit in the shade at <b>${esc(it.at.n)}</b>, ${esc(it.at.d)}.`};
     case "disc":return {ic:"🎧",tx:`<b>Fill the gap:</b> catch ${it.catchM}+ min of ${nm(it.b)} (${P.c.tier[it.b.id]<0?"unrated":"😐 "+sc1(P.c.score[it.b.id])} · ${esc(it.b.fam)}) at ${esc(stShort(it.b.stage))}, ${fmt(it.b.s)}–${fmt(it.b.e)}.`,btn:`<button class="btn ghost" data-a="${it.b.id}">Listen</button>`};
-    case "walk":return {ic:"🚶",tx:`${it.wk} min walk to ${esc(stShort(it.to))}${it.free>=8?``:it.free>=0?` · ${it.free} min to spare`:""}`,mini:true};
-    case "exit":return {ic:"🚪",tx:`Head out via the <b>${esc(it.g.n)}</b>, about ${it.wk} min from ${esc(stShort(it.from))}. Everyone leaves at once after the headliners.`};
+    case "walk":return {ic:"🚶",tx:`${it.wk}+ min walk to ${esc(stShort(it.to))}${it.free>=8?``:it.free>=0?` · ${it.free} min to spare`:""}`,mini:true};
+    case "exit":return {ic:"🚪",tx:`Head out via the <b>${esc(it.g.n)}</b>, at least ${it.wk} min from ${esc(stShort(it.from))}. Everyone leaves at once after the headliners.`};
   }}
 function curveD(p,q,bend){const mx=(p.x+q.x)/2,my=(p.y+q.y)/2,dx=q.x-p.x,dy=q.y-p.y,L=Math.hypot(dx,dy)||1;const k=bend*Math.min(45,L*.16);const c={x:mx-dy/L*k,y:my+dx/L*k};
   return {d:`M${p.x.toFixed(1)},${p.y.toFixed(1)} Q${c.x.toFixed(1)},${c.y.toFixed(1)} ${q.x.toFixed(1)},${q.y.toFixed(1)}`,c,L}}
@@ -1407,7 +1407,7 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
   const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,(j%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
     let g=`<path d="${c.d}" class="halo" stroke-width="${u(cls==="mine"?7:5)}"/><path d="${c.d}" class="dots" stroke="${tcol}" stroke-width="${u(cls==="mine"?3.8:3)}" stroke-dasharray="0.01 ${u(cls==="mine"?8:7)}"/>`;
     const ts=Lpx>240?[.3,.7]:[.5];ts.forEach(t=>{const b=bez(sg.p,c.c,sg.q,t);g+=px(b.x,b.y,`<path d="M-4.5,-4.5 L4,0 L-4.5,4.5 Z" fill="${tcol}" stroke="#FFF5E8" stroke-width="1" transform="rotate(${b.ang.toFixed(0)})"/>`)});
-    if(withPills&&Lpx>56){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+" min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
+    if(withPills&&Lpx>56){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
     s+=`<g class="seg ${cls}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
   if(RO&&osegs.length)drawSegs(osegs,"#C2459A","theirs",-1.25,false);
   drawSegs(segs,"#1F6FB8","mine",1,true);
@@ -1451,10 +1451,10 @@ function renderMap(){
   const sw=document.getElementById("mapFriendSw");if(sw)sw.onclick=()=>{S.ui.mapFriend=!showO;save();renderMap()};
   // itinerary
   const head=VIEW?`${esc(P.name)}'s ${DAYS[day]}`:`Your ${DAYS[day]}`;document.getElementById("itinHead").innerHTML=head;
-  document.getElementById("itinSum").innerHTML=R.pl.length?`<span class="chip">${R.pl.length} set${R.pl.length===1?"":"s"}</span><span class="chip">🚶 ~${R.walk} min walking</span><span class="chip">⚡ ${R.decide+R.tight} decision point${R.decide+R.tight===1?"":"s"}</span><span class="chip">🍔 ${R.food} food window${R.food===1?"":"s"}</span>${meetIds.size?`<span class="chip">🤝 ${meetIds.size} with ${esc(first(O.name))}</span>`:""}`:"";
+  document.getElementById("itinSum").innerHTML=R.pl.length?`<span class="chip">${R.pl.length} set${R.pl.length===1?"":"s"}</span><span class="chip">🚶 ${R.walk}+ min walking</span><span class="chip">⚡ ${R.decide+R.tight} decision point${R.decide+R.tight===1?"":"s"}</span><span class="chip">🍔 ${R.food} food window${R.food===1?"":"s"}</span>${meetIds.size?`<span class="chip">🤝 ${meetIds.size} with ${esc(first(O.name))}</span>`:""}`:"";
   let L="";
   if(!R.pl.length)L=`<li class="mini"><span></span><span>${VIEW?"Nothing planned this day yet.":`Rate some ${DAYS[day].split(",")[0]} artists ❤️ or 👍 and your route, decision points and breaks appear here.`}</span><span></span></li>`;
-  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk} min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
+  if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
   for(const it of R.items){
     if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmt(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc(first(O.name))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · until ${fmt(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
     const m=mapItemText(it,P);if(!m)continue;
