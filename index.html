@@ -194,6 +194,7 @@ details.foot p{font-size:13px;max-width:70ch}
 .pinbtn.on{background:var(--ink);color:var(--bg)}
 .clash{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
 .dialog{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:50;padding:16px;overflow:auto}
+.toastundo{margin-left:8px;border:1.5px solid var(--bg);background:transparent;color:var(--bg);border-radius:999px;padding:2px 10px;font-weight:800;font-size:13px}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:60;max-width:calc(100% - 32px);text-align:center}
 .note{font-size:12.5px;color:var(--ink-soft)}
 .welcome{display:grid;gap:10px;border:3px solid var(--marigold);margin-top:12px}
@@ -305,6 +306,28 @@ details.foot p{font-size:13px;max-width:70ch}
 .itin li.k-decide,.itin li.k-tight,.itin li.k-warn{background:#E5432B1f;border-left-color:var(--poppy)}
 .itin li.mini{background:transparent;padding:1px 10px;font-size:12px;color:var(--ink-soft);cursor:default}
 .itin li.hl{outline:3px solid var(--ink);outline-offset:-1px}
+.itin .setact{display:grid;gap:4px;justify-items:end}
+.rmbtn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;line-height:1.3}
+.rmbtn:hover{border-color:var(--poppy);color:var(--poppy)}
+.dgrp summary{cursor:pointer;list-style:none}.dgrp summary::-webkit-details-marker{display:none}
+.dgrp summary::after{content:" ▾";font-size:11px;opacity:.7}.dgrp[open] summary::after{content:" ▴"}
+.dgrp .dlist{display:grid;gap:6px;margin-top:6px}
+.dgrp .drow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface);border-radius:8px;padding:6px 8px;cursor:default}
+.dgrp .drow .btn{padding:5px 12px;font-size:13px}
+.gaterow{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:14px}
+.gaterow select{padding:5px 8px;border-width:1.5px;font-size:14px;flex:1 1 180px;max-width:300px}
+.linkbtn{border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.peList{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.peList li{display:grid;grid-template-columns:128px 1fr auto;gap:10px;align-items:center;border-radius:10px;padding:8px 12px;border:1.5px dashed var(--line);border-left-width:6px}
+.peList li.in{background:var(--surface-2);border-style:solid;border-color:var(--surface-2);border-left-color:var(--unrated)}
+.peList li.in.hot{border-left-color:var(--hot)}.peList li.in.warm{border-left-color:var(--warm)}.peList li.in.cool{border-left-color:var(--cool)}.peList li.in.cold{border-left-color:var(--cold)}
+.peList li.out{opacity:.8}.peList li.gone{opacity:.6}
+.peList .t{font-weight:800;font-size:13px}
+.peList .act{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+.peList .gapline{display:block;border:0;background:transparent;padding:0 12px;font-size:12px;color:var(--ink-soft);text-align:center}
+.peadd{border:2px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;white-space:nowrap}
+.perm{border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;white-space:nowrap}
+@media (max-width:640px){.peList li{grid-template-columns:62px 1fr;row-gap:6px}.peList .act{grid-column:2;justify-content:space-between}}
 /* crew */
 .crewchips{display:flex;gap:8px;flex-wrap:wrap}
 .friend{display:inline-flex;align-items:stretch;border:2px solid var(--ink);border-radius:999px;overflow:hidden}
@@ -401,6 +424,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     <button class="tab" role="tab" aria-selected="false" data-tab="rate">Rate &amp; Battle</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="rank">Rankings</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="sched">Heat Schedule</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="plan">My Schedule</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="map">Map</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="crew">Crew</button>
     <button class="tab" role="tab" aria-selected="false" data-tab="lineup">Lineup</button>
@@ -506,8 +530,9 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     <div class="two">
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px">Your plan for <span id="planDay"></span></h3>
-        <p class="small muted" style="margin:0">Suggested from your ranking: highest-ranked sets first, and a set overlapping one you've already got by more than 15 minutes drops out unless you picked it head to head. Tap any set on the grid to add it yourself, or ✕ to drop one; your changes stick.</p>
+        <p class="small muted" style="margin:0">Suggested from your ranking, plus any changes you've made. Add or drop sets on the My Schedule tab, or tap any set on the grid.</p>
         <ol class="planlist" id="planlist"></ol>
+        <div class="row" id="toPlanRow"><button class="btn primary" id="toPlan">Customize my schedule</button></div>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px">Clashes to settle</h3>
@@ -517,10 +542,24 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
     </div>
   </section>
 
+  <section class="panel" id="p-plan" hidden>
+    <div class="card planed" style="display:grid;gap:12px">
+      <div class="daytabs" id="planDays" role="tablist" aria-label="Day"><button role="tab" data-day="Fri"><span class="dl">Friday</span><span class="ds">Fri</span> <small>10/9</small></button><button role="tab" data-day="Sat"><span class="dl">Saturday</span><span class="ds">Sat</span> <small>10/10</small></button><button role="tab" data-day="Sun"><span class="dl">Sunday</span><span class="ds">Sun</span> <small>10/11</small></button></div>
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div style="display:grid;gap:2px"><h3 style="font-size:22px" id="peHead">Your Friday</h3><span class="small muted" id="peSum"></span></div>
+        <div class="row" style="gap:6px"><span id="peResetWrap"><button class="btn ghost" id="peReset">Back to suggested</button></span></div>
+      </div>
+      <p class="small muted" id="peNote" style="margin:0">Your plan starts from your ranking. Add any set or remove any set and it sticks. Removing an act leaves a gap, nothing gets pulled in to fill it. Changes show on the Map right away.</p>
+      <div class="row" id="peShow" role="group" aria-label="Show"><button class="pill" data-show="all">Every set</button><button class="pill" data-show="mine">Just my plan</button></div>
+      <ol class="peList" id="peList"></ol>
+    </div>
+  </section>
+
   <section class="panel" id="p-map" hidden>
     <div class="mapgrid">
       <div class="card mapcard">
         <div class="daytabs" id="mapDays" role="tablist" aria-label="Day"><button role="tab" data-day="Fri"><span class="dl">Friday</span><span class="ds">Fri</span> <small>10/9</small></button><button role="tab" data-day="Sat"><span class="dl">Saturday</span><span class="ds">Sat</span> <small>10/10</small></button><button role="tab" data-day="Sun"><span class="dl">Sunday</span><span class="ds">Sun</span> <small>10/11</small></button></div>
+        <label class="gaterow" id="gateRow"><span>🎟️ <b id="gateDay">Friday</b> entrance</span><select id="mapGate" aria-label="Which gate you're entering through this day"></select></label>
         <div class="mapframe">
           <div class="mapscroll" id="mapWrap" aria-label="Festival map. Drag to move, pinch to zoom."></div>
           <div class="mapctl"><button class="mbtn keybtn" id="mKeyBtn" aria-expanded="false" aria-controls="mapKey">Key</button><div class="zoompair"><button class="mbtn" id="mZin" aria-label="Zoom in">+</button><button class="mbtn" id="mZout" aria-label="Zoom out">−</button></div></div>
@@ -538,7 +577,6 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
             </ul>
             <button class="switch" id="mAllWalk" role="switch" aria-checked="false"><i></i><span>Show every walk time</span></button>
             <div id="mapOverlay"></div>
-            <div class="keysect"><b class="small">Which gate are you using?</b><div class="row" id="mapGates" role="group" aria-label="Entrance"><button class="pill" data-gate="auto">Closest</button><button class="pill" data-gate="ladybird">Lady Bird</button><button class="pill" data-gate="west">West</button><button class="pill" data-gate="east">East</button></div></div>
             <p class="small" style="margin:0">Drag to move the map and pinch to zoom. Tap any step in your plan to find it here.</p>
             <p class="small muted" style="margin:0">Roads, lake and park are real (OpenStreetMap). Stages, food and water are placed from the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL map</a>, so they're close but not exact. Check the ACL app on the day for changes.</p>
           </aside>
@@ -736,7 +774,7 @@ document.getElementById("filterCard").addEventListener("toggle",e=>{S.ui.filters
 /* ---------- tabs ---------- */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 function setTab(t){S.ui.tab=t;document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
-  ["rate","rank","sched","map","crew","lineup"].forEach(k=>document.getElementById("p-"+k).hidden=k!==t);
+  ["rate","rank","sched","plan","map","crew","lineup"].forEach(k=>document.getElementById("p-"+k).hidden=k!==t);
   if(t==="crew")refreshCrew();
   document.getElementById("filterCard").hidden=!(t==="rate"||t==="lineup");
   save();renderAll()}
@@ -1014,7 +1052,7 @@ function renderRank(){
   html+=`<div class="tierhead"><h3>Not rated yet</h3><span class="small muted">${C.unr.length}</span>${C.unr.length?`<button class="btn ghost" id="unrToggle" style="padding:3px 12px;font-size:12px">${S.ui.showUnr?"Hide names":"Show names"}</button>`:""}</div>`;
   if(S.ui.showUnr&&C.unr.length)html+=`<p class="small muted" style="margin:0">${C.unr.map(i=>esc(A[i].name)).join(" · ")}</p>`;
   document.getElementById("ranklist").innerHTML=html;
-  document.querySelectorAll("#ranklist [data-pl]").forEach(b=>b.onclick=()=>{togglePlan(+b.dataset.pl);renderRank()});
+  document.querySelectorAll("#ranklist [data-pl]").forEach(b=>b.onclick=()=>togglePlan(+b.dataset.pl,renderRank));
   const t=document.getElementById("unrToggle");if(t)t.onclick=()=>{S.ui.showUnr=!S.ui.showUnr;save();renderRank()};
   const nm=document.getElementById("myName");if(document.activeElement!==nm)nm.value=S.name||"";
   renderDist();renderCompareMini()}
@@ -1058,18 +1096,22 @@ function h2hIn(hist,a,b){let wa=0,wb=0;for(const [x,y,r] of (hist||[])){if(r!==0
 function prefer(a,b){const h=h2h(a,b);if(h!==null)return h;return C.pos[a]<=C.pos[b]?a:b}
 function plan(d){return planFor(d,C,S.h)}
 // Suggested plan from your ranking, plus any sets you added yourself (always kept) minus any you removed.
+// A removed set still holds its time slot while the suggestions are worked out, then drops out, so removing an act
+// leaves a gap instead of pulling in the next-best act. Adding a set yourself always wins.
 function planFor(d,cc,hist){const pin=cc.pin||{},add=new Set(pin.a||[]),rm=new Set(pin.r||[]);
-  const pick=A.filter(a=>a.day===d&&add.has(a.id)&&!rm.has(a.id));
+  const pick=A.filter(a=>a.day===d&&(add.has(a.id)||rm.has(a.id)));
   const sets=A.filter(a=>a.day===d&&!add.has(a.id)&&!rm.has(a.id)&&cc.tier[a.id]>=0&&cc.tier[a.id]<3).sort((x,y)=>cc.pos[x.id]-cc.pos[y.id]);
   for(const a of sets){const clash=pick.filter(p=>overlap(p,a)>15);
-    if(!clash.length)pick.push(a);else if(clash.length===1&&!add.has(clash[0].id)&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
-  return pick.sort((x,y)=>x.s-y.s)}
+    if(!clash.length)pick.push(a);else if(clash.length===1&&!add.has(clash[0].id)&&!rm.has(clash[0].id)&&h2hIn(hist,clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
+  return pick.filter(a=>!rm.has(a.id)).sort((x,y)=>x.s-y.s)}
 const inPlan=id=>plan(A[id].day).some(x=>x.id===id);
 const pinnedAdd=id=>!!(S.pin&&S.pin.a.includes(id));
-function togglePlan(id){if(VIEW)return toast("View only. Open your own board to plan.");checkpoint();const P=S.pin||(S.pin={a:[],r:[]});const a=A[id];
-  if(inPlan(id)){P.a=P.a.filter(i=>i!==id);recompute();if(inPlan(id))P.r.push(id);toast(`Removed ${a.name} from your ${a.day} plan`)}
-  else{P.r=P.r.filter(i=>i!==id);recompute();if(!inPlan(id))P.a.push(id);toast(`Added ${a.name} to your ${a.day} plan`)}
-  save();recompute()}
+function togglePlan(id,rerender){if(VIEW)return toast("View only. Open your own board to plan.");checkpoint();const P=S.pin||(S.pin={a:[],r:[]});const a=A[id];
+  const before=JSON.stringify(P);const back=rerender?()=>{S.pin=JSON.parse(before);save();recompute();rerender()}:null;
+  if(inPlan(id)){P.a=P.a.filter(i=>i!==id);if(!P.r.includes(id))P.r.push(id);toast(`Removed ${a.name} from ${a.day}`,back)}
+  else{const was=plan(a.day);P.r=P.r.filter(i=>i!==id);recompute();if(!inPlan(id))P.a.push(id);recompute();const out=was.filter(x=>!inPlan(x.id));
+    toast(`Added ${a.name} to ${a.day}${out.length?`, in place of ${out.map(x=>x.name).join(" and ")}`:""}`,back)}
+  save();recompute();if(rerender)rerender()}
 function renderSched(){
   const day=S.ui.day||"Fri";document.querySelectorAll("#dayBtns button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
   const T0=12*60+30,T1=22*60,PX=1.5,H=(T1-T0)*PX;const P=new Set(plan(day).map(a=>a.id));
@@ -1082,19 +1124,53 @@ function renderSched(){
   const el=document.getElementById("sched");el.innerHTML=html;el.querySelectorAll(".set").forEach(b=>b.onclick=()=>showArtist(A[+b.dataset.id]));
   requestAnimationFrame(()=>applyZoom(curZ()));
   document.getElementById("planDay").textContent=DAYS[day];const pl=plan(day);
-  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b>${pinnedAdd(a.id)?` <span class="chip">📌 added</span>`:""}<div class="small muted">${a.stage}</div></span><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="heat ${heatOf(a.id)}">${C.tier[a.id]>=0?iconOf(a.id)+" "+scoreTxt(a.id):"unrated"}</span>${VIEW?"":`<button class="pinbtn" data-rm="${a.id}" aria-label="Remove ${esc(a.name)} from your plan" title="Remove from plan">✕</button>`}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists, or tap any set on the grid to add it.</span></li>`;
-  document.querySelectorAll("#planlist [data-rm]").forEach(b=>b.onclick=()=>{togglePlan(+b.dataset.rm);renderSched()});
+  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b>${pinnedAdd(a.id)?` <span class="chip">📌 added</span>`:""}<div class="small muted">${a.stage}</div></span><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="heat ${heatOf(a.id)}">${C.tier[a.id]>=0?iconOf(a.id)+" "+scoreTxt(a.id):"unrated"}</span></span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists, or tap any set on the grid to add it.</span></li>`;
+  document.getElementById("toPlanRow").hidden=!!VIEW;
   const cl=CLASH.filter(([x,y])=>A[x].day===day&&C.tier[x]>=0&&C.tier[x]<=1&&C.tier[y]>=0&&C.tier[y]<=1);
   document.getElementById("clashes").innerHTML=cl.length?cl.map(([x,y])=>{const hw=h2h(x,y);const pf=prefer(x,y);
     return `<div class="clash"><span class="small"><b>${esc(A[x].name)}</b> ${scoreTxt(x)} vs <b>${esc(A[y].name)}</b> ${scoreTxt(y)} · ${overlap(A[x],A[y])} min<br><span class="muted">${hw!==null?"You picked "+esc(A[hw].name)+" head to head":"Leaning "+esc(A[pf].name)+" on ranking"}</span></span><button class="btn" data-p="${x},${y}">Battle</button></div>`}).join(""):`<p class="small muted" style="margin:0">No ❤️/👍 clashes on ${day} yet.</p>`;
   document.querySelectorAll("#clashes [data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p))}
+document.getElementById("toPlan").onclick=()=>setTab("plan");
+/* ---------- My Schedule: every set of the day, add or remove any of them ---------- */
+function renderPlanEd(){
+  const day=S.ui.day||"Fri";document.querySelectorAll("#planDays button").forEach(x=>x.setAttribute("aria-selected",x.dataset.day===day));
+  const show=S.ui.peShow==="mine"?"mine":"all";document.querySelectorAll("#peShow button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.show===show));
+  const pl=plan(day),inP=new Set(pl.map(a=>a.id)),pin=C.pin||S.pin||{a:[],r:[]},added=new Set(pin.a||[]),gone=new Set(pin.r||[]);
+  const nAdd=pl.filter(a=>added.has(a.id)).length,nGone=A.filter(a=>a.day===day&&gone.has(a.id)).length;
+  document.getElementById("peHead").textContent=VIEW?`${VIEW.name||VIEW.share}'s ${DAYS[day]}`:`Your ${DAYS[day]}`;
+  document.getElementById("peSum").textContent=[`${pl.length} set${pl.length===1?"":"s"} in the plan`,nAdd?`${nAdd} added by ${VIEW?"them":"you"}`:"",nGone?`${nGone} removed`:""].filter(Boolean).join(" · ");
+  document.getElementById("peNote").hidden=!!VIEW;document.getElementById("peResetWrap").hidden=!!VIEW||!(nAdd||nGone||A.some(a=>a.day===day&&added.has(a.id)));
+  const order=a=>a.s*10+STAGES.indexOf(a.stage);
+  const list=(show==="mine"?pl:A.filter(a=>a.day===day)).slice().sort((x,y)=>order(x)-order(y));
+  let L="",prevEnd=null;
+  for(const a of list){const on=inP.has(a.id),h=heatOf(a.id);
+    if(show==="mine"&&prevEnd!=null&&a.s-prevEnd>=20)L+=`<li class="gapline">· · · free ${fmtP(prevEnd)}–${fmtP(a.s)} (${a.s-prevEnd} min) · · ·</li>`;
+    if(on)prevEnd=Math.max(prevEnd??0,a.e);
+    const ov=pl.filter(p=>p.id!==a.id&&overlap(p,a)>15);
+    const chip=on?(added.has(a.id)?`<span class="chip">📌 Added</span>`:`<span class="chip">Suggested</span>`):gone.has(a.id)?`<span class="chip">Removed</span>`:"";
+    const warn=ov.length?`<div class="small" style="color:var(--poppy);font-weight:700">⚡ ${on?"Overlaps":"Clashes with"} ${ov.map(p=>esc(p.name)).join(", ")}</div>`:"";
+    L+=`<li class="${on?"in":gone.has(a.id)?"out gone":"out"} ${h}"><span class="t tnum">${fmtP(a.s)}–${fmtP(a.e)}</span><span><button class="linkbtn" data-a="${a.id}"><b>${esc(a.name)}</b></button> ${chip}<div class="small muted">${esc(stShort(a.stage))}</div>${warn}</span>
+      <span class="act"><span class="heat ${h}">${C.tier[a.id]>=0?iconOf(a.id)+" "+scoreTxt(a.id):"unrated"}</span>${VIEW?"":on?`<button class="perm" data-tg="${a.id}" aria-label="Remove ${esc(a.name)} from your plan">Remove</button>`:`<button class="peadd" data-tg="${a.id}" aria-label="Add ${esc(a.name)} to your plan">＋ Add</button>`}</span></li>`}
+  if(!list.length)L=`<li class="gapline">${show==="mine"?`Nothing planned for ${DAYS[day]} yet. Switch to Every set and add some.`:"No sets this day."}</li>`;
+  const el=document.getElementById("peList");el.innerHTML=L;
+  el.querySelectorAll("[data-tg]").forEach(b=>b.onclick=()=>togglePlan(+b.dataset.tg,renderPlanEd));
+  el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>showArtist(A[+b.dataset.a]))}
+document.querySelectorAll("#planDays button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;save();renderPlanEd()});
+document.querySelectorAll("#peShow button").forEach(b=>b.onclick=()=>{S.ui.peShow=b.dataset.show;save();renderPlanEd()});
+document.getElementById("peReset").onclick=()=>{const day=S.ui.day||"Fri";const box=document.getElementById("peResetWrap");
+  box.innerHTML=`<span class="row small" style="gap:6px"><span>Undo every add and removal for ${DAYS[day].split(",")[0]}?</span><button class="btn primary" id="peResetYes">Yes, reset</button><button class="btn ghost" id="peResetNo">Keep</button></span>`;
+  document.getElementById("peResetNo").onclick=()=>{restoreReset();renderPlanEd()};
+  document.getElementById("peResetYes").onclick=()=>{checkpoint();const P=S.pin||(S.pin={a:[],r:[]});const before=JSON.stringify(P);const keep=i=>A[i].day!==day;P.a=P.a.filter(keep);P.r=P.r.filter(keep);save();recompute();restoreReset();renderPlanEd();
+    toast(`${DAYS[day].split(",")[0]} is back to your suggested plan`,()=>{S.pin=JSON.parse(before);save();recompute();renderPlanEd()})}};
+function restoreReset(){const box=document.getElementById("peResetWrap");box.innerHTML=`<button class="btn ghost" id="peReset">Back to suggested</button>`;document.getElementById("peReset").onclick=PERESET}
+const PERESET=document.getElementById("peReset").onclick;
 function goBattle(p){S.ui.pair=p.split(",").map(Number);S.ui.pairKind="clash";S.ui.card=null;S.ui.follow=[];S.ui.ins=null;document.getElementById("dialogHost").innerHTML="";setTab("rate")}
 function showArtist(a){const host=document.getElementById("dialogHost");const ov=A.filter(o=>o.id!==a.id&&overlap(o,a)>=20);
   host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="${esc(a.name)}"><div style="max-width:460px;width:100%;display:grid;gap:10px">${artCard(a)}
   ${ov.length?`<div class="card" style="display:grid;gap:6px"><b class="small">Overlaps with</b>${ov.map(o=>`<div class="clash"><span class="small"><b>${esc(o.name)}</b> ${iconOf(o.id)} ${scoreTxt(o.id)} · ${overlap(o,a)} min</span><button class="btn" data-p="${a.id},${o.id}">Battle</button></div>`).join("")}</div>`:""}
   <div class="row" style="justify-content:center">${VIEW?"":`<button class="btn ${inPlan(a.id)?"":"primary"}" id="planTgl">${inPlan(a.id)?`✓ In your ${a.day} plan · Remove`:`＋ Add to my ${a.day} plan`}</button>`}<button class="btn" id="closeDlg">Close</button></div></div></div>`;
   const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;
-  const pt=document.getElementById("planTgl");if(pt)pt.onclick=()=>{togglePlan(a.id);showArtist(a)};host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
+  const pt=document.getElementById("planTgl");if(pt)pt.onclick=()=>togglePlan(a.id,()=>document.querySelector("#dialogHost .dialog")?showArtist(a):renderAll());host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
   bindRate(host,()=>showArtist(a));host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p));if(HOSTED)markPlaying();document.getElementById("closeDlg").focus()}
 
 
@@ -1459,19 +1535,22 @@ const walkRaw=(p,q)=>p===q||(p.x===q.x&&p.y===q.y)?0:Math.max(1,Math.hypot(p.x-q
 const walkT=(p,q)=>Math.round(walkRaw(p,q));
 function nearest(list,p){return list.reduce((b,s)=>!b||walkRaw(p,s)<walkRaw(p,b)?s:b,null)}
 function bestStop(list,from,to,free,dwell){let best=null;for(const s of list){const det=walkRaw(from,s)+walkRaw(s,to)-walkRaw(from,to);if(det+dwell<=free&&(!best||det<best.det))best={s,det}}return best?{s:best.s,det:Math.max(1,Math.round(best.det))}:null}
-function pickGate(firstSet){const g=S.ui.gate&&GATES.find(x=>x.k===S.ui.gate);return g||nearest(GATES,ST(firstSet.stage))}
+// your entrance for each day (Closest = nearest to your first set); friends' routes always use their closest gate
+const GSHORT={ladybird:"Lady Bird",west:"West",east:"East"};
+const gateFor=day=>{const G=S.ui.gates||{};return G[day]||null};
+function pickGate(firstSet,day,P){const k=P&&P.me!==false?gateFor(day):null;const g=k&&GATES.find(x=>x.k===k);return g||nearest(GATES,ST(firstSet.stage))}
 const stShort=s=>s==="American Express"?"AmEx":s;
 function buildDay(day,P){
   const pl=planFor(day,P.c,P.h);const items=[];const R={pl,items,walk:0,decide:0,food:0,tight:0};if(!pl.length)return R;
   const add=o=>{o.i=items.length;items.push(o);return o};
-  const gate=pickGate(pl[0]);const w0=walkT(gate,ST(pl[0].stage));R.walk+=w0;R.gate=gate;
+  const gate=pickGate(pl[0],day,P);const w0=walkT(gate,ST(pl[0].stage));R.walk+=w0;R.gate=gate;
   add({k:"gate",t:pl[0].s-w0-10,g:gate,wk:w0,to:pl[0].stage});
   let lastWater=pl[0].s-w0;
   pl.forEach((a,i)=>{
     if(a.e-lastWater>150){const w=nearest(WATER,ST(a.stage));add({k:"water",warn:true,t:a.s,at:w,near:a.stage});lastWater=a.s}
     const alts=A.filter(b=>b.day===day&&b.id!==a.id&&P.c.tier[b.id]>=0&&P.c.tier[b.id]<=1&&!pl.includes(b)&&overlap(a,b)>=20).sort((x,y)=>P.c.pos[x.id]-P.c.pos[y.id]).slice(0,2);
     add({k:"set",a,t:a.s,n:i+1});
-    alts.forEach(b=>{R.decide++;add({k:"decide",a,b,t:Math.max(a.s,b.s),hw:h2hIn(P.h,a.id,b.id)})});
+    let g0=null;alts.forEach(b=>{R.decide++;const d=add({k:"decide",a,b,t:Math.max(a.s,b.s),hw:h2hIn(P.h,a.id,b.id)});if(g0==null)g0=d.i;d.g0=g0});
     const nx=pl[i+1];if(!nx)return;
     const from=ST(a.stage),to=ST(nx.stage),wk=walkT(from,to);R.walk+=wk;const free=nx.s-a.e-wk;
     if(free<0){R.tight++;add({k:"tight",a,b:nx,t:a.e+free,short:-free,wk});return}
@@ -1586,7 +1665,7 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
     s+=px(g.x,g.y,blk,`stage${visits.length?" on":ovis.length?" oon":""}`)}
   // decisions: ⚡ on the pin of the stage you'd be giving up
   R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
-    s+=px(g.x,g.y,`<g transform="translate(${-11-(n-1)*16} -11)"><circle r="7.5" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.3" class="boltic">⚡</text></g><title>${fmtP(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.i)});
+    s+=px(g.x,g.y,`<g transform="translate(${-11-(n-1)*16} -11)"><circle r="7.5" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.3" class="boltic">⚡</text></g><title>${fmtP(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.g0)});
   // compass + attribution stay put in the corners
   s+=px(MV.x+k0*24,MV.y+k0*26,`<circle r="17" fill="#FFF5E8" opacity=".92"/><path d="M0,-12 L5,4 L0,1 L-5,4 Z" fill="#E5432B"/><text y="13.5" class="compass">N</text>`);
   s+=px(MV.x+MV.w-k0*6,MV.y+MV.h-k0*6,`<text class="osm" text-anchor="end">© OpenStreetMap contributors</text>`);
@@ -1596,8 +1675,13 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
 
 function renderMap(){
   const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-selected",x.dataset.day===day));
-  const gk=S.ui.gate||"auto";document.querySelectorAll("#mapGates button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.gate===gk));
+  if(S.ui.gate){S.ui.gates={Fri:S.ui.gate,Sat:S.ui.gate,Sun:S.ui.gate};delete S.ui.gate;save()}
   const P=subjectPerson();const R=buildDay(day,P);const cands=routeCands();
+  // your entrance for this day
+  const gr=document.getElementById("gateRow");gr.hidden=!P.me||!R.pl.length;
+  if(!gr.hidden){document.getElementById("gateDay").textContent=DAYS[day].split(",")[0];const near=nearest(GATES,ST(R.pl[0].stage));const gk=gateFor(day)||"auto";
+    document.getElementById("mapGate").innerHTML=`<option value="auto">Closest (${esc(GSHORT[near.k])})</option>`+GATES.map(g=>`<option value="${g.k}">${esc(GSHORT[g.k])} gate</option>`).join("");
+    document.getElementById("mapGate").value=gk}
   const OL=cands.filter(o=>MAPSHOW.has(o.key)).map(o=>{const RR=buildDay(day,o);return {...o,R:RR,segs:RR.pl.length?routeSegs(RR):[]}});
   const meetBy={};OL.forEach(o=>o.R.pl.forEach(a=>{if(R.pl.some(x=>x.id===a.id))(meetBy[a.id]=meetBy[a.id]||[]).push(first(o.name))}));
   const meetIds=new Set(Object.keys(meetBy).map(Number));const showO=OL.length>0,RO=null,O=OL[0]||null;
@@ -1605,7 +1689,7 @@ function renderMap(){
   const segs=routeSegs(R),osegs=[];
   const top=R.pl.length?[...R.pl].sort((x,y)=>(P.c.score[y.id]??-1)-(P.c.score[x.id]??-1))[0]:null;
   const itPts={};const addP=(i,...ps)=>{(itPts[i]=itPts[i]||[]).push(...ps)};
-  segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.i,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
+  segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.g0,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
   if(MDATA&&MDATA.day!==day){MVfit="park";mapFocus=null}
   // the walk to show by default: the next one if today is this festival day, otherwise none (tap a step, or turn on all walk times in the Key)
   let nextI=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
@@ -1636,11 +1720,16 @@ function renderMap(){
   if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick${P.c.tier[R.nofood.a.id]>=0?`, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}`:""}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
   for(const it of R.items){
     const pc=cur==null?"":it.i===cur?" now":it.i<cur?" past":"";const nowChip=it.i===cur?` <span class="chip nowchip">${live&&!STEP.manual?"You are here":"This step"}</span>`:"";
-    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}${pc}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${nowChip}${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc((meetBy[a.id]||[]).join(", "))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${P.c.tier[a.id]>=0?TIERS[P.c.tier[a.id]].icon+" "+sc1(P.c.score[a.id]):"📌"}</span></li>`;continue}
+    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}${pc}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${nowChip}${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc((meetBy[a.id]||[]).join(", "))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="setact"><span class="heat ${heatOf2(P,a.id)}">${P.c.tier[a.id]>=0?TIERS[P.c.tier[a.id]].icon+" "+sc1(P.c.score[a.id]):"📌"}</span>${P.me&&!VIEW?`<button class="rmbtn" data-rm="${a.id}" aria-label="Remove ${esc(a.name)} from your plan">Remove</button>`:""}</span></li>`;continue}
+    if(it.k==="decide"){if(it.i!==it.g0)continue;const grp=R.items.filter(x=>x.k==="decide"&&x.g0===it.g0);const n=grp.length;
+      const rows=grp.map(x=>{const m=mapItemText(x,P);return `<div class="drow"><span class="small">${m.tx.replace(/^<b>Decision point:<\/b> /,"")}</span><span>${m.btn||""}</span></div>`}).join("");
+      L+=`<li class="it k-decide${pc}" data-it="${it.g0}"><span class="t tnum">⚡ ${fmtP(it.t)}</span><span><details class="dgrp"><summary><b>${n} decision point${n===1?"":"s"}</b> during ${esc(it.a.name)}: ${grp.map(x=>esc(x.b.name)).join(", ")} ${n===1?"plays":"play"} too</summary><div class="dlist">${rows}</div></details></span><span></span></li>`;continue}
     const m=mapItemText(it,P);if(!m)continue;
     L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}${pc}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmtP(it.t)}`}</span><span>${m.tx}${nowChip}</span><span>${m.btn||""}</span></li>`}
   const ol=document.getElementById("itin");ol.innerHTML=L;
   ol.querySelectorAll("[data-p]").forEach(b=>b.onclick=e=>{e.stopPropagation();goBattle(b.dataset.p)});
+  ol.querySelectorAll("[data-rm]").forEach(b=>b.onclick=e=>{e.stopPropagation();STEP={day:null,i:null,manual:false};mapFocus=null;togglePlan(+b.dataset.rm,renderMap)});
+  ol.querySelectorAll(".dlist").forEach(d=>d.onclick=e=>e.stopPropagation());
   ol.querySelectorAll("button[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation();showArtist(A[+b.dataset.a])});
   ol.querySelectorAll("li[data-it]").forEach(li=>li.onclick=()=>{const i=+li.dataset.it;if(MDATA.steps.includes(i)){setStep(i,true);if(window.innerWidth<=900){const c=document.querySelector(".mapcard"),t=document.querySelector(".tabs");window.scrollTo({top:c.getBoundingClientRect().top+window.scrollY-(t?t.offsetHeight:0)-8,behavior:"smooth"})}}else focusIt(li.dataset.it,true)});
   markFocus()}
@@ -1699,13 +1788,16 @@ function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;drawMap(
   document.getElementById("mAllWalk").onclick=()=>{S.ui.allWalk=!S.ui.allWalk;save();renderMap()};document.getElementById("mKeyX").onclick=()=>setKey(false);
   let rzT=null;window.addEventListener("resize",()=>{if(S.ui.tab!=="map"||!MV)return;clearTimeout(rzT);rzT=setTimeout(()=>{if(MVfit)applyFit();else setMV(MV,true);drawMap()},120)})})();
 document.querySelectorAll("#mapDays button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;mapFocus=null;save();renderMap()});
-document.querySelectorAll("#mapGates button").forEach(b=>b.onclick=()=>{S.ui.gate=b.dataset.gate==="auto"?null:b.dataset.gate;save();renderMap()});
+document.getElementById("mapGate").onchange=e=>{const day=S.ui.day||"Fri";const G=S.ui.gates=Object.assign({},S.ui.gates);if(e.target.value==="auto")delete G[day];else G[day]=e.target.value;save();if(STEP.day===day&&STEP.manual)STEP={day:null,i:null,manual:false};renderMap();
+  const g=GATES.find(x=>x.k===e.target.value);toast(g?`${DAYS[day].split(",")[0]}: entering at the ${g.n}`:`${DAYS[day].split(",")[0]}: closest gate to your first set`)};
 document.getElementById("crewAddBtn").onclick=()=>addFriend(document.getElementById("crewCode").value);
 document.getElementById("crewCode").addEventListener("keydown",e=>{if(e.key==="Enter")addFriend(e.target.value)});
 document.getElementById("toCrew").onclick=()=>setTab("crew");
 
 /* ---------- utils & boot ---------- */
-function toast(m){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+function toast(m,onUndo){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;
+  if(onUndo){const b=document.createElement("button");b.className="toastundo";b.textContent="Undo";b.onclick=()=>{t.remove();onUndo()};t.append(" ",b)}
+  document.body.appendChild(t);setTimeout(()=>t.remove(),onUndo?5000:2800)}
 function copy(txt,msg){const fallback=()=>{const host=document.getElementById("dialogHost");
     host.innerHTML=`<div class="dialog"><div class="card" style="display:grid;gap:10px;max-width:460px;width:100%"><b>Copy this</b><textarea id="cpy" style="min-height:160px">${esc(txt)}</textarea><button class="btn" id="cpyClose">Done</button></div></div>`;
     const c=document.getElementById("cpy");c.focus();c.select();document.getElementById("cpyClose").onclick=()=>host.innerHTML=""};
@@ -1713,9 +1805,9 @@ function copy(txt,msg){const fallback=()=>{const host=document.getElementById("d
 function renderWelcome(){document.getElementById("welcome").hidden=!!S.name||!!VIEW}
 document.getElementById("welcomeGo").onclick=()=>{const v=document.getElementById("welcomeName").value.trim();if(!v)return toast("Add a name first");S.name=v.slice(0,40);ensureBid();save();renderWelcome();setTab("rate")};
 document.getElementById("welcomeName").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("welcomeGo").click()});
-function renderAll(){renderWelcome();updateFcount();const t=S.ui.tab;if(t==="lineup")renderLineup();if(t==="rate")renderRate();if(t==="rank")renderRank();if(t==="sched")renderSched();if(t==="map")renderMap();if(t==="crew")renderCrew()}
+function renderAll(){renderWelcome();updateFcount();const t=S.ui.tab;if(t==="lineup")renderLineup();if(t==="rate")renderRate();if(t==="rank")renderRank();if(t==="sched")renderSched();if(t==="plan")renderPlanEd();if(t==="map")renderMap();if(t==="crew")renderCrew()}
 function afterLoad(){recompute();hydrateCrew();renderService();if(S.name)ensureBid();buildFilters();document.getElementById("filterCard").open=!!S.ui.filtersOpen;
-  let t=S.ui.tab||"rate";if(location.hash&&["rate","rank","sched","map","crew","lineup"].includes(location.hash.slice(1)))t=location.hash.slice(1);setTab(t)}
+  let t=S.ui.tab||"rate";if(location.hash&&["rate","rank","sched","plan","map","crew","lineup"].includes(location.hash.slice(1)))t=location.hash.slice(1);setTab(t)}
 if(!HOSTED){document.getElementById("crewCode").placeholder="Paste a friend's ranking code (ACL26…)";document.getElementById("crewCode").setAttribute("aria-label","Friend's ranking code")}
 if(HOSTED&&location.pathname.startsWith("/b/"))startView();else{afterLoad();if(HOSTED){pendingCompare();cloudSync();setTimeout(()=>refreshCrew(true),2500)}}
 if(HOSTED)loadPreviews();
