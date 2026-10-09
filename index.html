@@ -196,9 +196,26 @@ details.foot p{font-size:13px;max-width:70ch}
 /* map */
 .mapgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:16px;align-items:start}
 .mapcard{display:grid;gap:10px;padding:12px}
+.daytabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface-2);border-radius:12px;padding:4px}
+.daytabs button{border:0;background:transparent;border-radius:9px;padding:8px 4px;font-family:var(--f-display);font-size:17px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
+.daytabs button small{font-family:var(--f-body);font-size:11px;font-weight:700;opacity:.7;letter-spacing:0}
+.daytabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.daytabs .ds{display:none}
+@media (max-width:640px){.daytabs .dl{display:none}.daytabs .ds{display:inline}
+  /* phones: keep the map itself clear; the buttons sit in a row underneath it */
+  .mapcard .mapframe{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.mapcard .mapscroll{flex:1 1 100%}
+  .mapcard .mview{position:static;order:2}.mapcard .mapctl{position:static;order:3;margin-left:auto;display:flex}}
+.routes{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.routes:empty{display:none}
+.routes b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-right:2px}
+.rchk{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:999px;padding:4px 10px 4px 6px;font-weight:700;cursor:pointer;background:var(--surface)}
+.rchk input{width:16px;height:16px;margin:0;accent-color:var(--rc)}
+.rchk i{width:18px;height:0;border-top:3px dotted var(--rc)}
+.rchk:has(input:checked){border-color:var(--rc)}
+.rchk.me{cursor:default;opacity:.9}
 @media (min-width:901px){.mapcard{position:sticky;top:64px}}
 .mapframe{position:relative}
-.mapscroll{position:relative;overflow:hidden;border-radius:12px;background:#4C6F3C;aspect-ratio:4/3;max-height:72vh;width:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.mapscroll{position:relative;overflow:hidden;border-radius:12px;background:#4C6F3C;aspect-ratio:4/3;width:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .mapscroll:active{cursor:grabbing}
 #mapSvg{display:block;width:100%;height:100%;font-family:var(--f-body)}
 .mapctl{position:absolute;right:8px;top:8px;display:grid;gap:6px;justify-items:end;z-index:2}
@@ -225,7 +242,7 @@ details.foot p{font-size:13px;max-width:70ch}
 .ksample.kbolt{width:20px;height:20px;border-radius:50%;background:#E5432B;justify-content:center;font-size:11px}
 .keysect{display:grid;gap:6px}
 .keysect .pill{padding:3px 10px;font-size:12px}
-@media (max-width:640px){.mapscroll{aspect-ratio:1/1;max-height:68vh}.zoompair{display:none}.mbtn{height:30px}.mbtn.wide{height:30px;font-size:12px}}
+@media (max-width:640px){.zoompair{display:none}.mbtn{height:30px}.mbtn.wide{height:30px;font-size:12px}}
 .mbtn[aria-pressed="true"]{background:#163C29;color:#FFF5E8}
 .mbtn:disabled{opacity:.45}
 #mapSvg .rd{fill:none;stroke:#E4D6A6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
@@ -479,9 +496,9 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
   </section>
 
   <section class="panel" id="p-map" hidden>
-    <div class="row" id="mapDays" role="group" aria-label="Day" style="justify-content:center"><button class="pill" data-day="Fri">Fri 10/9</button><button class="pill" data-day="Sat">Sat 10/10</button><button class="pill" data-day="Sun">Sun 10/11</button></div>
     <div class="mapgrid">
       <div class="card mapcard">
+        <div class="daytabs" id="mapDays" role="tablist" aria-label="Day"><button role="tab" data-day="Fri"><span class="dl">Friday</span><span class="ds">Fri</span> <small>10/9</small></button><button role="tab" data-day="Sat"><span class="dl">Saturday</span><span class="ds">Sat</span> <small>10/10</small></button><button role="tab" data-day="Sun"><span class="dl">Sunday</span><span class="ds">Sun</span> <small>10/11</small></button></div>
         <div class="mapframe">
           <div class="mapscroll" id="mapWrap" aria-label="Festival map. Drag to move, pinch to zoom."></div>
           <div class="mapctl"><button class="mbtn keybtn" id="mKeyBtn" aria-expanded="false" aria-controls="mapKey">Key</button><div class="zoompair"><button class="mbtn" id="mZin" aria-label="Zoom in">+</button><button class="mbtn" id="mZout" aria-label="Zoom out">−</button></div></div>
@@ -504,6 +521,7 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
             <p class="small muted" style="margin:0">Roads, lake and park are real (OpenStreetMap). Stages, food and water are placed from the <a href="https://support.aclfestival.com/hc/en-us/articles/4405399774484-Festival-Map" target="_blank" rel="noopener">official ACL map</a>, so they're close but not exact. Check the ACL app on the day for changes.</p>
           </aside>
         </div>
+        <div class="routes" id="mapRoutes"></div>
       </div>
       <div class="card" style="display:grid;gap:10px;align-content:start">
         <h3 style="font-size:22px" id="itinHead">Your day</h3>
@@ -1220,6 +1238,10 @@ function subjectPerson(){return {name:VIEW?(VIEW.name||VIEW.share):(S.name||"You
 function mePerson(){if(VIEW)return MY&&Object.keys(MY.t||{}).length?{name:MY.name||"You",c:compute(MY),h:MY.h,me:true}:null;return {name:S.name||"You",c:C,h:S.h,me:true}}
 function friendPerson(){return FRIEND?{name:FRIEND.name,c:FRIEND.c,h:FRIEND.st.h,share:FRIEND.share}:null}
 function mapOverlay(){return VIEW?mePerson():friendPerson()}
+const RCOLS=["#C2459A","#7B4BC4","#138A7E","#B8641C","#5B6CC9","#8E3B5E"];
+const MAPSHOW=new Set();   // friends whose routes are switched on; not saved, so the map always opens with only your route
+function routeCands(){if(VIEW){const m=mePerson();return m?[{key:"me",name:"You",c:m.c,h:m.h,col:RCOLS[0]}]:[]}
+  return Object.values(CREW).map((f,i)=>({key:f.k,name:f.name,c:f.c,h:f.st.h,col:RCOLS[i%RCOLS.length]}))}
 const first=n=>String(n||"").trim().split(/\s+/)[0]||"Friend";
 
 /* ---------- crew: friends you compare with, kept in this browser (with a cached copy for bad festival signal) ---------- */
@@ -1353,7 +1375,7 @@ function renderCrew(){const out=document.getElementById("crewOut"),add=document.
   const P=mePerson(),Q=friendPerson();out.innerHTML=pairHTML(P,Q)+(Object.keys(CREW).length>=2?crewHTML(P):"");bindCrewOut(out,P,Q)}
 function bindCrewOut(out,P,Q){
   out.querySelectorAll("[data-a]").forEach(li=>li.onclick=()=>showArtist(A[+li.dataset.a]));
-  out.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.ui.mapFriend=true;setTab(b.dataset.go)});
+  out.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{MAPSHOW.add(VIEW?"me":(FRIEND&&FRIEND.k));setTab(b.dataset.go)});
   const sm=document.getElementById("shareMatch");if(sm&&P&&Q)sm.onclick=()=>openMatchShare(P,Q)}
 function openMatchShare(P,Q){const host=document.getElementById("dialogHost");const txt=matchupText(P,Q);const canNative=!!navigator.share;
   host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="Share this matchup"><div class="card sharebox"><h3 style="font-size:24px">Share this matchup</h3><textarea readonly aria-label="Message preview">${esc(txt)}</textarea>
@@ -1461,7 +1483,7 @@ function routeBox(){const D=MDATA;if(!D||!D.segs.length)return null;return bboxO
 function fitPx(b,pad,minW){const {W,H}=mapSize();const iw=Math.max(60,W-pad[0]-pad[2]),ih=Math.max(60,H-pad[1]-pad[3]);const bw=Math.max(minW||0,b[2]-b[0]),bh=b[3]-b[1];
   const k=Math.max(bw/iw,bh/ih);const cx=(b[0]+b[2])/2,cy=(b[1]+b[3])/2;const x=cx-(pad[0]+iw/2)*k,y=cy-(pad[1]+ih/2)*k;return {x,y,w:W*k,h:H*k}}
 const narrowMap=()=>mapSize().W<520;
-function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[70,100,80,90]:[90,110,140,90],260):fitPx(PARKB,n?[16,44,16,52]:[24,30,24,40])}else MV=fitPx(PARKB,n?[16,44,16,52]:[24,30,24,40])}
+function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[60,70,70,60]:[90,110,140,90],260):fitPx(PARKB,n?[22,8,8,34]:[24,30,24,40])}else MV=fitPx(PARKB,n?[22,8,8,34]:[24,30,24,40])}
 function setMV(v,now){const {W,H}=mapSize();const w=Math.min(1900,Math.max(110,v.w)),h=w*H/W,cx=v.x+v.w/2,cy=v.y+v.h/2;MV={x:cx-w/2,y:cy-h/2,w,h};
   const svg=document.getElementById("mapSvg");if(svg)svg.setAttribute("viewBox",`${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}`);
   clearTimeout(mpT);if(now)drawMap();else mpT=setTimeout(drawMap,140)}
@@ -1469,7 +1491,7 @@ function zoomAt(f,cx,cy){const r=mapEl().getBoundingClientRect();const fx=cx==nu
   const mx=MV.x+fx*MV.w,my=MV.y+fy*MV.h;const nw=Math.min(1900,Math.max(110,MV.w/f)),nh=nw*MV.h/MV.w;MVfit=null;setMV({x:mx-fx*nw,y:my-fy*nh,w:nw,h:nh})}
 
 function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSize();const k0=MV.w/W,k=k0*(narrowMap()?.8:1),u=v=>+(v*k).toFixed(2);
-  const {R,RO,P,O,meetIds,used,segs,osegs,top}=D;const day=S.ui.day||"Fri";
+  const {R,P,OL=[],meetIds,used,segs,top}=D;const day=S.ui.day||"Fri";
   const px=(x,y,inner,cls,it)=>`<g${cls?` class="${cls}"`:""}${it!=null?` data-it="${it}"`:""} transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${k.toFixed(4)})">${inner}</g>`;
   let s=`<svg id="mapSvg" viewBox="${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Map of Zilker Park with ${esc(P.name)}'s ${DAYS[day]} route">
   <rect x="-3000" y="-3000" width="6000" height="6000" fill="#4C6F3C"/><path d="${MAPG.lawn}" fill="#5B7D48"/>
@@ -1496,15 +1518,15 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
     if(withPills&&!showPill&&sg.tight){const b=bez(sg.p,c.c,sg.q,.5);g+=px(b.x,b.y,`<circle r="7" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.3"/><text y="3.1" class="boltic">⚡</text>`)}
     if(showPill&&Lpx>40){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
     s+=`<g class="seg ${cls}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
-  if(RO&&osegs.length)drawSegs(osegs,"#C2459A","theirs",-1.25,false);
+  OL.forEach((o,n)=>{if(o.segs.length)drawSegs(o.segs,o.col,"theirs",-(1.25+n*.45),false)});
   drawSegs(segs,"#1F6FB8","mine",1,true);
   // start / exit pins
   if(R.gate){const g=R.gate;const t=`START ${fmtP(R.items[0].t)}`;const w=t.length*5.9+14;s+=px(g.x,g.y,`<g transform="translate(0 -19)"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="#1F6FB8" stroke="#FFF5E8" stroke-width="1.2"/><text y="3.6" class="pilltxt">${t}</text></g>`,"startpin")}
   // stages: a small pin on the real spot; the name sits off to the side (away from the middle of the park, where paths cross),
   // with your set times listed under it
-  const DIRS={"T-Mobile":[0,1],"Miller Lite":[-.25,-1],"Tito's":[.6,-.8],"American Express":[.15,1],"Snapchat":[1,.3],"BMI":[-.25,1],"Beatbox":[1,.45]};
+  const DIRS={"T-Mobile":[0,1],"Miller Lite":[-.25,-1],"Tito's":[1,-.25],"American Express":[.15,1],"Snapchat":[1,.3],"BMI":[-.25,1],"Beatbox":[1,.15]};
   const forkN={};
-  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];
+  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=OL.flatMap(o=>o.R.pl.filter(a=>a.stage===name).map(a=>({a,o})));
     let [dx,dy]=DIRS[name]||[0,1];const L=Math.hypot(dx,dy);dx/=L;dy/=L;const D0=22,ax=dx*D0,ay=dy*D0;
     const lw=g.lab.length*6.7+14,rows=visits.map(v=>({v,meet:meetIds.has(v.a.id),top:top&&top.id===v.a.id})),rw=r=>62+(r.meet?16:0)+(r.top?13:0);
     const H=19+rows.length*20;const top0=dy<-.3?-H:dy>.3?0:-9.5;const xAt=w=>dx<-.3?-w:dx>.3?0:-w/2;
@@ -1513,7 +1535,7 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
     rows.forEach((r,j)=>{const w=rw(r),x=xAt(w),y=top0+21+j*20,h=heatOf2(P,r.v.a.id);
       blk+=`<g data-it="${r.v.i}" class="tag"><rect x="${x}" y="${y}" width="${w}" height="18" rx="9" class="tagbg${r.meet?" meet":""}"/><circle cx="${x+9}" cy="${y+9}" r="7.2" class="tagn ${h}"/><text x="${x+9}" y="${y+12.4}" class="tagnt ${h}">${r.v.n}</text><text x="${x+20}" y="${y+12.6}" class="tagtt">${fmtP(r.v.a.s)}</text>${r.top?`<text x="${x+w-(r.meet?24:8)}" y="${y+13.5}" class="xmark" font-size="13">✕</text>`:""}${r.meet?`<text x="${x+w-9}" y="${y+12.6}" class="tagtt" text-anchor="middle">🤝</text>`:""}<title>${r.v.n}. ${fmtP(r.v.a.s)}–${fmtP(r.v.a.e)} ${esc(r.v.a.name)}${r.top?" · your top set":""}${r.meet?" · meet-up":""}</title></g>`});
     blk+=`</g><title>${esc(name)}${visits.length?": "+visits.map(v=>fmtP(v.a.s)+" "+v.a.name).join(", "):""}</title>`;
-    if(RO&&!visits.length&&ovis.length)blk+=`<circle cx="7" cy="-7" r="4.5" fill="#C2459A" stroke="#FFF5E8" stroke-width="1.4"><title>${esc(O.name)}: ${ovis.map(a=>fmtP(a.s)+" "+a.name).join(", ")}</title></circle>`;
+    if(!visits.length&&ovis.length){const seen=[...new Set(ovis.map(x=>x.o))];seen.forEach((o,q)=>{blk+=`<circle cx="${7+q*9}" cy="-7" r="4.5" fill="${o.col}" stroke="#FFF5E8" stroke-width="1.4"><title>${esc(o.name)}: ${ovis.filter(x=>x.o===o).map(x=>fmtP(x.a.s)+" "+x.a.name).join(", ")}</title></circle>`})}
     s+=px(g.x,g.y,blk,`stage${visits.length?" on":ovis.length?" oon":""}`)}
   // decisions: ⚡ on the pin of the stage you'd be giving up
   R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
@@ -1526,12 +1548,14 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
   if(mapFocus!=null)markFocus()}
 
 function renderMap(){
-  const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
+  const day=S.ui.day||"Fri";document.querySelectorAll("#mapDays button").forEach(x=>x.setAttribute("aria-selected",x.dataset.day===day));
   const gk=S.ui.gate||"auto";document.querySelectorAll("#mapGates button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.gate===gk));
-  const P=subjectPerson();const R=buildDay(day,P);const O=mapOverlay();const showO=!!O&&S.ui.mapFriend===true;const RO=showO?buildDay(day,O):null;
-  const meetIds=new Set(RO?RO.pl.map(a=>a.id).filter(id=>R.pl.some(a=>a.id===id)):[]);
+  const P=subjectPerson();const R=buildDay(day,P);const cands=routeCands();
+  const OL=cands.filter(o=>MAPSHOW.has(o.key)).map(o=>{const RR=buildDay(day,o);return {...o,R:RR,segs:RR.pl.length?routeSegs(RR):[]}});
+  const meetBy={};OL.forEach(o=>o.R.pl.forEach(a=>{if(R.pl.some(x=>x.id===a.id))(meetBy[a.id]=meetBy[a.id]||[]).push(first(o.name))}));
+  const meetIds=new Set(Object.keys(meetBy).map(Number));const showO=OL.length>0,RO=null,O=OL[0]||null;
   const used=new Set(R.items.filter(it=>it.at).map(it=>it.at.k).concat(R.items.filter(it=>it.water&&it.k==="food").map(it=>it.water.k)));
-  const segs=routeSegs(R),osegs=RO&&RO.pl.length?routeSegs(RO):[];
+  const segs=routeSegs(R),osegs=[];
   const top=R.pl.length?[...R.pl].sort((x,y)=>P.c.score[y.id]-P.c.score[x.id])[0]:null;
   const itPts={};const addP=(i,...ps)=>{(itPts[i]=itPts[i]||[]).push(...ps)};
   segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.i,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
@@ -1540,22 +1564,24 @@ function renderMap(){
   let nextI=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
     const today={"2026-10-09":"Fri","2026-10-10":"Sat","2026-10-11":"Sun"}[`${parts.year}-${parts.month}-${parts.day}`];
     if(today===day){const nowM=+parts.hour*60+ +parts.minute;const sg=segs.find(sg=>(R.items[sg.i].t||0)>=nowM-5);nextI=sg?sg.i:null}}catch(e){}
-  MDATA={R,RO,P,O,meetIds,used,segs,osegs,top,itPts,day,nextI};
+  MDATA={R,RO,P,O,OL,meetBy,meetIds,used,segs,osegs,top,itPts,day,nextI};
   if(!MV||MVfit)applyFit();
   drawMap();
   updView();document.getElementById("mAllWalk").setAttribute("aria-checked",!!S.ui.allWalk);
-  document.getElementById("keyFriendRow").hidden=!showO;if(showO)document.getElementById("keyFriendTxt").textContent=`${VIEW?"Your":first(O.name)+"'s"} path.`;
-  // overlay toggle
-  document.getElementById("mapOverlay").innerHTML=O?`<button class="switch" id="mapFriendSw" role="switch" aria-checked="${showO}"><i></i><span>Show ${VIEW?"my":esc(first(O.name))+"'s"} path in pink${RO&&meetIds.size?` · ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""}</span></button>`:(VIEW?"":`<span class="small muted">Add a friend on the Crew tab to see their path here too.</span>`);
-  const sw=document.getElementById("mapFriendSw");if(sw)sw.onclick=()=>{S.ui.mapFriend=!showO;save();renderMap()};
+  document.getElementById("keyFriendRow").hidden=!showO;if(showO)document.getElementById("keyFriendTxt").textContent=`Dots in other colours: ${OL.map(o=>VIEW?"your":first(o.name)+"'s").join(", ")} route${OL.length===1?"":"s"}.`;
+  document.getElementById("mapOverlay").innerHTML=cands.length||VIEW?"":`<span class="small muted">Add friends on the Crew tab to compare routes here.</span>`;
+  // whose routes to show: yours always; friends by name, off until you tick them
+  const rt=document.getElementById("mapRoutes");
+  rt.innerHTML=cands.length?`<b>Routes</b><span class="rchk me" style="--rc:#1F6FB8"><i></i>${VIEW?esc(first(P.name)):"You"}</span>`+cands.map(o=>`<label class="rchk" style="--rc:${o.col}"><input type="checkbox" data-rk="${esc(o.key)}"${MAPSHOW.has(o.key)?" checked":""}><i></i>${esc(o.key==="me"?"You":first(o.name))}</label>`).join("")+(meetIds.size?`<span class="small muted">· ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝</span>`:""):"";
+  rt.querySelectorAll("[data-rk]").forEach(c=>c.onchange=()=>{if(c.checked)MAPSHOW.add(c.dataset.rk);else MAPSHOW.delete(c.dataset.rk);renderMap()});
   // itinerary
   const head=VIEW?`${esc(P.name)}'s ${DAYS[day]}`:`Your ${DAYS[day]}`;document.getElementById("itinHead").innerHTML=head;
-  document.getElementById("itinSum").innerHTML=R.pl.length?[`${R.pl.length} set${R.pl.length===1?"":"s"}`,`${R.walk}+ min walking`,R.decide+R.tight?`${R.decide+R.tight} heads-up${R.decide+R.tight===1?"":"s"} ⚡`:"",R.food?`${R.food} food break${R.food===1?"":"s"}`:"",meetIds.size?`${meetIds.size} with ${esc(first(O.name))} 🤝`:""].filter(Boolean).join(" · "):"";
+  document.getElementById("itinSum").innerHTML=R.pl.length?[`${R.pl.length} set${R.pl.length===1?"":"s"}`,`${R.walk}+ min walking`,R.decide+R.tight?`${R.decide+R.tight} heads-up${R.decide+R.tight===1?"":"s"} ⚡`:"",R.food?`${R.food} food break${R.food===1?"":"s"}`:"",meetIds.size?`${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""].filter(Boolean).join(" · "):"";
   let L="";
   if(!R.pl.length)L=`<li class="mini"><span></span><span>${VIEW?"Nothing planned this day yet.":`Rate some ${DAYS[day].split(",")[0]} artists ❤️ or 👍 and your route, decision points and breaks appear here.`}</span><span></span></li>`;
   if(R.nofood)L+=`<li class="it k-warn" data-it="nf"><span class="t">🍔</span><span><b>No 35-minute gap today.</b> Eat before you go in, or duck out of ${esc(R.nofood.a.name)} (your lowest-ranked pick, ${TIERS[P.c.tier[R.nofood.a.id]].icon} ${sc1(P.c.score[R.nofood.a.id])}): ${esc(R.nofood.f.n)} is ${R.nofood.wk}+ min from ${esc(stShort(R.nofood.a.stage))}.</span><span></span></li>`;
   for(const it of R.items){
-    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc(first(O.name))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
+    if(it.k==="set"){const a=it.a;const meet=meetIds.has(a.id);L+=`<li class="it k-set ${heatOf2(P,a.id)}" data-it="${it.i}"><span class="t tnum">${fmtP(a.s)}</span><span><b>${it.n}. ${esc(a.name)}</b>${top&&top.id===a.id?` <span class="chip">✕ top set</span>`:""}${meet?` <span class="chip">🤝 ${esc((meetBy[a.id]||[]).join(", "))} too</span>`:""}<div class="small muted">${esc(stShort(a.stage))} · ends ${fmtP(a.e)}</div></span><span class="heat ${heatOf2(P,a.id)}">${TIERS[P.c.tier[a.id]].icon} ${sc1(P.c.score[a.id])}</span></li>`;continue}
     const m=mapItemText(it,P);if(!m)continue;
     L+=`<li class="it k-${it.k}${it.warn?" k-warn":""}${m.mini?" mini":""}" data-it="${it.i}"><span class="t tnum">${m.mini?m.ic:`${m.ic} ${it.k==="gate"||it.k==="exit"?"":fmtP(it.t)}`}</span><span>${m.tx}</span><span>${m.btn||""}</span></li>`}
   const ol=document.getElementById("itin");ol.innerHTML=L;
