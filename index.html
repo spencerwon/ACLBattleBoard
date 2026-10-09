@@ -250,6 +250,7 @@ details.foot p{font-size:13px;max-width:70ch}
 #mapSvg .tagn{fill:#C9BBAE;stroke:#FFF5E8;stroke-width:1} #mapSvg .tagn.hot{fill:#E5432B} #mapSvg .tagn.warm{fill:#F4A12B} #mapSvg .tagn.cool{fill:#5EC6F1} #mapSvg .tagn.cold{fill:#2F79C2}
 #mapSvg .tagnt{font-family:var(--f-display);font-size:10.5px;text-anchor:middle;fill:#163C29} #mapSvg .tagnt.hot,#mapSvg .tagnt.cold{fill:#FFF5E8}
 #mapSvg .tagtt{font-size:10px;font-weight:800;fill:#163C29}
+#mapSvg .leader{stroke:#163C29;stroke-width:1.5;opacity:.55}
 #mapSvg .xmark{font-family:var(--f-display);font-size:20px;fill:#E5432B;text-anchor:middle;paint-order:stroke;stroke:#FFF5E8;stroke-width:3px}
 #mapSvg .boltic{font-size:9px;text-anchor:middle}
 #mapSvg .compass{font-family:var(--f-display);font-size:8px;text-anchor:middle;fill:#163C29}
@@ -490,12 +491,13 @@ body.viewing .tab[data-tab="rate"],body.viewing #shareBtn,body.viewing #compareC
             <ul class="keylist">
               <li><svg viewBox="0 0 44 14" width="44" height="14" aria-hidden="true"><path d="M2,7 H34" stroke="#1F6FB8" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="0.01 7"/><path d="M34,2 L42,7 L34,12 Z" fill="#1F6FB8"/></svg><span>Your walking path. Arrows point the way.</span></li>
               <li><span class="ksample"><i class="kn">1</i>2:00pm</span><span>Your sets in order, with the time each one starts.</span></li>
-              <li><span class="ksample kmin">7+ min</span><span>Shortest possible walk. Crowds add more.</span></li>
-              <li><span class="ksample kx">✕</span><span>Your favourite set of the day.</span></li>
+              <li><span class="ksample kmin">7+ min</span><span>Shortest walk to your next stop (crowds add more). Tap a step to see its walk.</span></li>
+              <li><span class="ksample kx">✕</span><span>Next to a time: your favourite set of the day.</span></li>
               <li><span class="ksample kbolt">⚡</span><span>Heads up: a tight walk, or another set you like at the same time.</span></li>
               <li><span class="ksample">🍴 💧 🌳 ✚</span><span>Food, water, shade, first aid. Big ones are on your path.</span></li>
               <li id="keyFriendRow" hidden><svg viewBox="0 0 44 14" width="44" height="14" aria-hidden="true"><path d="M2,7 H40" stroke="#C2459A" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.01 7"/></svg><span id="keyFriendTxt">Your friend's path.</span></li>
             </ul>
+            <button class="switch" id="mAllWalk" role="switch" aria-checked="false"><i></i><span>Show every walk time</span></button>
             <div id="mapOverlay"></div>
             <div class="keysect"><b class="small">Which gate are you using?</b><div class="row" id="mapGates" role="group" aria-label="Entrance"><button class="pill" data-gate="auto">Closest</button><button class="pill" data-gate="ladybird">Lady Bird</button><button class="pill" data-gate="west">West</button><button class="pill" data-gate="east">East</button></div></div>
             <p class="small" style="margin:0">Drag to move the map and pinch to zoom. Tap any step in your plan to find it here.</p>
@@ -1420,7 +1422,7 @@ function routeBox(){const D=MDATA;if(!D||!D.segs.length)return null;return bboxO
 function fitPx(b,pad,minW){const {W,H}=mapSize();const iw=Math.max(60,W-pad[0]-pad[2]),ih=Math.max(60,H-pad[1]-pad[3]);const bw=Math.max(minW||0,b[2]-b[0]),bh=b[3]-b[1];
   const k=Math.max(bw/iw,bh/ih);const cx=(b[0]+b[2])/2,cy=(b[1]+b[3])/2;const x=cx-(pad[0]+iw/2)*k,y=cy-(pad[1]+ih/2)*k;return {x,y,w:W*k,h:H*k}}
 const narrowMap=()=>mapSize().W<520;
-function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[40,48,84,48]:[70,50,130,50],260):fitPx(PARKB,n?[6,44,6,44]:[4,4,4,4])}else MV=fitPx(PARKB,n?[6,44,6,44]:[4,4,4,4])}
+function applyFit(){const n=narrowMap();if(MVfit==="route"){const b=routeBox();MV=b?fitPx(b,n?[70,100,80,90]:[90,110,140,90],260):fitPx(PARKB,n?[16,44,16,52]:[24,30,24,40])}else MV=fitPx(PARKB,n?[16,44,16,52]:[24,30,24,40])}
 function setMV(v,now){const {W,H}=mapSize();const w=Math.min(1900,Math.max(110,v.w)),h=w*H/W,cx=v.x+v.w/2,cy=v.y+v.h/2;MV={x:cx-w/2,y:cy-h/2,w,h};
   const svg=document.getElementById("mapSvg");if(svg)svg.setAttribute("viewBox",`${MV.x.toFixed(1)} ${MV.y.toFixed(1)} ${MV.w.toFixed(1)} ${MV.h.toFixed(1)}`);
   clearTimeout(mpT);if(now)drawMap();else mpT=setTimeout(drawMap,140)}
@@ -1439,34 +1441,44 @@ function drawMap(){const D=MDATA;if(!D)return;if(!MV)applyFit();const {W}=mapSiz
   MAPG.labels.forEach(l=>{s+=`<text class="mlab ${l.c}" transform="translate(${l.x} ${l.y}) rotate(${l.a})" font-size="${u(l.c==="wt"?10:l.c==="lm"?8.5:8)}" dy="${u(3)}">${l.t}</text>`});
   // amenities (bigger when your day uses them)
   const showLab=k0<1.3;
-  for(const sp of SPOTS){const on=used.has(sp.k);const r=sp.t==="water"?(on?8:5.5):sp.t==="med"?5.5:(on?10:7.5);
+  for(const sp of SPOTS){const on=used.has(sp.k);if(!on&&k0>0.95)continue;const r=sp.t==="water"?(on?8:5.5):sp.t==="med"?5.5:(on?10:7.5);
     const fill=sp.t==="water"?"#5EC6F1":sp.t==="med"?"#E5432B":sp.t==="chill"?"#3E6B37":"#F4A12B";const ic=sp.t==="water"?"💧":sp.t==="med"?"✚":sp.t==="chill"?"🌳":"🍴";
     const its=R.items.filter(it=>(it.at&&it.at.k===sp.k)||(it.water&&it.k==="food"&&it.water.k===sp.k)).map(it=>it.i);
     const lab=(sp.t==="food"||sp.t==="chill")&&(showLab||on)?`<text y="${r+10}" class="spotlab${on?" on":""}">${esc(sp.n.replace(/^The /,""))}</text>`:"";
     s+=px(sp.x,sp.y,`<circle r="${r}" fill="${fill}" stroke="#FFF5E8" stroke-width="${on?2.2:1.3}"/><text y="${on?3.6:2.7}" font-size="${on?10:7.5}" class="${sp.t==="med"?"medtxt":"ic"}">${ic}</text>${lab}<title>${esc(sp.t==="water"?"Hydration station: "+sp.n.replace(/^the /,""):sp.n+(sp.d?": "+sp.d:""))}</title>`,`spot${on?" used":""}`,its.length?its.join(" "):null)}
   for(const g of GATES){const on=R.gate===g||R.items.some(it=>it.k==="exit"&&it.g===g);const w=g.lab.length*5.3+12;
+    if(!on&&k0>0.95)continue;
     s+=px(g.x,g.y,`<rect x="${-w/2}" y="-7" width="${w}" height="14" rx="4"/><text y="3">${g.lab}</text><title>${esc(g.n)}</title>`,`gate${on?" on":""}`)}
   // treasure-map route: friend first (pink dots), then yours (blue dots), each with direction arrows and walk minutes
   const drawSegs=(list,col,cls,sign,withPills)=>{list.forEach((sg,j)=>{const c=curveD(sg.p,sg.q,(j%2?1:-1)*sign);const Lpx=c.L/k0;const tcol=sg.tight?"#E5432B":col;
     let g=`<path d="${c.d}" class="halo" stroke-width="${u(cls==="mine"?7:5)}"/><path d="${c.d}" class="dots" stroke="${tcol}" stroke-width="${u(cls==="mine"?3.8:3)}" stroke-dasharray="0.01 ${u(cls==="mine"?8:7)}"/>`;
     const ts=Lpx>240?[.3,.7]:[.5];ts.forEach(t=>{const b=bez(sg.p,c.c,sg.q,t);g+=px(b.x,b.y,`<path d="M-4.5,-4.5 L4,0 L-4.5,4.5 Z" fill="${tcol}" stroke="#FFF5E8" stroke-width="1" transform="rotate(${b.ang.toFixed(0)})"/>`)});
-    if(withPills&&Lpx>56){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
+    const showPill=withPills&&(S.ui.allWalk||String(sg.i)===String(mapFocus)||sg.i===D.nextI);
+    if(withPills&&!showPill&&sg.tight){const b=bez(sg.p,c.c,sg.q,.5);g+=px(b.x,b.y,`<circle r="7" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.3"/><text y="3.1" class="boltic">⚡</text>`)}
+    if(showPill&&Lpx>40){const b=bez(sg.p,c.c,sg.q,ts.length>1?.5:.62);const lab=(sg.tight?"⚡ ":"")+sg.m+"+ min";const w=lab.length*5.6+10;g+=px(b.x,b.y,`<g transform="translate(0 ${-13})"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="${sg.tight?"#E5432B":"#FFF5E8"}" stroke="${tcol}" stroke-width="1.2"/><text y="3.6" class="mins" fill="${sg.tight?"#FFF5E8":tcol}">${lab}</text></g>`)}
     s+=`<g class="seg ${cls}"${cls==="mine"?` data-it="${sg.i}"`:""}>${g}</g>`})};
   if(RO&&osegs.length)drawSegs(osegs,"#C2459A","theirs",-1.25,false);
   drawSegs(segs,"#1F6FB8","mine",1,true);
   // start / exit pins
   if(R.gate){const g=R.gate;const t=`START ${fmtP(R.items[0].t)}`;const w=t.length*5.9+14;s+=px(g.x,g.y,`<g transform="translate(0 -19)"><rect x="${-w/2}" y="-8" width="${w}" height="16" rx="8" fill="#1F6FB8" stroke="#FFF5E8" stroke-width="1.2"/><text y="3.6" class="pilltxt">${t}</text></g>`,"startpin")}
-  // decisions: ⚡ beside the stage you'd be giving up
+  // stages: a small pin on the real spot; the name sits off to the side (away from the middle of the park, where paths cross),
+  // with your set times listed under it
+  const DIRS={"T-Mobile":[0,1],"Miller Lite":[-.25,-1],"Tito's":[.6,-.8],"American Express":[.15,1],"Snapchat":[1,.3],"BMI":[-.25,1],"Beatbox":[1,.45]};
   const forkN={};
-  // stages + numbered time tags
-  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];const lw=g.lab.length*6.7+14;
-    s+=px(g.x,g.y,`<rect x="${-lw/2}" y="-9.5" width="${lw}" height="19" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.4:1.2}"/><text y="4.6" fill="${g.ink}" class="stlab">${g.lab}</text><title>${esc(name)}${visits.length?": "+visits.map(v=>fmt(v.a.s)+" "+v.a.name).join(", "):""}</title>`,`stage${visits.length?" on":ovis.length?" oon":""}`,visits.length?visits.map(v=>v.i).join(" "):null);
-    if(top&&top.stage===name)s+=px(g.x,g.y,`<text y="27" class="xmark">✕</text><title>X marks your top set: ${esc(top.name)}</title>`);
-    visits.forEach((v,j)=>{const meet=meetIds.has(v.a.id);const tw=66+(meet?16:0);
-      s+=px(g.x,g.y,`<g transform="translate(${lw/2+4} ${-9.5+j*20})"><rect width="${tw}" height="18" rx="9" class="tagbg${meet?" meet":""}"/><circle cx="9" cy="9" r="7.2" class="tagn ${heatOf2(P,v.a.id)}"/><text x="9" y="12.4" class="tagnt ${heatOf2(P,v.a.id)}">${v.n}</text><text x="20" y="12.6" class="tagtt">${fmtP(v.a.s)}</text>${meet?`<text x="${tw-9}" y="12.6" class="tagtt" text-anchor="middle">🤝</text>`:""}</g><title>${v.n}. ${fmtP(v.a.s)}–${fmtP(v.a.e)} ${esc(v.a.name)}${meet?" · meet-up":""}</title>`,"tag",v.i)});
-    if(RO&&!visits.length&&ovis.length)s+=px(g.x,g.y,`<circle cx="${lw/2+6}" cy="-8" r="4.5" fill="#C2459A" stroke="#FFF5E8" stroke-width="1.4"/><title>${esc(O.name)}: ${ovis.map(a=>fmt(a.s)+" "+a.name).join(", ")}</title>`)}
-  R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const lw=g.lab.length*6.7+14;const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
-    s+=px(g.x,g.y,`<g transform="translate(${-lw/2-11-(n-1)*18} 0)"><circle r="8" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.4" class="boltic">⚡</text></g><title>${fmt(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.i)});
+  for(const [name,g] of Object.entries(STAGEXY)){const visits=R.items.filter(it=>it.k==="set"&&it.a.stage===name);const ovis=RO?RO.pl.filter(a=>a.stage===name):[];
+    let [dx,dy]=DIRS[name]||[0,1];const L=Math.hypot(dx,dy);dx/=L;dy/=L;const D0=22,ax=dx*D0,ay=dy*D0;
+    const lw=g.lab.length*6.7+14,rows=visits.map(v=>({v,meet:meetIds.has(v.a.id),top:top&&top.id===v.a.id})),rw=r=>62+(r.meet?16:0)+(r.top?13:0);
+    const H=19+rows.length*20;const top0=dy<-.3?-H:dy>.3?0:-9.5;const xAt=w=>dx<-.3?-w:dx>.3?0:-w/2;
+    let blk=`<line x1="0" y1="0" x2="${ax.toFixed(1)}" y2="${ay.toFixed(1)}" class="leader"/><circle r="6" fill="${g.c}" stroke="#FFF5E8" stroke-width="2"/>`;
+    blk+=`<g transform="translate(${ax.toFixed(1)} ${ay.toFixed(1)})"><rect x="${xAt(lw)}" y="${top0}" width="${lw}" height="19" rx="4" fill="${g.c}" stroke="#FFF5E8" stroke-width="${visits.length?2.2:1.2}"/><text x="${xAt(lw)+lw/2}" y="${top0+14.1}" fill="${g.ink}" class="stlab">${g.lab}</text>`;
+    rows.forEach((r,j)=>{const w=rw(r),x=xAt(w),y=top0+21+j*20,h=heatOf2(P,r.v.a.id);
+      blk+=`<g data-it="${r.v.i}" class="tag"><rect x="${x}" y="${y}" width="${w}" height="18" rx="9" class="tagbg${r.meet?" meet":""}"/><circle cx="${x+9}" cy="${y+9}" r="7.2" class="tagn ${h}"/><text x="${x+9}" y="${y+12.4}" class="tagnt ${h}">${r.v.n}</text><text x="${x+20}" y="${y+12.6}" class="tagtt">${fmtP(r.v.a.s)}</text>${r.top?`<text x="${x+w-(r.meet?24:8)}" y="${y+13.5}" class="xmark" font-size="13">✕</text>`:""}${r.meet?`<text x="${x+w-9}" y="${y+12.6}" class="tagtt" text-anchor="middle">🤝</text>`:""}<title>${r.v.n}. ${fmtP(r.v.a.s)}–${fmtP(r.v.a.e)} ${esc(r.v.a.name)}${r.top?" · your top set":""}${r.meet?" · meet-up":""}</title></g>`});
+    blk+=`</g><title>${esc(name)}${visits.length?": "+visits.map(v=>fmtP(v.a.s)+" "+v.a.name).join(", "):""}</title>`;
+    if(RO&&!visits.length&&ovis.length)blk+=`<circle cx="7" cy="-7" r="4.5" fill="#C2459A" stroke="#FFF5E8" stroke-width="1.4"><title>${esc(O.name)}: ${ovis.map(a=>fmtP(a.s)+" "+a.name).join(", ")}</title></circle>`;
+    s+=px(g.x,g.y,blk,`stage${visits.length?" on":ovis.length?" oon":""}`)}
+  // decisions: ⚡ on the pin of the stage you'd be giving up
+  R.items.filter(it=>it.k==="decide").forEach(it=>{const g=ST(it.b.stage);const n=forkN[it.b.stage]=(forkN[it.b.stage]||0)+1;
+    s+=px(g.x,g.y,`<g transform="translate(${-11-(n-1)*16} -11)"><circle r="7.5" fill="#E5432B" stroke="#FFF5E8" stroke-width="1.4"/><text y="3.3" class="boltic">⚡</text></g><title>${fmtP(it.b.s)} ${esc(it.b.name)}: the set you'd skip for ${esc(it.a.name)}</title>`,"fork",it.i)});
   // compass + attribution stay put in the corners
   s+=px(MV.x+k0*24,MV.y+k0*26,`<circle r="17" fill="#FFF5E8" opacity=".92"/><path d="M0,-12 L5,4 L0,1 L-5,4 Z" fill="#E5432B"/><text y="13.5" class="compass">N</text>`);
   s+=px(MV.x+MV.w-k0*6,MV.y+MV.h-k0*6,`<text class="osm" text-anchor="end">© OpenStreetMap contributors</text>`);
@@ -1485,10 +1497,14 @@ function renderMap(){
   const itPts={};const addP=(i,...ps)=>{(itPts[i]=itPts[i]||[]).push(...ps)};
   segs.forEach(sg=>addP(sg.i,sg.p,sg.q));R.items.forEach(it=>{if(it.k==="set")addP(it.i,ST(it.a.stage));if(it.k==="decide")addP(it.i,ST(it.a.stage),ST(it.b.stage));if(it.at)addP(it.i,it.at);if(it.k==="disc")addP(it.i,ST(it.b.stage));if(it.k==="gate")addP(it.i,it.g,ST(it.to))});
   if(MDATA&&MDATA.day!==day){MVfit="park";mapFocus=null}
-  MDATA={R,RO,P,O,meetIds,used,segs,osegs,top,itPts,day};
+  // the walk to show by default: the next one if today is this festival day, otherwise none (tap a step, or turn on all walk times in the Key)
+  let nextI=null;try{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).map(p=>[p.type,p.value]));
+    const today={"2026-10-09":"Fri","2026-10-10":"Sat","2026-10-11":"Sun"}[`${parts.year}-${parts.month}-${parts.day}`];
+    if(today===day){const nowM=+parts.hour*60+ +parts.minute;const sg=segs.find(sg=>(R.items[sg.i].t||0)>=nowM-5);nextI=sg?sg.i:null}}catch(e){}
+  MDATA={R,RO,P,O,meetIds,used,segs,osegs,top,itPts,day,nextI};
   if(!MV||MVfit)applyFit();
   drawMap();
-  updView();
+  updView();document.getElementById("mAllWalk").setAttribute("aria-checked",!!S.ui.allWalk);
   document.getElementById("keyFriendRow").hidden=!showO;if(showO)document.getElementById("keyFriendTxt").textContent=`${VIEW?"Your":first(O.name)+"'s"} path.`;
   // overlay toggle
   document.getElementById("mapOverlay").innerHTML=O?`<button class="switch" id="mapFriendSw" role="switch" aria-checked="${showO}"><i></i><span>Show ${VIEW?"my":esc(first(O.name))+"'s"} path in pink${RO&&meetIds.size?` · ${meetIds.size} meet-up${meetIds.size===1?"":"s"} 🤝`:""}</span></button>`:(VIEW?"":`<span class="small muted">Add a friend on the Crew tab to see their path here too.</span>`);
@@ -1516,7 +1532,7 @@ function markFocus(){const svg=document.getElementById("mapSvg");if(!svg)return;
   svg.querySelectorAll("[data-it]").forEach(g=>g.classList.toggle("hl",mapFocus!=null&&g.getAttribute("data-it").split(" ").includes(String(mapFocus))));
   document.querySelectorAll("#itin li[data-it]").forEach(li=>li.classList.toggle("hl",mapFocus!=null&&li.dataset.it===String(mapFocus)));
   if(mapFocus!=null&&!svg.querySelector(".hl"))svg.classList.remove("focus")}
-function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;markFocus();return}mapFocus=i;
+function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;drawMap();return}mapFocus=i;drawMap();
   const pts=MDATA&&MDATA.itPts[i];
   if(fromList&&pts&&pts.length){const b=bboxOf(pts);const v=fitBox(b,90,360);if(v.w<MV.w||b[0]<MV.x||b[2]>MV.x+MV.w||b[1]<MV.y||b[3]>MV.y+MV.h){MVfit=null;MV=v;drawMap();updView()}}
   markFocus();if(fromList&&window.innerWidth<=900){const c=document.querySelector(".mapcard"),t=document.querySelector(".tabs");window.scrollTo({top:c.getBoundingClientRect().top+window.scrollY-(t?t.offsetHeight:0)-8,behavior:"smooth"})}}
@@ -1538,7 +1554,8 @@ function focusIt(i,fromList){i=String(i);if(mapFocus===i){mapFocus=null;markFocu
   document.getElementById("mView").onclick=()=>{MVfit=MVfit==="park"&&MDATA&&MDATA.segs.length?"route":"park";applyFit();renderMap()};
   const key=document.getElementById("mapKey"),kb=document.getElementById("mKeyBtn");
   const setKey=o=>{key.hidden=!o;kb.setAttribute("aria-expanded",o);kb.classList.toggle("on",o)};
-  kb.onclick=()=>setKey(key.hidden);document.getElementById("mKeyX").onclick=()=>setKey(false);
+  kb.onclick=()=>setKey(key.hidden);
+  document.getElementById("mAllWalk").onclick=()=>{S.ui.allWalk=!S.ui.allWalk;save();renderMap()};document.getElementById("mKeyX").onclick=()=>setKey(false);
   let rzT=null;window.addEventListener("resize",()=>{if(S.ui.tab!=="map"||!MV)return;clearTimeout(rzT);rzT=setTimeout(()=>{if(MVfit)applyFit();else setMV(MV,true);drawMap()},120)})})();
 document.querySelectorAll("#mapDays button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;mapFocus=null;save();renderMap()});
 document.querySelectorAll("#mapGates button").forEach(b=>b.onclick=()=>{S.ui.gate=b.dataset.gate==="auto"?null:b.dataset.gate;save();renderMap()});
