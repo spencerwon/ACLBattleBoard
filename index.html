@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ACL Battle Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}
+/* Layout: poster masthead + playlist bar, tab bar, one working panel per tab; schedule mirrors the official stage grid. */
+:root{
+  --forest:#163C29; --poppy:#E5432B; --marigold:#F4A12B; --sky:#5EC6F1; --blue:#2F79C2;
+  --bg:#EC86BC; --surface:#FFF5E8; --surface-2:#FCE7D4; --ink:#163C29; --ink-soft:#4A6656; --line:#16402B22; --accent:#E5432B; --on-accent:#FFF5E8;
+  --hot:#E5432B; --warm:#F4A12B; --cool:#5EC6F1; --cold:#2F79C2; --unrated:#C9BBAE; --on-heat:#163C29; --on-hot:#FFF5E8;
+  --grid-bg:#2F79C2; --grid-cell:#8ED6F5; --grid-ink:#0E2A1C; --apple:#FA2D48;
+  --f-display:"Anton","Impact","Arial Narrow Bold",sans-serif;
+  --f-body:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E2519; --surface:#163627; --surface-2:#1D4532; --ink:#FFF0E0; --ink-soft:#BFD3C6; --line:#FFF0E01f; --accent:#F0609F; --on-accent:#0E2519;
+  --unrated:#4B6357; --grid-bg:#0B1E14; --grid-cell:#1B4A6B; --grid-ink:#EAF6FF; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E2519; --surface:#163627; --surface-2:#1D4532; --ink:#FFF0E0; --ink-soft:#BFD3C6; --line:#FFF0E01f; --accent:#F0609F; --on-accent:#0E2519;
+  --unrated:#4B6357; --grid-bg:#0B1E14; --grid-cell:#1B4A6B; --grid-ink:#EAF6FF; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 60px;display:grid;gap:0}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;letter-spacing:.01em;text-wrap:balance;margin:0;text-transform:uppercase}
+.mast{display:grid;gap:6px;text-align:center;padding-block:10px 14px;justify-items:center}
+.mast .kick{font-weight:800;font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+.mast h1{font-size:clamp(38px,8vw,78px);line-height:.92}
+.mast h1 span{color:var(--accent)}
+.mast .dates{font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.sparkle{display:inline-block;color:var(--accent);margin-inline:8px}
+.applebar{display:inline-flex;align-items:center;gap:10px;background:var(--forest);color:#FFF5E8;text-decoration:none;border-radius:999px;padding:8px 18px 8px 8px;font-weight:800;margin-top:6px}
+.applebar .dot{width:30px;height:30px;border-radius:50%;background:var(--apple);display:grid;place-items:center;font-size:13px}
+.applebar small{font-weight:600;opacity:.8}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding-block:10px;background:var(--bg)}
+.tab{border:2px solid var(--ink);background:transparent;font-family:var(--f-display);font-size:18px;letter-spacing:.04em;text-transform:uppercase;padding:6px 16px;border-radius:999px}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.panel{display:grid;gap:16px;padding-top:12px}
+.card{background:var(--surface);border-radius:var(--r);padding:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--ink-soft)} .small{font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--ink)}
+.heat{font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:11px;padding:3px 9px;border-radius:999px;color:var(--on-heat);white-space:nowrap}
+.heat.hot{background:var(--hot);color:var(--on-hot)} .heat.warm{background:var(--warm)} .heat.cool{background:var(--cool)} .heat.cold{background:var(--cold);color:var(--on-hot)} .heat.unrated{background:var(--unrated)}
+.btn{border:2px solid var(--ink);background:var(--surface);font-weight:800;border-radius:999px;padding:8px 16px;font-size:14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:transparent}
+.btn:hover{border-color:var(--accent)}
+input[type=text],input[type=search],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:2px solid var(--ink);border-radius:10px;padding:8px 10px;min-width:0}
+textarea{width:100%;min-height:70px;font-size:12px}
+.tnum{font-variant-numeric:tabular-nums}
+.score{font-family:var(--f-display);font-size:30px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.score small{font-family:var(--f-body);font-size:11px;font-weight:800;letter-spacing:.06em;display:block;color:var(--ink-soft)}
+.pill{border:2px solid var(--ink);background:transparent;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.switch{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:14px;border:0;background:transparent;padding:0}
+.switch i{width:42px;height:24px;border-radius:999px;background:var(--unrated);position:relative;flex:none}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);transition:left .15s}
+.switch[aria-checked="true"] i{background:var(--accent)}
+.switch[aria-checked="true"] i::after{left:21px}
+/* filters */
+#filterCard{margin-top:12px}
+#filterCard summary::-webkit-details-marker{display:none}
+.filters{display:grid;gap:10px}
+.fgroup{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fgroup > b{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);min-width:84px}
+.range{position:relative;height:28px;flex:1 1 220px;min-width:180px}
+.range input{position:absolute;left:0;right:0;width:100%;top:6px;margin:0;pointer-events:none;-webkit-appearance:none;appearance:none;background:transparent;height:16px}
+.range input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 2px var(--ink)}
+.range input::-moz-range-thumb{pointer-events:auto;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--surface)}
+.range .track{position:absolute;left:0;right:0;top:12px;height:5px;border-radius:9px;background:var(--surface-2)}
+.range .fill{position:absolute;top:12px;height:5px;border-radius:9px;background:var(--accent)}
+.fcount{font-weight:800;font-size:13px}
+/* rating buttons */
+.rate{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rate button{border:2px solid var(--line);background:var(--surface-2);border-radius:12px;padding:6px 4px;font-size:20px;line-height:1;display:grid;gap:3px;justify-items:center}
+.rate button span{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.rate button[aria-pressed="true"]{border-color:var(--ink);background:var(--marigold)}
+.rate button[aria-pressed="true"] span{color:#163C29}
+/* lineup */
+.grid-art{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.art{background:var(--surface);border-radius:var(--r);padding:14px;display:grid;gap:8px;align-content:start;min-width:0;border-top:6px solid var(--unrated)}
+.art.hot{border-top-color:var(--hot)} .art.warm{border-top-color:var(--warm)} .art.cool{border-top-color:var(--cool)} .art.cold{border-top-color:var(--cold)}
+.art h3{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px;margin:0}
+.meta dt{font-weight:800;text-transform:uppercase;font-size:10.5px;letter-spacing:.1em;color:var(--ink-soft);padding-top:2px}
+.meta dd{margin:0;min-width:0}
+.pop{display:flex;align-items:center;gap:8px}
+.popbar{flex:1;height:7px;border-radius:9px;background:var(--surface-2);overflow:hidden;max-width:140px}
+.popbar i{display:block;height:100%;background:var(--accent);border-radius:9px}
+.songs{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.songs li{display:flex;gap:4px;align-items:stretch}
+.songs li > a,.songs li > button.sp{flex:1;min-width:0;display:flex;gap:8px;align-items:center;text-decoration:none;padding:6px 8px;border-radius:8px;background:var(--surface-2);font-size:13.5px;font-weight:600;border:0;text-align:left}
+.songs li > a:hover,.songs li > button.sp:hover{background:var(--marigold);color:#163C29}
+.songs li > button.sp.playing{background:var(--forest);color:#FFF5E8}
+.songs .play{flex:none;width:24px;height:24px;border-radius:50%;background:var(--apple);color:#fff;display:grid;place-items:center;font-size:10px}
+.songs .play.search{background:var(--ink-soft)}
+.songs .tag{margin-left:auto;font-weight:700;color:var(--ink-soft);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.songs .out{flex:none;display:grid;place-items:center;width:36px;border-radius:8px;background:var(--surface-2);text-decoration:none;font-weight:800;font-size:13px}
+.setline{font-weight:800;font-size:13px}
+.topline{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.topline > div{min-width:0}
+.needs{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.04em}
+/* rate & battle stage */
+.stagebar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.meter{height:10px;background:var(--surface-2);border-radius:9px;overflow:hidden;flex:1 1 200px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--cold),var(--cool),var(--warm),var(--hot))}
+.deckwrap{display:grid;justify-items:center;gap:12px;padding-block:6px}
+.swipe{width:min(460px,100%);background:var(--surface);border-radius:22px;padding:18px;display:grid;gap:10px;box-shadow:0 18px 40px -18px #163C2988, 0 0 0 1px var(--line);touch-action:pan-y;user-select:none;-webkit-user-select:none;position:relative;transition:transform .25s ease, opacity .25s ease;cursor:grab}
+.swipe.dragging{transition:none;cursor:grabbing}
+.swipe h2{font-size:clamp(34px,7vw,48px);line-height:.95;overflow-wrap:anywhere}
+.swipe .stamp{position:absolute;top:18px;padding:6px 12px;border:4px solid currentColor;border-radius:10px;font-family:var(--f-display);font-size:26px;text-transform:uppercase;opacity:0;pointer-events:none;background:var(--surface)}
+.swipe .stamp.l{right:16px;color:var(--cold);transform:rotate(8deg)} .swipe .stamp.r{left:16px;color:var(--warm);transform:rotate(-8deg)} .swipe .stamp.u{left:50%;top:auto;bottom:24px;transform:translateX(-50%);color:var(--hot)} .swipe .stamp.d{left:50%;transform:translateX(-50%);color:var(--cool)}
+.bigrate{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(460px,100%)}
+.bigrate button{border:0;border-radius:50%;aspect-ratio:1;max-width:92px;width:100%;justify-self:center;display:grid;place-items:center;font-size:clamp(28px,7vw,40px);background:var(--surface);position:relative;transition:transform .12s}
+.bigrate button span{position:absolute;bottom:-20px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.bigrate .b0{box-shadow:0 0 0 4px var(--hot),0 8px 18px -8px #163C2999} .bigrate .b1{box-shadow:0 0 0 4px var(--warm),0 8px 18px -8px #163C2999} .bigrate .b2{box-shadow:0 0 0 4px var(--cool),0 8px 18px -8px #163C2999} .bigrate .b3{box-shadow:0 0 0 4px var(--cold),0 8px 18px -8px #163C2999}
+.bigrate button:hover{transform:scale(1.06)}
+.hint{font-size:12px;color:var(--ink-soft);text-align:center}
+.arena{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.vs{align-self:center;font-family:var(--f-display);font-size:44px;color:var(--accent);text-align:center;display:grid;gap:8px;justify-items:center}
+.fighter{background:var(--surface);border-radius:var(--r);padding:16px;display:grid;gap:10px;align-content:start;min-width:0;border:3px solid transparent}
+.fighter:hover{border-color:var(--accent)}
+.fighter h2{font-size:clamp(28px,4vw,40px);line-height:1;overflow-wrap:anywhere}
+.fighter .pick{font-size:18px;padding:12px;width:100%;font-family:var(--f-display);letter-spacing:.05em;text-transform:uppercase}
+.clashflag{background:var(--poppy);color:#FFF5E8;font-family:var(--f-body);font-weight:800;border-radius:10px;padding:6px 10px;font-size:12px;text-align:center;max-width:120px}
+.context{background:var(--forest);color:#FFF5E8;border-radius:12px;padding:10px 14px;font-weight:600;font-size:14px}
+.context .up{color:#9BE7A8} .context .dn{color:#FFB4A6}
+.follow{background:var(--surface);border-radius:var(--r);padding:18px;display:grid;gap:12px;border:3px solid var(--marigold);max-width:640px;margin-inline:auto;width:100%}
+.follow h3{font-size:26px}
+.follow .opts{display:grid;gap:8px}
+.follow .opts .btn{text-align:left;border-radius:12px}
+.flash{animation:flash .35s ease}
+@keyframes flash{from{opacity:.75;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* rankings */
+.rankhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.tierhead{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.tierhead h3{font-size:22px}
+.ranklist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ranklist li{display:grid;grid-template-columns:40px 1fr auto 56px;gap:10px;align-items:center;background:var(--surface);border-radius:10px;padding:8px 12px;border-left:7px solid var(--unrated)}
+.ranklist li.hot{border-left-color:var(--hot)} .ranklist li.warm{border-left-color:var(--warm)} .ranklist li.cool{border-left-color:var(--cool)} .ranklist li.cold{border-left-color:var(--cold)}
+.ranklist .n{font-family:var(--f-display);font-size:22px;text-align:right}
+.ranklist .nm{font-weight:800;min-width:0;overflow-wrap:anywhere}
+.ranklist .sub{font-size:12px;color:var(--ink-soft);font-weight:500}
+.ranklist .sc{font-family:var(--f-display);font-size:24px;text-align:right}
+.ranklist .rec{font-size:11.5px;color:var(--ink-soft);font-weight:700;white-space:nowrap}
+.two{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.two > *{min-width:0}
+.dist svg{width:100%;height:auto;display:block;color:var(--ink)}
+details.foot{background:var(--surface);border-radius:var(--r);padding:12px 16px}
+details.foot summary{cursor:pointer;font-weight:800;font-size:13px}
+details.foot p{font-size:13px;max-width:70ch}
+.idchip{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--surface-2);padding:3px 8px;border-radius:6px}
+/* schedule */
+.legend{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sched-scroll{overflow-x:auto;border-radius:var(--r);background:var(--grid-bg);padding:10px}
+.sched{position:relative;display:grid;grid-template-columns:54px repeat(7,minmax(100px,1fr));min-width:820px;column-gap:6px}
+.sched .head{font-family:var(--f-display);text-transform:uppercase;font-size:15px;text-align:center;background:var(--grid-cell);color:var(--grid-ink);border-radius:6px;padding:6px 2px;line-height:1.05;display:grid;place-items:center;min-height:44px}
+.col{position:relative;background:#ffffff14;border-radius:6px}
+.times{position:relative}
+.times span{position:absolute;right:4px;font-family:var(--f-display);font-size:13px;color:#FFF5E8;transform:translateY(-50%)}
+.set{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 5px;overflow:hidden;display:grid;align-content:center;text-align:center;cursor:pointer;border:0;color:var(--on-heat);background:var(--unrated);font-family:inherit;gap:1px}
+.set b{font-family:var(--f-display);font-weight:400;text-transform:uppercase;font-size:13.5px;line-height:1.05;overflow-wrap:anywhere}
+.set small{font-size:10.5px;font-weight:700;opacity:.9}
+.set .sv{font-family:var(--f-display);font-size:15px}
+.set.hot{background:var(--hot);color:var(--on-hot)} .set.warm{background:var(--warm)} .set.cool{background:var(--cool)} .set.cold{background:var(--cold);color:var(--on-hot)}
+.set.plan{box-shadow:0 0 0 3px #FFF5E8, 0 0 0 6px var(--forest)}
+.set.dim{opacity:.6}
+.planlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.planlist li{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
+.planlist .t{font-weight:800}
+.clash{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:8px 12px}
+.dialog{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:50;padding:16px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;z-index:60;max-width:calc(100% - 32px);text-align:center}
+.note{font-size:12.5px;color:var(--ink-soft)}
+.welcome{display:grid;gap:10px;border:3px solid var(--marigold);margin-top:12px}
+@media (max-width:760px){
+  .arena{grid-template-columns:1fr}
+  .vs{font-size:32px}
+  .two{grid-template-columns:1fr}
+  .ranklist li{grid-template-columns:32px 1fr 50px}
+  .ranklist li .rec{display:none}
+  .planlist li{grid-template-columns:78px 1fr}
+  .planlist li .heat{display:none}
+  .fgroup > b{min-width:100%}
+}
+.coffee{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;gap:6px;background:#F7A8CF;color:#163C29;border:0;border-radius:999px;padding:8px 16px;font-weight:800;font-size:13px;text-decoration:none;box-shadow:0 0 0 2px #163C29,0 0 0 5px #FFF5E8,0 0 0 7px #E5432B,0 10px 22px -8px #163C29aa}
+.coffee:hover{background:#FFC2DF;box-shadow:0 0 0 2px #163C29,0 0 0 5px #FFF5E8,0 0 0 7px #F4A12B,0 10px 22px -8px #163C29aa}
+@media (max-width:760px){.wrap{padding-bottom:84px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="kick">Rank it your way · Austin City Limits 25 Years</div>
+    <h1>ACL <span>Battle</span> Board</h1>
+    <div class="dates"><span class="sparkle">✦</span>Weekend Two · Oct 9–11 · Zilker Park<span class="sparkle">✦</span></div>
+    <a class="applebar" href="https://music.apple.com/us/playlist/acl2026full/pl.u-leylM7YHjLy2oR5" target="_blank" rel="noopener"><span class="dot">▶</span><span>Play ACL2026Full in Apple Music <small>· 300 songs</small></span></a>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" aria-selected="false" data-tab="rate">Rate &amp; Battle</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="rank">Rankings</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="sched">Heat Schedule</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="lineup">Lineup</button>
+  </nav>
+
+  <div class="card welcome" id="welcome" hidden>
+    <h2 style="font-size:24px">Start your board</h2>
+    <p class="small" style="margin:0">Your board lives in this browser and saves after every tap. Add your name so friends can tell your rankings apart.</p>
+    <div class="row"><input type="text" id="welcomeName" placeholder="Your name" aria-label="Your name" style="flex:1 1 200px"><button class="btn primary" id="welcomeGo">Start rating</button></div>
+  </div>
+
+  <details class="card" id="filterCard">
+    <summary class="row" style="justify-content:space-between;cursor:pointer;list-style:none"><b style="font-family:var(--f-display);font-size:20px;letter-spacing:.03em;text-transform:uppercase;font-weight:400">Filters ▾</b><span class="fcount" id="fcount"></span></summary>
+    <div class="filters" style="margin-top:12px">
+      <div class="fgroup"><b>Day</b><span id="fDays" class="row" style="gap:6px"></span></div>
+      <div class="fgroup"><b>Time</b><div class="range"><div class="track"></div><div class="fill" id="tfill"></div><input type="range" id="tFrom" min="750" max="1320" step="15" aria-label="From time"><input type="range" id="tTo" min="750" max="1320" step="15" aria-label="To time"></div><span class="small tnum" id="tLabel" style="min-width:110px;font-weight:800"></span></div>
+      <div class="fgroup"><b>Genre</b><span id="fGenres" class="row" style="gap:6px"></span></div>
+      <div class="fgroup"><b>Popularity</b><span id="fPops" class="row" style="gap:6px"></span></div>
+      <div class="row"><input type="search" id="q" placeholder="Search artist, hometown, song" aria-label="Search" style="flex:1 1 200px"><button class="btn ghost" id="fClear">Clear filters</button></div>
+    </div>
+  </details>
+
+  <section class="panel" id="p-rate" hidden>
+    <div class="card stagebar">
+      <div class="meter" aria-hidden="true"><i id="meterFill" style="width:0%"></i></div>
+      <span class="small tnum" id="meterText" style="font-weight:700"></span>
+      <button class="switch" id="h2hSwitch" role="switch" aria-checked="true"><i></i><span>Head-to-head placement</span></button>
+    </div>
+    <div id="context"></div>
+    <div id="stage"></div>
+    <div class="row" style="justify-content:center" id="stageBtns"></div>
+  </section>
+
+  <section class="panel" id="p-rank" hidden>
+    <div class="two">
+      <div style="display:grid;gap:8px;align-content:start">
+        <div class="rankhead"><h2 style="font-size:30px" id="rankTitle">My ranking</h2><span class="idchip" id="bidChip"></span></div>
+        <div id="ranklist"></div>
+      </div>
+      <div style="display:grid;gap:16px;align-content:start">
+        <div class="card dist" style="display:grid;gap:8px">
+          <h3 style="font-size:22px">Score spread</h3>
+          <div id="distChart"></div>
+        </div>
+        <div class="card" style="display:grid;gap:10px">
+          <h3 style="font-size:22px">Compare with a friend</h3>
+          <label class="small" for="friendCode" style="font-weight:800">Paste a friend's ranking code</label>
+          <textarea id="friendCode" placeholder="ACL26…"></textarea>
+          <div class="row"><button class="btn primary" id="loadFriend">Compare</button><button class="btn ghost" id="clearFriend">Clear</button></div>
+          <div id="friendOut"></div>
+        </div>
+        <div class="card" style="display:grid;gap:10px">
+          <h3 style="font-size:22px">Your board</h3>
+          <input type="text" id="myName" placeholder="Your name" aria-label="Your name">
+          <p class="small muted" style="margin:0">Board ID <span class="idchip" id="bidChip2"></span> keeps your board separate from anyone with the same name.</p>
+          <div class="row"><button class="btn primary" id="copyCode">Copy my ranking code</button></div>
+          <p class="small muted" style="margin:0">Send the code to friends to compare. It's also your backup: paste it on another device and choose Restore to pick up exactly where you left off.</p>
+          <div class="row"><button class="btn ghost" id="restoreBtn">Restore my board from a code</button></div>
+          <div id="restoreBox" hidden style="display:grid;gap:8px"><textarea id="restoreCode" placeholder="ACL26…"></textarea><div class="row"><button class="btn primary" id="restoreYes">Replace this board</button><button class="btn ghost" id="restoreNo">Cancel</button></div></div>
+        </div>
+      </div>
+    </div>
+    <details class="foot">
+      <summary>How scoring works</summary>
+      <p>❤️ Love scores 8.1–10.0, 👍 Like 6.1–8.0, 😐 Meh 4.1–6.0 and 👎 Nope 0.1–4.0. Your rating picks the band. Head-to-head battles then set the order inside the band: each newly rated artist battles members of its band (a binary search, so a band of 15 takes about 4 battles) until its spot is clear. Scores are spread across the band on a bell curve, so the first ❤️ sits at 9.0, and a second ❤️ that beats it lands at 9.5 while the first drops to 8.5. As a band fills up, neighbours can share a score, but the numbered order never ties.</p>
+      <p>With head-to-head placement switched off, a newly rated artist sits at the middle of its band at the band's centre score until you battle it.</p>
+      <p>A lower-rated act can beat a higher-rated one in a set-clash battle without changing bands, because genre and mood don't always line up. You choose whether to move either act or keep both ratings.</p>
+      <p id="syncNote"></p>
+      <div class="row"><button class="btn ghost" id="resetBtn">Reset my board</button><span id="resetConfirm" hidden class="row small"><span>Erase every rating and battle?</span><button class="btn primary" id="resetYes">Yes, reset</button><button class="btn ghost" id="resetNo">Keep them</button></span></div>
+    </details>
+  </section>
+
+  <section class="panel" id="p-sched" hidden>
+    <div class="card row" style="justify-content:space-between">
+      <div class="row" id="dayBtns" role="group" aria-label="Day">
+        <button class="pill" data-day="Fri">Fri 10/9</button><button class="pill" data-day="Sat">Sat 10/10</button><button class="pill" data-day="Sun">Sun 10/11</button>
+      </div>
+      <div class="legend"><span class="heat hot">❤️ Hot</span><span class="heat warm">👍 Warm</span><span class="heat cool">😐 Cool</span><span class="heat cold">👎 Cold</span><span class="heat unrated">Unrated</span><span class="chip">Ring = your plan</span></div>
+    </div>
+    <p class="note" style="margin:0">Tap any set to play its songs, rate it, or battle it against whatever it overlaps.</p>
+    <div class="sched-scroll"><div class="sched" id="sched"></div></div>
+    <div class="two">
+      <div class="card" style="display:grid;gap:10px;align-content:start">
+        <h3 style="font-size:22px">Your plan for <span id="planDay"></span></h3>
+        <p class="small muted" style="margin:0">Your highest-ranked sets go first; a set overlapping one you've already got by more than 15 minutes drops out unless you picked it head to head. 👎 sets never make the plan.</p>
+        <ol class="planlist" id="planlist"></ol>
+      </div>
+      <div class="card" style="display:grid;gap:10px;align-content:start">
+        <h3 style="font-size:22px">Clashes to settle</h3>
+        <p class="small muted" style="margin:0">Overlapping sets where both acts are ❤️ or 👍.</p>
+        <div id="clashes" style="display:grid;gap:6px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-lineup" hidden>
+    <div class="row" style="justify-content:space-between">
+      <select id="fSort" aria-label="Sort"><option value="time">Sort: day &amp; time</option><option value="rank">Sort: my ranking</option><option value="pop">Sort: popularity</option><option value="name">Sort: A–Z</option></select>
+      <button class="btn ghost" id="copyPlaylist">Copy song list</button>
+    </div>
+    <div class="grid-art" id="lineup"></div>
+    <p class="note">Red ▶ plays a 30-second preview right here; ↗ opens the full song in Apple Music. Grey ▶ means the song isn't in the playlist yet, so it opens a search. Popularity is approximate Spotify monthly listeners (≈ marks an estimate). Headliner end times are estimated; check the ACL app on the day.</p>
+  </section>
+</div>
+<div id="dialogHost"></div>
+<a class="coffee" href="https://venmo.com/u/speence" target="_blank" rel="noopener" aria-label="Buy me a coffee on Venmo, @speence">☕ Buy me a coffee</a>
+
+<script>
+const MODE="friends", HOSTED=true, CLOUD=false;
+const RAW=[{"name":"Happy Landing","day":"Fri","stage":"T-Mobile","start":"1:00","end":"1:45","genre":"Folk rock","fam":"Indie","tags":["southern rock","indie folk","fiddle-driven"],"hometown":"Oxford, MS","bestKnownFor":"Rowdy five-piece Ole Miss college-town band; 2026 LP 'Big Sun' and party-ready live shows","listeners":250000,"listenersEstimated":true,"pl":[["Let Me Out","let-me-out/1737518878"],["My, My, My","my-my-my/1745013688"],["Come On South","come-on-south/1844938259"]],"topSongs":[{"title":"Let Me Out","year":2024},{"title":"Golden","year":2024},{"title":"My, My, My","year":2025},{"title":"Come On South","year":2026}]},{"name":"Bella Kay","day":"Fri","stage":"T-Mobile","start":"2:30","end":"3:15","genre":"Indie pop","fam":"Pop","tags":["bedroom pop","confessional","pop-rock"],"hometown":"Houston, TX","bestKnownFor":"'Iloveitiloveitiloveit' went Top 20 on the Hot 100 and No. 2 in the UK; Texas-raised Atlantic signee","listeners":20000000,"listenersEstimated":true,"pl":[["iloveitiloveitiloveit","iloveitiloveitiloveit/1867034427"],["The Sick","the-sick/1830111228"],["Steady","steady/6784153608"],["Promise?","promise/6771161775"]],"topSongs":[{"title":"Iloveitiloveitiloveit","year":2026},{"title":"The Sick","year":2025},{"title":"Steady","year":2026},{"title":"Promise?","year":2026}]},{"name":"Jesse Welles","day":"Fri","stage":"T-Mobile","start":"4:15","end":"5:15","genre":"Folk","fam":"Indie","tags":["protest folk","americana","singer-songwriter"],"hometown":"Ozark, AR","bestKnownFor":"Viral one-take protest songs that led to four 2026 Grammy noms; 'Horses' hit No. 2 at AAA radio","listeners":3000000,"listenersEstimated":true,"pl":[["Horses","horses/1790226097"],["War Isn't Murder","war-isnt-murder/1751329066"],["United Health","united-health/1784836836"],["Won’t You Come Out Tonight","wont-you-come-out-tonight/6767564228"]],"topSongs":[{"title":"Horses","year":2025},{"title":"War Isn't Murder","year":2024},{"title":"United Health","year":2024},{"title":"Won't You Come Out Tonight","year":2026}]},{"name":"Turnstile","day":"Fri","stage":"T-Mobile","start":"6:15","end":"7:15","genre":"Hardcore punk","fam":"Rock","tags":["hardcore","alt-rock","mosh pit"],"hometown":"Baltimore, MD","bestKnownFor":"Genre-bending hardcore that crossed over with 'Glow On' and 2025's Grammy-winning 'Never Enough'","listeners":4500000,"listenersEstimated":true,"pl":[["MYSTERY","mystery/1767334316"],["HOLIDAY","holiday/1576430737"],["NEVER ENOUGH","never-enough/1829390812"],["BLACKOUT","blackout/1763046214"]],"topSongs":[{"title":"Mystery","year":2021},{"title":"Holiday","year":2021},{"title":"Never Enough","year":2025},{"title":"Blackout","year":2021}]},{"name":"Kings of Leon","day":"Fri","stage":"T-Mobile","start":"8:15","end":"9:45","genre":"Rock","fam":"Rock","tags":["southern rock","arena rock","garage rock"],"hometown":"Nashville, TN","bestKnownFor":"Followill family band behind 'Sex on Fire' and 'Use Somebody'; ACL 2026 headliner","listeners":27260818,"listenersEstimated":false,"pl":[["Sex On Fire","sex-on-fire/290303003"],["Use Somebody","use-somebody/290303018"],["Closer","closer/290302928"],["Waste a Moment","waste-a-moment/1487726835"]],"topSongs":[{"title":"Sex on Fire","year":2008},{"title":"Use Somebody","year":2008},{"title":"Closer","year":2008},{"title":"Waste a Moment","year":2016}]},{"name":"Radio Free Alice","day":"Fri","stage":"Miller Lite","start":"1:45","end":"2:30","genre":"Post-punk","fam":"Rock","tags":["indie rock","aussie rock","jangly"],"hometown":"Sydney, Australia","bestKnownFor":"Hook-laden Aussie post-punk upstarts; 'Look What You've Done' and debut LP 'What's In Between'","listeners":423428,"listenersEstimated":false,"pl":[["Look What You've Done","look-what-youve-done/1714937661"],["Paris is Gone","paris-is-gone/1714937412"],["Johnny","johnny/1755507548"],["Empty Words","empty-words/1796980079"]],"topSongs":[{"title":"Look What You've Done","year":2023},{"title":"Paris is Gone","year":2023},{"title":"Johnny","year":2024},{"title":"Empty Words","year":2025}]},{"name":"Sienna Spiro","day":"Fri","stage":"Miller Lite","start":"3:30","end":"4:15","genre":"Pop soul","fam":"Pop","tags":["piano ballads","jazz-tinged","confessional"],"hometown":"London, UK","bestKnownFor":"Powerhouse voice behind 'Die on This Hill' (UK No. 9, Hot 100 No. 19); BRIT Critics' Choice buzz","listeners":33265858,"listenersEstimated":false,"pl":[["Die On This Hill","die-on-this-hill/6775655126"],["MAYBE.","maybe/1795807374"],["The Visitor","the-visitor/6768784079"],["You Stole The Show","you-stole-the-show/1892179709"]],"topSongs":[{"title":"Die on This Hill","year":2025},{"title":"MAYBE.","year":2024},{"title":"The Visitor","year":2026},{"title":"You Stole the Show","year":2025}]},{"name":"Paris Paloma","day":"Fri","stage":"Miller Lite","start":"5:15","end":"6:15","genre":"Dark folk-pop","fam":"Indie","tags":["indie folk","feminist anthems","cinematic"],"hometown":"Ashbourne, UK","bestKnownFor":"Viral feminist anthem 'Labour'; new LP 'The Fatal Flaw' (Sept 2026) with anti-AI single 'Miyazaki'","listeners":4000000,"listenersEstimated":true,"pl":[["LABOUR (the cacophony)","labour-the-cacophony/1735597248"],["Good Boy (Radio Edit)","good-boy-radio-edit/1854945470"],["Miyazaki","miyazaki/1879636424"],["drywall","drywall/1717936330"]],"topSongs":[{"title":"Labour","year":2023},{"title":"Good Boy","year":2025},{"title":"Miyazaki","year":2026},{"title":"Drywall","year":2023}]},{"name":"Leon Thomas","day":"Fri","stage":"Miller Lite","start":"7:15","end":"8:15","genre":"R&B","fam":"Hip-Hop/R&B","tags":["neo-soul","psychedelic r&b","guitar-driven"],"hometown":"Brooklyn, NY","bestKnownFor":"Two-time 2026 Grammy winner; 'MUTT' won Best R&B Album and its title track was a breakout hit","listeners":10000000,"listenersEstimated":true,"pl":[["MUTT","mutt/1765022211"],["YES IT IS","yes-it-is/6784504043"],["VIBES DON'T LIE","vibes-dont-lie/1765021947"],["FEELINGS ON SILENT","feelings-on-silent/1765021952"]],"topSongs":[{"title":"MUTT","year":2024},{"title":"YES IT IS","year":2024},{"title":"VIBES DON'T LIE","year":2025},{"title":"Feelings on Silent","year":2023}]},{"name":"Leon Knight","day":"Fri","stage":"BMI","start":"1:45","end":"2:30","genre":"Funk rock","fam":"Rock","tags":["retro funk","glam","unc core"],"hometown":"New York, NY","bestKnownFor":"Prince-style 'Unc Core' funk showman who went viral with 'Yes I Do' (ft. DE'WAYNE)","listeners":150000,"listenersEstimated":true,"pl":[["Yes I Do","yes-i-do/1845114025"],["Hard Pass","hard-pass/1528411569"],["Dirty Dancer","dirty-dancer/1483633946"]],"topSongs":[{"title":"Yes I Do","year":2025},{"title":"Hard Pass","year":2023},{"title":"Dirty Dancer","year":2023}]},{"name":"Girlfriend","day":"Fri","stage":"BMI","start":"3:30","end":"4:15","genre":"Alt-R&B","fam":"Hip-Hop/R&B","tags":["90s r&b","slow jams","southern soul"],"hometown":"Mississippi, US","bestKnownFor":"Kenya Edwards' retro-R&B project; Billboard/Complex 2026 artist to watch, opened for Ella Mai","listeners":300000,"listenersEstimated":true,"pl":[["Tell Me Again","tell-me-again/1802284726"],["Bon Voyage (feat. Tierra Whack)","bon-voyage-feat-tierra-whack/1808063222"],["Deep","deep/1858611584"],["Sticky Situation","sticky-situation/1846400297"]],"topSongs":[{"title":"Tell Me Again","year":2024},{"title":"Bon Voyage","year":2025},{"title":"Deep","year":2025},{"title":"Sticky Situation","year":2025}]},{"name":"Joe Jordan","day":"Fri","stage":"BMI","start":"5:15","end":"6:15","genre":"Folk-country","fam":"Indie","tags":["americana","singer-songwriter","tiktok-grown"],"hometown":"Woonsocket, RI","bestKnownFor":"TikTok-grown dad-of-four songwriter of 'Big Enough Mountain'; Atlantic debut 'The Heart Sessions'","listeners":800000,"listenersEstimated":true,"pl":[["Big Enough Mountain","big-enough-mountain/1828234741"],["Frost On The Pines","frost-on-the-pines/1828463938"]],"topSongs":[{"title":"Big Enough Mountain","year":2024},{"title":"Frost On The Pines","year":2024},{"title":"Don't Tell Alley","year":2025},{"title":"Spiraling Down","year":2025}]},{"name":"S.G. Goodman","day":"Fri","stage":"Beatbox","start":"2:00","end":"2:45","genre":"Americana","fam":"Indie","tags":["southern gothic","alt-country","rural rock"],"hometown":"Hickman, KY","bestKnownFor":"Western Kentucky truth-teller with a haunting yodel-edged voice; 2025 LP 'Planting by the Signs'","listeners":175000,"listenersEstimated":false,"pl":[["Space And Time","space-and-time/1532009045"],["Teeth Marks","teeth-marks/1610230720"],["Snapping Turtle","snapping-turtle/1799811100"],["Old Time Feeling","old-time-feeling/1499565244"]],"topSongs":[{"title":"Space and Time","year":2022},{"title":"Teeth Marks","year":2022},{"title":"Snapping Turtle","year":2025},{"title":"Old Time Feeling","year":2020}]},{"name":"World Famous Pets","day":"Fri","stage":"Beatbox","start":"3:30","end":"4:30","genre":"Art rock","fam":"Rock","tags":["psychedelic","jazz-folk","supergroup"],"hometown":"Los Angeles, CA","bestKnownFor":"Edie Brickell's new band with Matt Chamberlain; self-titled debut out Sept 25, 2026","listeners":30000,"listenersEstimated":true,"pl":[["Propaganda","propaganda/6780532062"],["Hadna Been For You","hadna-been-for-you/6780532058"],["Connected","connected/6780532073"],["Bleeding in the Dark","bleeding-in-the-dark/6780532059"]],"topSongs":[{"title":"Propaganda","year":2026},{"title":"Hadna Been for You","year":2026},{"title":"Connected","year":2026},{"title":"Bleeding in the Dark","year":2026}]},{"name":"Rusowsky","day":"Fri","stage":"Beatbox","start":"5:30","end":"6:30","genre":"Alt-pop","fam":"Pop","tags":["spanish-language","alt-reggaeton","hyperpop"],"hometown":"Madrid, Spain","bestKnownFor":"Madrid producer-singer whose 2025 debut 'Daisy' hit No. 1 in Spain; 'Malibu' went double platinum","listeners":36720101,"listenersEstimated":false,"pl":[["malibU","malibu/1810078255"],["ALTAGAMA","altagama/1798924339"],["BBY ROMEO","bby-romeo/1810536332"],["malibU x pink + pink (Live from NPR's Tiny Desk)","malibu-x-pink-pink-live-from-nprs-tiny-desk/1854990201"]],"topSongs":[{"title":"Malibu","year":2025},{"title":"Altagama","year":2025},{"title":"Bby Romeo","year":2025},{"title":"Pink + Pink","year":2025}]},{"name":"Live","day":"Fri","stage":"Beatbox","start":"7:30","end":"8:30","genre":"Alternative rock","fam":"Rock","tags":["90s alt","post-grunge","arena rock"],"hometown":"York, PA","bestKnownFor":"\"Lightning Crashes\" and the 8x-platinum 1994 album Throwing Copper","listeners":3500000,"listenersEstimated":true,"pl":[["Lightning Crashes","lightning-crashes/1440487152"],["I Alone","i-alone/1884638379"],["Selling the Drama","selling-the-drama/1440486994"],["The Dolphin's Cry","the-dolphins-cry/1440760203"]],"topSongs":[{"title":"Lightning Crashes","year":1994},{"title":"I Alone","year":1994},{"title":"Selling the Drama","year":1994},{"title":"The Dolphin's Cry","year":1999}]},{"name":"Almost Heaven","day":"Fri","stage":"Tito's","start":"12:45","end":"1:30","genre":"Indie dance","fam":"EDM","tags":["bloghouse revival","post-punk","electronic"],"hometown":"Austin, TX","bestKnownFor":"Sweaty 'bloghouse revival' duo (Stefan Barraza & Jaelyn Valero) behind the 2026 debut EP RAW CRANIUM","listeners":15000,"listenersEstimated":true,"pl":[["Hypnoxia","hypnoxia/6806347060"],["Power music (elektrik revival)","power-music-elektrik-revival/6807523671"],["Stricken With Uncertainty","stricken-with-uncertainty/1712246539"]],"topSongs":[{"title":"fever trying to blow","year":2025},{"title":"hypnoxia","year":2025},{"title":"power music (elektrik revival)","year":2026},{"title":"STRICKEN WITH UNCERTAINTY","year":2024}]},{"name":"Cassandra Coleman","day":"Fri","stage":"Tito's","start":"2:00","end":"2:45","genre":"Folk pop","fam":"Indie","tags":["indie folk","singer-songwriter","confessional"],"hometown":"Nashville, TN","bestKnownFor":"\"Bite My Tongue\" from Netflix's Nobody Wants This S2; Jack Antonoff-produced debut \"Coming of Age\"","listeners":400000,"listenersEstimated":true,"pl":[["Bite My Tongue","bite-my-tongue/1843996295"],["Moonbeam","moonbeam/1854442191"],["Coming of Age","coming-of-age/1814731551"],["Dying Star","dying-star/1894385096"]],"topSongs":[{"title":"Bite My Tongue","year":2025},{"title":"Moonbeam","year":2024},{"title":"Coming of Age","year":2024},{"title":"Dying Star","year":2026}]},{"name":"Bo Staloch","day":"Fri","stage":"Tito's","start":"3:15","end":"4:00","genre":"Indie folk","fam":"Indie","tags":["alt-folk","americana","singer-songwriter"],"hometown":"Austin, TX","bestKnownFor":"21-year-old Austin-born, Nashville-based storyteller; breakout \"Springtime Red Tulips\", opened for Zach Bryan","listeners":900000,"listenersEstimated":true,"pl":[["Springtime Red Tulips","springtime-red-tulips/1698091305"],["Your Eyes Tell Stories","your-eyes-tell-stories/1730208344"],["Santa Fe","santa-fe/1766367811"],["Masks","masks/6791004299"]],"topSongs":[{"title":"Springtime Red Tulips","year":2024},{"title":"Your Eyes Tell Stories","year":2024},{"title":"Santa Fe","year":2025},{"title":"Masks","year":2026}]},{"name":"Natasha Bedingfield","day":"Fri","stage":"Tito's","start":"4:30","end":"5:30","genre":"Pop","fam":"Pop","tags":["2000s pop","feel-good","soul pop"],"hometown":"London, UK","bestKnownFor":"\"Unwritten\" — The Hills theme, revived by Anyone But You in 2024","listeners":12000000,"listenersEstimated":true,"pl":[["Unwritten","unwritten/1685076967"],["Pocketful of Sunshine","pocketful-of-sunshine/1429194116"],["These Words","these-words/430514889"],["Love Like This","love-like-this/581672015"]],"topSongs":[{"title":"Unwritten","year":2004},{"title":"Pocketful of Sunshine","year":2008},{"title":"These Words","year":2004},{"title":"Love Like This","year":2007}]},{"name":"Steve Aoki","day":"Fri","stage":"Tito's","start":"6:30","end":"7:30","genre":"EDM / Electro house","fam":"EDM","tags":["big room","cake-throwing","festival edm"],"hometown":"Miami, FL","bestKnownFor":"Dim Mak founder famous for caking fans; hits \"Just Hold On\" and BTS collab \"Waste It on Me\"","listeners":12000000,"listenersEstimated":true,"pl":[["Just Hold On","just-hold-on/1712926789"],["Waste It on Me (feat. BTS)","waste-it-on-me-feat-bts/1439859429"],["Boneless","boneless/1713785069"],["Delirious (Boneless) [feat. Kid Ink]","delirious-boneless-feat-kid-ink/1713785629"]],"topSongs":[{"title":"Just Hold On","year":2016},{"title":"Waste It on Me","year":2018},{"title":"Boneless","year":2013},{"title":"Delirious (Boneless)","year":2014}]},{"name":"Dallas Wax","day":"Fri","stage":"Snapchat","start":"2:00","end":"2:45","genre":"Blues rock","fam":"Rock","tags":["psych rock","southern rock","garage punk"],"hometown":"New York, NY","bestKnownFor":"Raucous NYC five-piece mixing 70s riffs, punk, psychedelia and blues","listeners":5000,"listenersEstimated":true,"pl":[["Mud","mud/1727008721"],["Oh, Oh Well","oh-oh-well/1764321794"],["Girl Like Me","girl-like-me/1836011829"],["The Ride","the-ride/1764322133"]],"topSongs":[{"title":"Mud","year":2025},{"title":"Oh, Oh Well","year":2024},{"title":"Girl Like Me","year":2025},{"title":"The Ride","year":2024}]},{"name":"LP","day":"Fri","stage":"Snapchat","start":"3:30","end":"4:30","genre":"Pop rock","fam":"Pop","tags":["whistle hooks","powerhouse vocals","singer-songwriter"],"hometown":"Huntington Station, NY","bestKnownFor":"Whistled global smash \"Lost on You\"; also wrote for Rihanna and Christina Aguilera","listeners":9000000,"listenersEstimated":true,"pl":[["Lost on You","lost-on-you/1675487260"],["Girls Go Wild (James Krausse Mix)","girls-go-wild-james-krausse-mix/1675516592"],["Muddy Waters","muddy-waters/1675487258"],["Other People","other-people/1675487265"]],"topSongs":[{"title":"Lost on You","year":2016},{"title":"Girls Go Wild","year":2015},{"title":"Muddy Waters","year":2016},{"title":"Other People","year":2016}]},{"name":"Bunt.","day":"Fri","stage":"Snapchat","start":"5:30","end":"6:30","genre":"Stutter house","fam":"EDM","tags":["folk house","melodic house","dance"],"hometown":"Stuttgart, Germany","bestKnownFor":"Stutter-house pioneer; breakout \"Clouds\" (300M+ streams, Billboard Hot Electronic #15)","listeners":8000000,"listenersEstimated":true,"pl":[["Clouds","clouds/1668459118"],["TRIPPIN","trippin/6764649224"],["i need u","i-need-u/1889349101"],["Old Guitar","old-guitar/1643155437"]],"topSongs":[{"title":"Clouds","year":2023},{"title":"Trippin","year":2024},{"title":"i need u","year":2026},{"title":"Old Guitar","year":2016}]},{"name":"The Chainsmokers","day":"Fri","stage":"Snapchat","start":"7:30","end":"8:30","genre":"EDM pop","fam":"EDM","tags":["future bass","festival pop","2010s hits"],"hometown":"New York, NY","bestKnownFor":"\"Closer\" with Halsey — 12 weeks at #1 on the Hot 100","listeners":30000000,"listenersEstimated":true,"pl":[["Closer (feat. Halsey)","closer-feat-halsey/6769147755"],["Something Just Like This","something-just-like-this/1207120448"],["Don't Let Me Down (feat. Daya)","dont-let-me-down-feat-daya/6769147752"],["Roses (feat. ROZES)","roses-feat-rozes/1050203620"]],"topSongs":[{"title":"Closer","year":2016},{"title":"Something Just Like This","year":2017},{"title":"Don't Let Me Down","year":2016},{"title":"Roses","year":2015}]},{"name":"Brigitte Calls Me Baby","day":"Fri","stage":"American Express","start":"1:15","end":"2:00","genre":"Indie rock","fam":"Rock","tags":["new wave","crooner","post-punk"],"hometown":"Chicago, IL","bestKnownFor":"Morrissey-esque croon of Wes Leavins; 2026 ATO album Irreversible","listeners":800000,"listenersEstimated":true,"pl":[["Impressively Average","impressively-average/1706486375"],["Slumber Party","slumber-party/1857886954"],["Eddie My Love","eddie-my-love/1658627612"],["I Danced with Another Love in My Dream","i-danced-with-another-love-in-my-dream/1857886956"]],"topSongs":[{"title":"Impressively Average","year":2022},{"title":"Slumber Party","year":2026},{"title":"Eddie My Love","year":2023},{"title":"I Danced with Another Love in My Dream","year":2026}]},{"name":"Faouzia","day":"Fri","stage":"American Express","start":"2:45","end":"3:30","genre":"Pop","fam":"Pop","tags":["power ballad","dark pop","big vocals"],"hometown":"Carman, Canada","bestKnownFor":"Soaring vocals on \"Tears of Gold\" and the John Legend duet \"Minefields\"","listeners":5000000,"listenersEstimated":true,"pl":[["Tears of Gold","tears-of-gold/1486169235"],["Minefields","minefields/1620589339"],["RIP, Love (Acoustic Live)","rip-love-acoustic-live/1645466611"]],"topSongs":[{"title":"Tears of Gold","year":2021},{"title":"Minefields","year":2020},{"title":"RIP, Love","year":2021},{"title":"Crazy","year":2019}]},{"name":"Amyl and the Sniffers","day":"Fri","stage":"American Express","start":"4:30","end":"5:30","genre":"Pub punk","fam":"Rock","tags":["punk","garage rock","high energy"],"hometown":"Melbourne, Australia","bestKnownFor":"Amy Taylor's ferocious frontwoman energy; ARIA-winning Aussie pub punk","listeners":1500000,"listenersEstimated":true,"pl":[["Hertz","hertz/1574728169"],["Guided By Angels","guided-by-angels/1574728158"],["U Should Not Be Doing That","u-should-not-be-doing-that/1776690192"],["Some Mutts (Can't Be Muzzled)","some-mutts-cant-be-muzzled/1462476072"]],"topSongs":[{"title":"Hertz","year":2021},{"title":"Guided by Angels","year":2021},{"title":"U Should Not Be Doing That","year":2024},{"title":"Some Mutts (Can't Be Muzzled)","year":2019}]},{"name":"Labrinth","day":"Fri","stage":"American Express","start":"6:30","end":"7:30","genre":"Alt-R&B","fam":"Hip-Hop/R&B","tags":["cinematic","electropop","soundtrack"],"hometown":"London, UK","bestKnownFor":"Emmy-winning Euphoria score and \"Still Don't Know My Name\"; one-third of LSD","listeners":20000000,"listenersEstimated":true,"pl":[["Still Don't Know My Name (From \"Euphoria: Season 1\" Soundtrack)","still-dont-know-my-name-from-euphoria-season-1-soundtrack/1481092695"],["Jealous","jealous/1719082403"],["Beneath Your Beautiful (feat. Emeli Sandé)","beneath-your-beautiful-feat-emeli-sand%C3%A9/687554548"],["Earthquake (feat. Tinie Tempah) [Full Version]","earthquake-feat-tinie-tempah-full-version/516905306"]],"topSongs":[{"title":"Still Don't Know My Name","year":2019},{"title":"Jealous","year":2014},{"title":"Beneath Your Beautiful","year":2012},{"title":"Earthquake","year":2011}]},{"name":"Charli XCX","day":"Fri","stage":"American Express","start":"8:35","end":"10:00","genre":"Hyperpop","fam":"Pop","tags":["club pop","brat","electropop"],"hometown":"Cambridge, UK","bestKnownFor":"Brat summer — Grammy-winning 2024 album brat and \"360\"","listeners":35000000,"listenersEstimated":true,"pl":[["360","360/1820890999"],["Apple","apple/1803556638"],["Boom Clap","boom-clap/855630942"],["Speed Drive","speed-drive/1689239213"]],"topSongs":[{"title":"360","year":2024},{"title":"Apple","year":2024},{"title":"Boom Clap","year":2014},{"title":"Speed Drive","year":2023}]},{"name":"Night Tapes","day":"Sat","stage":"T-Mobile","start":"1:00","end":"1:45","genre":"Dream pop","fam":"Indie","tags":["indie electronic","ethereal","synth"],"hometown":"London, UK","bestKnownFor":"Hazy, synth-washed dream pop led by Iiris Vesik; debut LP portals//polarities","listeners":1500000,"listenersEstimated":true,"pl":[["drifting","drifting/1711646196"],["swordsman","swordsman/1808825508"],["Humans","humans/1691952883"],["storm","storm/1808826278"]],"topSongs":[{"title":"drifting","year":2023},{"title":"swordsman","year":2024},{"title":"Humans","year":2021},{"title":"storm","year":2025}]},{"name":"Balu Brigada","day":"Sat","stage":"T-Mobile","start":"2:30","end":"3:15","genre":"Indie pop","fam":"Indie","tags":["alt-pop","brother duo","groovy"],"hometown":"Auckland, New Zealand","bestKnownFor":"Kiwi brothers whose breakout 'So Cold' became a Billboard Chartbreaker; debut LP Portal (2025)","listeners":3000000,"listenersEstimated":true,"pl":[["So Cold","so-cold/1750274397"],["Backseat","backseat/6786605036"],["What Do We Ever Really Know?","what-do-we-ever-really-know/1823610279"],["Sideways","sideways/1834660785"]],"topSongs":[{"title":"So Cold","year":2024},{"title":"Backseat","year":2023},{"title":"What Do We Ever Really Know?","year":2025},{"title":"Sideways","year":2025}]},{"name":"Suki Waterhouse","day":"Sat","stage":"T-Mobile","start":"4:15","end":"5:15","genre":"Indie pop","fam":"Pop","tags":["dreamy","soft rock","melancholy"],"hometown":"London, UK","bestKnownFor":"Model-actor turned Sub Pop songwriter; slow-burn viral hit 'Good Looking'","listeners":12000000,"listenersEstimated":true,"pl":[["Good Looking (Stripped)","good-looking-stripped/1638431185"],["Melrose Meltdown","melrose-meltdown/1592223952"],["OMG","omg/1719350663"],["My Fun","my-fun/1736964517"]],"topSongs":[{"title":"Good Looking","year":2017},{"title":"Melrose Meltdown","year":2022},{"title":"OMG","year":2024},{"title":"My Fun","year":2024}]},{"name":"Bleachers","day":"Sat","stage":"T-Mobile","start":"6:15","end":"7:15","genre":"Indie rock","fam":"Rock","tags":["synth-pop","heartland","anthemic"],"hometown":"New Jersey, US","bestKnownFor":"Jack Antonoff's big-hearted Jersey band behind 'I Wanna Get Better'","listeners":6000000,"listenersEstimated":true,"pl":[["I Wanna Get Better","i-wanna-get-better/1030798836"],["Don't Take the Money","dont-take-the-money/1225759939"],["Rollercoaster","rollercoaster/884282120"],["Tiny Moves","tiny-moves/1712730492"]],"topSongs":[{"title":"I Wanna Get Better","year":2014},{"title":"Don't Take the Money","year":2017},{"title":"Rollercoaster","year":2014},{"title":"Tiny Moves","year":2024}]},{"name":"Lorde","day":"Sat","stage":"T-Mobile","start":"8:15","end":"9:45","genre":"Art pop","fam":"Pop","tags":["electropop","alt-pop","anthemic"],"hometown":"Auckland, New Zealand","bestKnownFor":"Grammy-winning 'Royals' prodigy; 2025 album Virgin; Saturday headliner","listeners":30000000,"listenersEstimated":true,"pl":[["Royals","royals/1890346753"],["Green Light (Chromeo Remix)","green-light-chromeo-remix/1444857198"],["Team","team/1440818672"],["What Was That","what-was-that/1810905307"]],"topSongs":[{"title":"Royals","year":2013},{"title":"Green Light","year":2017},{"title":"Team","year":2013},{"title":"What Was That","year":2025}]},{"name":"Temper City","day":"Sat","stage":"Miller Lite","start":"1:45","end":"2:30","genre":"Indie rock","fam":"Rock","tags":["alt-pop","synth rock","moody"],"hometown":"Los Angeles, CA","bestKnownFor":"Israeli-born LA trio whose debut 'Self Aware' hit #1 on Spotify's Global Viral 50 in 2026","listeners":6000000,"listenersEstimated":true,"pl":[["Self Aware","self-aware/1877803360"],["Reverse Psychology","reverse-psychology/6802274761"]],"topSongs":[{"title":"Self Aware","year":2026},{"title":"Reverse Psychology","year":2026},{"title":"All In Now","year":2026}]},{"name":"Łaszewo","day":"Sat","stage":"Miller Lite","start":"3:15","end":"4:15","genre":"EDM / Dance pop","fam":"EDM","tags":["electronic","remixes","festival"],"hometown":"Santa Barbara, CA","bestKnownFor":"Santa Barbara trio with viral EDM flips ('messy') and the Alok/A$AP Rocky collab 'HIGHJACK'","listeners":2000000,"listenersEstimated":true,"pl":[["messy","messy/1797332699"],["HIGHJACK (right back)","highjack-right-back/1812022809"],["3am","3am/1819048276"],["collide","collide/1825622269"]],"topSongs":[{"title":"messy","year":2025},{"title":"HIGHJACK (right back)","year":2025},{"title":"3am","year":2023},{"title":"collide","year":2025}]},{"name":"Arcy Drive","day":"Sat","stage":"Miller Lite","start":"5:15","end":"6:15","genre":"Indie rock","fam":"Rock","tags":["psych rock","funky","jam"],"hometown":"Long Island, NY","bestKnownFor":"Long Island rockers with a groovy, theatrical live show; debut album The Pit","listeners":300000,"listenersEstimated":true,"pl":[["Thrift Store","thrift-store/1792954819"],["The Itch","the-itch/1792954426"],["Under The Rug","under-the-rug/1774598853"],["Time Shrinks","time-shrinks/1711273714"]],"topSongs":[{"title":"Thrift Store","year":2025},{"title":"The Itch","year":2025},{"title":"Under the Rug","year":2023},{"title":"Time Shrinks","year":2025}]},{"name":"Levity","day":"Sat","stage":"Miller Lite","start":"7:15","end":"8:15","genre":"Dubstep / Bass","fam":"EDM","tags":["bass music","trap","edm"],"hometown":"Chicago, IL","bestKnownFor":"Chicago bass trio whose surprise Electric Forest 2024 set made them EDM's fastest risers","listeners":1000000,"listenersEstimated":true,"pl":[["Flip It (feat. Dem Jointz)","flip-it-feat-dem-jointz/1709360114"],["Like This","like-this/1804178514"],["Front to Back","front-to-back/1739834293"],["Pop Off","pop-off/1872187055"]],"topSongs":[{"title":"Flip It","year":2023},{"title":"Like This","year":2025},{"title":"Front to Back","year":2024},{"title":"Pop Off","year":2026}]},{"name":"Macy Todd","day":"Sat","stage":"BMI","start":"12:45","end":"1:15","genre":"Alt-pop","fam":"Pop","tags":["country-pop","folk","singer-songwriter"],"hometown":"Nashville, TN","bestKnownFor":"Georgia-raised, ex-Austin songwriter mixing pop, country and folk; debut EP pretty ruthless (2026)","listeners":50000,"listenersEstimated":true,"pl":[["mean!","mean/6783024577"],["love of my life","love-of-my-life/6772332225"],["bad bad love","bad-bad-love/1889345633"],["pocket change","pocket-change/1789675107"]],"topSongs":[{"title":"mean!","year":2026},{"title":"love of my life","year":2026},{"title":"bad bad love","year":2026},{"title":"pocket change","year":2025}]},{"name":"Damaris Bojor","day":"Sat","stage":"BMI","start":"1:45","end":"2:30","genre":"Latin folk","fam":"Indie","tags":["regional mexican","folkpirana","indie"],"hometown":"Hermosillo, Mexico","bestKnownFor":"Sonoran 'folkpirana' singer; 'Volar' made NPR's best songs list; debut LP Folkpirana","listeners":160000,"listenersEstimated":true,"pl":[["Volar","volar/1746780474"],["Nube de Paso","nube-de-paso/1735859659"],["Miro Al Cielo","miro-al-cielo/1793430562"],["El mismo pendej0","el-mismo-pendej0/1846909450"]],"topSongs":[{"title":"Volar","year":2024},{"title":"Nube De Paso","year":2024},{"title":"Miro Al Cielo","year":2024},{"title":"El Mismo Pendej0","year":2025}]},{"name":"Common People","day":"Sat","stage":"BMI","start":"3:30","end":"4:15","genre":"Alt rock","fam":"Rock","tags":["garage rock","indie rock","fuzzy"],"hometown":"Los Angeles, CA","bestKnownFor":"LA rock band signed by Cage the Elephant's Brad Shultz; debut EP Games","listeners":300000,"listenersEstimated":true,"pl":[["Thank You","thank-you/1826901205"],["Propaganda","propaganda/1837835237"],["Rain","rain/1862921362"],["Blue Eyes","blue-eyes/6763643505"]],"topSongs":[{"title":"Thank You","year":2025},{"title":"Propaganda","year":2025},{"title":"Rain","year":2026},{"title":"Blue Eyes","year":2026}]},{"name":"Chloe Qisha","day":"Sat","stage":"BMI","start":"5:15","end":"6:15","genre":"Alt-pop","fam":"Pop","tags":["electropop","nostalgic","pop"],"hometown":"London, UK","bestKnownFor":"Malaysian-born, London-based pop riser on the BBC Sound of 2026 list; 'So Sad So Hot'","listeners":800000,"listenersEstimated":true,"pl":[["21st Century Cool Girl","21st-century-cool-girl/1786981529"],["So Sad So Hot","so-sad-so-hot/1843116058"],["VCR Home Video","vcr-home-video/1751460378"],["Sexy Goodbye","sexy-goodbye/1766482190"]],"topSongs":[{"title":"21st Century Cool Girl","year":2025},{"title":"So Sad So Hot","year":2025},{"title":"VCR Home Video","year":2024},{"title":"Sexy Goodbye","year":2024}]},{"name":"Letrainiump","day":"Sat","stage":"Beatbox","start":"2:00","end":"2:45","genre":"Alt-pop / R&B","fam":"Hip-Hop/R&B","tags":["pop","r&b","louisiana"],"hometown":"Mamou, LA","bestKnownFor":"New Orleans pop/R&B singer LeTrainiump 'Tray' Richard, raised on zydeco and MJ","listeners":20000,"listenersEstimated":true,"pl":[["Lost? (feat. SaxKixAve)","lost-feat-saxkixave/1775284228"],["So Alive","so-alive/1775284226"],["Falling Again","falling-again/1722174601"],["RELEASE","release/1797419828"]],"topSongs":[{"title":"Lost?","year":2021},{"title":"So Alive","year":2021},{"title":"Falling Again","year":2023},{"title":"RELEASE","year":2023}]},{"name":"Lluvii","day":"Sat","stage":"Beatbox","start":"3:30","end":"4:15","genre":"Latin R&B","fam":"Hip-Hop/R&B","tags":["neo soul","psychedelic","art rock"],"hometown":"Austin, TX","bestKnownFor":"Austin band fronted by Carol Gonzalez blending Latin R&B, jazz and coastal psychedelia","listeners":10000,"listenersEstimated":true,"pl":[["Up All Night","up-all-night/1747074590"],["junii (llámame)","junii-ll%C3%A1mame/6807711176"],["Pacifico Pt. 2","pacifico-pt-2/1720583733"]],"topSongs":[{"title":"Up All Night","year":2024},{"title":"Junii (llámame)","year":2026},{"title":"Pacifico","year":2023}]},{"name":"Ryan Beatty","day":"Sat","stage":"Beatbox","start":"5:30","end":"6:30","genre":"Indie folk","fam":"Indie","tags":["soft rock","singer-songwriter","tender"],"hometown":"Los Angeles, CA","bestKnownFor":"Tender-voiced songwriter (Tyler, the Creator collaborator) behind the acclaimed album Calico","listeners":3000000,"listenersEstimated":true,"pl":[["Ribbons","ribbons/1676552616"],["Bruises off the Peach","bruises-off-the-peach/6764086890"],["Little Faith","little-faith/1676553136"]],"topSongs":[{"title":"Ribbons","year":2024},{"title":"Bruises Off the Peach","year":2024},{"title":"Patron Saint","year":2021},{"title":"Little Faith","year":2024}]},{"name":"Snow Strippers","day":"Sat","stage":"Beatbox","start":"7:30","end":"8:10","genre":"Electropop / EDM","fam":"EDM","tags":["witch house","electroclash","new rave"],"hometown":"Detroit, MI","bestKnownFor":"Neon, druggy rave-pop duo; viral 'Under Your Spell' and the Lil Uzi Vert collab 'Fire Alarm'","listeners":3500000,"listenersEstimated":true,"pl":[["Under Your Spell","under-your-spell/1882113387"],["Just Your Doll","just-your-doll/1713633617"],["So What If I'm a Freak","so-what-if-im-a-freak/1735564785"],["Fire Alarm (feat. Snow Strippers)","fire-alarm-feat-snow-strippers/1701759260"]],"topSongs":[{"title":"Under Your Spell","year":2023},{"title":"Just Your Doll","year":2023},{"title":"So What If I'm a Freak","year":2024},{"title":"Fire Alarm","year":2023}]},{"name":"Montclair","day":"Sat","stage":"Tito's","start":"12:45","end":"1:30","genre":"Indie folk","fam":"Indie","tags":["indie pop","folk rock","austin local"],"hometown":"Austin, TX","bestKnownFor":"Austin quartet of four half-siblings with warm harmonies; 2025 debut LP 'Heart Is Alive!'","listeners":30000,"listenersEstimated":true,"pl":[["Hey Victoria","hey-victoria/6771443740"],["Passing Through","passing-through/1805459974"]],"topSongs":[{"title":"Hey Victoria","year":2026},{"title":"Passing Through","year":2023}]},{"name":"DJ Cassandra","day":"Sat","stage":"Tito's","start":"2:00","end":"2:45","genre":"DJ / Dance","fam":"EDM","tags":["house","eclectic","austin local"],"hometown":"Austin, TX","bestKnownFor":"Austin's go-to party DJ (Cassandra Shankman); first woman to win Best DJ at the Austin Music Awards","listeners":2000,"listenersEstimated":true,"pl":[],"topSongs":[]},{"name":"Don West","day":"Sat","stage":"Tito's","start":"3:15","end":"4:00","genre":"Soul","fam":"Hip-Hop/R&B","tags":["neo-soul","singer-songwriter","australian"],"hometown":"Sydney, Australia","bestKnownFor":"Silky Aussie soul singer whose APRA-nominated 'Small Change' broke him internationally","listeners":1500000,"listenersEstimated":true,"pl":[["Small Change","small-change/1769331213"],["Julia","julia/1828421251"],["Money","money/1713357709"],["Equaliser","equaliser/1713356306"]],"topSongs":[{"title":"Small Change","year":2025},{"title":"Julia","year":2026},{"title":"Money","year":2019},{"title":"Equaliser","year":2020}]},{"name":"Rodrigo y Gabriela","day":"Sat","stage":"Tito's","start":"4:30","end":"5:30","genre":"Flamenco guitar","fam":"Indie","tags":["nuevo flamenco","acoustic","metal-influenced"],"hometown":"Mexico City, Mexico","bestKnownFor":"Grammy-winning acoustic guitar duo fusing flamenco speed with heavy-metal energy","listeners":2000000,"listenersEstimated":true,"pl":[["Tamacun","tamacun/432825233"],["Diablo Rojo","diablo-rojo/432825234"],["Hanuman","hanuman/432827909"],["Stairway to Heaven","stairway-to-heaven/432825239"]],"topSongs":[{"title":"Tamacun","year":2006},{"title":"Diablo Rojo","year":2006},{"title":"Hanuman","year":2009},{"title":"Stairway to Heaven","year":2006}]},{"name":"¥ØU$UK€ ¥UK1MAT$U","day":"Sat","stage":"Tito's","start":"6:30","end":"7:30","genre":"Experimental DJ","fam":"EDM","tags":["techno","trance","genre-defying"],"hometown":"Osaka, Japan","bestKnownFor":"Osaka DJ whose chaotic, shirtless 2025 Boiler Room Tokyo set racked up 12M+ views","listeners":50000,"listenersEstimated":true,"pl":[],"topSongs":[]},{"name":"Gabriel Jacoby","day":"Sat","stage":"Snapchat","start":"2:00","end":"2:45","genre":"Alt-R&B","fam":"Hip-Hop/R&B","tags":["soul","lo-fi r&b","southern"],"hometown":"Anderson, SC","bestKnownFor":"Hazy Southern alt-R&B singer behind the 2025 debut EP 'gutta child'","listeners":2300000,"listenersEstimated":false,"pl":[["the one","the-one/1838013724"],["baby","baby/1849765066"],["hillside","hillside/1764178641"],["be careful","be-careful/1831110072"]],"topSongs":[{"title":"the one","year":2025},{"title":"baby","year":2025},{"title":"hillside","year":2025},{"title":"be careful","year":2025}]},{"name":"Skye Newman","day":"Sat","stage":"Snapchat","start":"3:30","end":"4:30","genre":"Pop / R&B","fam":"Pop","tags":["neo-soul","british","powerhouse vocals"],"hometown":"London, UK","bestKnownFor":"BBC Sound of 2026 winner; Brit-nominated top-5 UK hit 'Family Matters'","listeners":6000000,"listenersEstimated":true,"pl":[["Family Matters","family-matters/1840621610"],["FU & UF","fu-uf/1840621396"],["Hairdresser","hairdresser/1840621397"],["Walk","walk/1875008123"]],"topSongs":[{"title":"Family Matters","year":2025},{"title":"FU & UF","year":2025},{"title":"Hairdresser","year":2025},{"title":"Walk","year":2026}]},{"name":"It's Murph","day":"Sat","stage":"Snapchat","start":"5:30","end":"6:30","genre":"Melodic house","fam":"EDM","tags":["house","dance","festival anthems"],"hometown":"Nashville, TN","bestKnownFor":"Nashville-raised house producer (Garrett Murphy) of euphoric anthems; 2026 Khalid collab","listeners":4000000,"listenersEstimated":true,"pl":[["Here With Me Now","here-with-me-now/6774231410"],["Down Low","down-low/1744030921"],["Through My System","through-my-system/1805658462"],["Fade Together","fade-together/1773993719"]],"topSongs":[{"title":"Here With Me Now","year":2026},{"title":"Down Low","year":2024},{"title":"Through My System","year":2025},{"title":"Fade Together","year":2024}]},{"name":"Lykke Li","day":"Sat","stage":"Snapchat","start":"7:30","end":"8:30","genre":"Indie pop","fam":"Indie","tags":["dream pop","swedish","melancholy"],"hometown":"Stockholm, Sweden","bestKnownFor":"Swedish heartbreak-pop icon of 'I Follow Rivers'; new disco-orchestral LP 'The Afterparty' (2026)","listeners":9000000,"listenersEstimated":true,"pl":[["I Follow Rivers (The Magician Remix)","i-follow-rivers-the-magician-remix/471141801"],["No Rest For the Wicked","no-rest-for-the-wicked/839186337"],["Little Bit","little-bit/281625359"],["Possibility","possibility/1656386892"]],"topSongs":[{"title":"I Follow Rivers","year":2011},{"title":"No Rest for the Wicked","year":2014},{"title":"Little Bit","year":2008},{"title":"Possibility","year":2009}]},{"name":"Annie DiRusso","day":"Sat","stage":"American Express","start":"1:15","end":"2:00","genre":"Indie rock","fam":"Indie","tags":["pop rock","singer-songwriter","confessional"],"hometown":"Nashville, TN","bestKnownFor":"Bittersweet Nashville pop-rocker; TikTok breakout 'Nine Months' and 2025 LP 'Super Pedestrian'","listeners":900000,"listenersEstimated":true,"pl":[["Nine Months","nine-months/1744153505"],["Coming Soon","coming-soon/1744345259"],["Hybrid","hybrid/1744347381"],["Back In Town","back-in-town/1852620049"]],"topSongs":[{"title":"Nine Months","year":2021},{"title":"Coming Soon","year":2021},{"title":"Hybrid","year":2025},{"title":"Back in Town","year":2025}]},{"name":"Finn Wolfhard","day":"Sat","stage":"American Express","start":"2:45","end":"3:30","genre":"Indie rock","fam":"Rock","tags":["lo-fi","garage rock","slacker"],"hometown":"Vancouver, Canada","bestKnownFor":"Stranger Things actor's scrappy solo indie rock; 2026 LP 'Fire From the Hip'","listeners":500000,"listenersEstimated":true,"pl":[["Choose the latter","choose-the-latter/1797418278"],["Trailers after dark","trailers-after-dark/1797418588"],["I'll Let You Finish","ill-let-you-finish/1891844342"],["Happy Birthday","happy-birthday/1797418275"]],"topSongs":[{"title":"Choose the latter","year":2025},{"title":"Trailers after dark","year":2025},{"title":"I'll Let You Finish","year":2026},{"title":"Happy Birthday","year":2025}]},{"name":"Young Miko","day":"Sat","stage":"American Express","start":"4:30","end":"5:30","genre":"Latin trap","fam":"Hip-Hop/R&B","tags":["reggaeton","latin rap","puerto rico"],"hometown":"Añasco, Puerto Rico","bestKnownFor":"Puerto Rican trap star of the Bizarrap session and the Feid smash 'Classy 101'","listeners":25000000,"listenersEstimated":true,"pl":[["Classy 101","classy-101/1679990038"],["Young Miko: Bzrp Music Sessions, Vol. 58/66","young-miko-bzrp-music-sessions-vol-58-66/1724265168"],["wiggy","wiggy/1698015525"],["Riri","riri/1663588077"]],"topSongs":[{"title":"Classy 101","year":2023},{"title":"Young Miko: Bzrp Music Sessions, Vol. 58","year":2023},{"title":"Wiggy","year":2024},{"title":"Riri","year":2024}]},{"name":"Lola Young","day":"Sat","stage":"American Express","start":"6:30","end":"7:30","genre":"Pop / Soul","fam":"Pop","tags":["alt-pop","british","raw vocals"],"hometown":"London, UK","bestKnownFor":"South London singer whose unfiltered 'Messy' hit No. 1 in the UK and went global","listeners":30000000,"listenersEstimated":true,"pl":[["Messy","messy/1746042186"],["Conceited","conceited/1708632329"],["Flicker of Light","flicker-of-light/1758777015"],["One Thing","one-thing/1811631385"]],"topSongs":[{"title":"Messy","year":2024},{"title":"Conceited","year":2024},{"title":"Flicker of Light","year":2023},{"title":"One Thing","year":2025}]},{"name":"RÜFÜS DU SOL","day":"Sat","stage":"American Express","start":"8:30","end":"10:00","genre":"Electronic / House","fam":"EDM","tags":["melodic house","indie dance","australian"],"hometown":"Sydney, Australia","bestKnownFor":"Grammy-winning Aussie trio of moody, euphoric live house; 'Innerbloom' is a modern rave hymn","listeners":10000000,"listenersEstimated":true,"pl":[["Innerbloom","innerbloom/1058740894"],["Alive","alive/1585865539"],["You Were Right","you-were-right/1058740887"],["On My Knees","on-my-knees/6796634147"]],"topSongs":[{"title":"Innerbloom","year":2015},{"title":"Alive","year":2021},{"title":"You Were Right","year":2016},{"title":"On My Knees","year":2021}]},{"name":"Thomas Day","day":"Sun","stage":"T-Mobile","start":"1:15","end":"2:00","genre":"Pop","fam":"Pop","tags":["pop-rock","tiktok","heartbreak pop"],"hometown":"Nashville, TN","bestKnownFor":"Ex-TikTok a cappella cover star turned heart-on-sleeve pop singer; new EP 'my bad' drops Oct 9","listeners":600000,"listenersEstimated":true,"pl":[["not my job anymore","not-my-job-anymore/1711274384"],["she got a thing about her","she-got-a-thing-about-her/1824294713"],["VICIOUS","vicious/1668188112"],["lost myself 4 u","lost-myself-4-u/1848968264"]],"topSongs":[{"title":"not my job anymore","year":2025},{"title":"she got a thing about her","year":2025},{"title":"VICIOUS","year":2024},{"title":"lost myself 4 u","year":2024}]},{"name":"Charlotte Lawrence","day":"Sun","stage":"T-Mobile","start":"2:45","end":"3:30","genre":"Alt-pop","fam":"Pop","tags":["dark pop","singer-songwriter","indie rock"],"hometown":"Los Angeles, CA","bestKnownFor":"Moody LA pop singer behind the 'Birds of Prey' cut and the 2025 debut album 'Somewhere'","listeners":1500000,"listenersEstimated":true,"pl":[["Joke's on You (From \"Birds of Prey\")","jokes-on-you-from-birds-of-prey/6795942991"],["Why Do You Love Me","why-do-you-love-me/1878127731"],["Navy Blue","navy-blue/1479606405"]],"topSongs":[{"title":"Joke's On You","year":2020},{"title":"God Must Hate Me","year":2025},{"title":"Why Do You Love Me","year":2019},{"title":"Navy Blue","year":2018}]},{"name":"Audrey Hobert","day":"Sun","stage":"T-Mobile","start":"4:30","end":"5:20","genre":"Pop","fam":"Pop","tags":["indie pop","comedic pop","singer-songwriter"],"hometown":"Los Angeles, CA","bestKnownFor":"Gracie Abrams co-writer turned witty pop breakout with 2025 debut 'Who's the Clown?'","listeners":3000000,"listenersEstimated":true,"pl":[["Sue me","sue-me/1826575254"],["Bowling alley","bowling-alley/1826575261"],["Thirst Trap","thirst-trap/1826575264"],["Phoebe","phoebe/1826575441"]],"topSongs":[{"title":"Sue Me","year":2025},{"title":"Bowling Alley","year":2025},{"title":"Thirst Trap","year":2025},{"title":"Phoebe","year":2025}]},{"name":"Geese","day":"Sun","stage":"T-Mobile","start":"6:20","end":"7:20","genre":"Indie rock","fam":"Rock","tags":["art rock","post-punk","brooklyn"],"hometown":"Brooklyn, NY","bestKnownFor":"Cameron Winter-fronted art-rockers whose 2025 LP 'Getting Killed' was the year's rock breakout","listeners":3500000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Taxes","year":2025},{"title":"Au Pays du Cocaine","year":2025},{"title":"Trinidad","year":2025},{"title":"2122","year":2023}]},{"name":"The xx","day":"Sun","stage":"T-Mobile","start":"8:35","end":"10:00","genre":"Indie pop","fam":"Indie","tags":["minimalist","dream pop","electronic"],"hometown":"London, UK","bestKnownFor":"Hushed, minimalist trio behind 'Intro' — the defining whisper-pop sound of the 2010s","listeners":10000000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Intro","year":2009},{"title":"Islands","year":2009},{"title":"Crystalised","year":2009},{"title":"On Hold","year":2017}]},{"name":"Joshua Jensen","day":"Sun","stage":"Miller Lite","start":"2:00","end":"2:45","genre":"Folk rock","fam":"Indie","tags":["folk","singer-songwriter"],"hometown":"Phoenix, AZ","bestKnownFor":"Arizona-born, NYC-based newcomer whose dorm-recorded debut single 'Hoping' dropped July 2026","listeners":20000,"listenersEstimated":true,"pl":[["Hoping","hoping/6778228358"]],"topSongs":[{"title":"Hoping","year":2026}]},{"name":"Claire Rosinkranz","day":"Sun","stage":"Miller Lite","start":"3:30","end":"4:30","genre":"Bedroom pop","fam":"Pop","tags":["indie pop","jazzy","tiktok"],"hometown":"Los Angeles, CA","bestKnownFor":"TikTok-born bedroom-pop singer whose breezy 'Backyard Boy' went viral at 16","listeners":1500000,"listenersEstimated":true,"pl":[["Backyard Boy","backyard-boy/1586741683"],["Frankenstein","frankenstein/1565619650"],["don't miss me","dont-miss-me/1597020592"]],"topSongs":[{"title":"Backyard Boy","year":2020},{"title":"Frankenstein","year":2021},{"title":"Don't Miss Me","year":2021}]},{"name":"Saint Motel","day":"Sun","stage":"Miller Lite","start":"5:20","end":"6:20","genre":"Indie pop","fam":"Indie","tags":["indie rock","funk-pop","horns"],"hometown":"Los Angeles, CA","bestKnownFor":"Horn-blasting LA indie-pop band behind the 2014 smash 'My Type'","listeners":3500000,"listenersEstimated":true,"pl":[["My Type","my-type/1879740098"],["Cold Cold Man","cold-cold-man/1739783211"],["Move","move/6781308595"],["Sweet Talk","sweet-talk/6801436274"]],"topSongs":[{"title":"My Type","year":2014},{"title":"Cold Cold Man","year":2014},{"title":"Move","year":2016},{"title":"Sweet Talk","year":2016}]},{"name":"Parcels","day":"Sun","stage":"Miller Lite","start":"7:20","end":"8:35","genre":"Disco / Funk","fam":"Indie","tags":["nu-disco","funk","electropop"],"hometown":"Byron Bay, Australia","bestKnownFor":"Berlin-based Aussie disco-funk five-piece; 'Overnight' was produced with Daft Punk","listeners":5000000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Tieduprightnow","year":2018},{"title":"Overnight","year":2017},{"title":"Somethinggreater","year":2021},{"title":"Leaveyourlove","year":2025}]},{"name":"Marzz","day":"Sun","stage":"BMI","start":"12:45","end":"1:15","genre":"R&B","fam":"Hip-Hop/R&B","tags":["neo-soul","alt-r&b"],"hometown":"Louisville, KY","bestKnownFor":"Louisville R&B singer in the Erykah Badu / Lauryn Hill lineage; RCA debut EP 'Love Letterz'","listeners":80000,"listenersEstimated":true,"pl":[["Countless Times","countless-times/1566946836"],["FYM (Explicit)","fym-explicit/1614337205"],["Cleopatra","cleopatra/1571176412"]],"topSongs":[{"title":"Countless Times","year":2020},{"title":"FYM","year":2021},{"title":"Cleopatra","year":2022}]},{"name":"Chelsea Jordan","day":"Sun","stage":"BMI","start":"2:15","end":"2:45","genre":"Soul-pop","fam":"Hip-Hop/R&B","tags":["r&b","singer-songwriter","tiktok"],"hometown":"Baltimore, MD","bestKnownFor":"Baltimore-born soulful songwriter, signed to Arista after viral TikTok hits 'Toronto' and 'halfwaythru'","listeners":300000,"listenersEstimated":true,"pl":[["halfwaythru","halfwaythru/1878512864"],["TORONTO","toronto/1753444900"],["level out","level-out/1878512863"],["THE GOOD PARTS","the-good-parts/1744679720"]],"topSongs":[{"title":"halfwaythru","year":2025},{"title":"Toronto","year":2024},{"title":"level out","year":2025},{"title":"THE GOOD PARTS","year":2024}]},{"name":"Vwillz","day":"Sun","stage":"BMI","start":"3:30","end":"4:15","genre":"Alt-pop / Hip-hop","fam":"Hip-Hop/R&B","tags":["emo rap","indie pop","acoustic"],"hometown":"Colorado Springs, CO","bestKnownFor":"Genre-blurring indie artist mixing hip-hop, emo and folk with hundreds of millions of streams","listeners":1000000,"listenersEstimated":true,"pl":[["Falling Slowly","falling-slowly/1663368213"],["Sundown","sundown/1710396057"],["Darkside","darkside/1661016580"],["Emo Rhapsody","emo-rhapsody/1505887449"]],"topSongs":[{"title":"Falling Slowly","year":2023},{"title":"Sundown","year":2024},{"title":"Darkside","year":2024},{"title":"Emo Rhapsody","year":2021}]},{"name":"Jason Scott & The High Heat","day":"Sun","stage":"BMI","start":"5:30","end":"6:30","genre":"Americana","fam":"Indie","tags":["heartland rock","red dirt","roots rock"],"hometown":"Oklahoma City, OK","bestKnownFor":"OKC 'amplified Americana' band — too loud for folk, too textured for Red Dirt","listeners":60000,"listenersEstimated":true,"pl":[["Quittin' Time","quittin-time/1596974998"]],"topSongs":[{"title":"Quittin' Time","year":2022},{"title":"American Grin","year":2024},{"title":"John Deere Green","year":2024}]},{"name":"Kevin Atwater","day":"Sun","stage":"Beatbox","start":"2:00","end":"2:45","genre":"Indie folk","fam":"Indie","tags":["dream pop","queer indie","singer-songwriter"],"hometown":"Downers Grove, IL","bestKnownFor":"Tender queer indie-folk songwriter who broke out via the viral TikTok hit 'star tripping'","listeners":1000000,"listenersEstimated":true,"pl":[["why did you invite me to your wedding","why-did-you-invite-me-to-your-wedding/1706378459"],["star tripping","star-tripping/1769673518"],["ferry beer","ferry-beer/1766052900"],["Dispose","dispose/1600576600"]],"topSongs":[{"title":"why did you invite me to your wedding","year":2024},{"title":"star tripping","year":2022},{"title":"ferry beer","year":2025},{"title":"Dispose","year":2022}]},{"name":"Bad Nerves","day":"Sun","stage":"Beatbox","start":"3:30","end":"4:30","genre":"Punk rock","fam":"Rock","tags":["power pop","garage punk","high energy"],"hometown":"Essex, UK","bestKnownFor":"Essex power-pop punks playing breakneck two-minute anthems with a ferocious live show","listeners":150000,"listenersEstimated":true,"pl":[["Can't Be Mine","cant-be-mine/1677130938"],["Baby Drummer","baby-drummer/1677130952"],["NETWORK","network/6775251629"],["Radio Punk","radio-punk/1677131277"]],"topSongs":[{"title":"Can't Be Mine","year":2020},{"title":"Baby Drummer","year":2020},{"title":"NETWORK","year":2026},{"title":"Radio Punk","year":2020}]},{"name":"Noga Erez","day":"Sun","stage":"Beatbox","start":"5:30","end":"6:30","genre":"Alt-pop / Hip-hop","fam":"Hip-Hop/R&B","tags":["electropop","political pop","israeli"],"hometown":"Tel Aviv, Israel","bestKnownFor":"Israeli rapper-producer of sharp, glitchy alt-pop; 'Dance While You Shoot' and 'You So Done' broke her out","listeners":900000,"listenersEstimated":true,"pl":[["Dance While You Shoot (Nnamdi Ogbonnaya Remix)","dance-while-you-shoot-nnamdi-ogbonnaya-remix/1721032556"],["You so Done (Against the Machine)","you-so-done-against-the-machine/1607490328"],["VIEWS (Against the Machine) [feat. ROUSSO]","views-against-the-machine-feat-rousso/1607490325"],["End of the Road","end-of-the-road/1607834578"]],"topSongs":[{"title":"Dance While You Shoot","year":2017},{"title":"You So Done","year":2021},{"title":"Views","year":2020},{"title":"End of the Road","year":2021}]},{"name":"Blood Orange","day":"Sun","stage":"Beatbox","start":"7:30","end":"8:30","genre":"Alt-R&B","fam":"Hip-Hop/R&B","tags":["indie soul","synth-funk","art pop"],"hometown":"New York, NY","bestKnownFor":"Dev Hynes' lush, intimate R&B project; 2025's Essex Honey marked his long-awaited return","listeners":3500000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Champagne Coast","year":2011},{"title":"Charcoal Baby","year":2018},{"title":"You're Not Good Enough","year":2013},{"title":"Time Will Tell","year":2013}]},{"name":"Huston-Tillotson University Jazz Collective","day":"Sun","stage":"Tito's","start":"12:45","end":"1:30","genre":"Jazz","fam":"Indie","tags":["college ensemble","big band","austin hbcu"],"hometown":"Austin, TX","bestKnownFor":"Student jazz ensemble from Huston-Tillotson, Austin's historic HBCU on the East Side","listeners":0,"listenersEstimated":true,"pl":[],"topSongs":[]},{"name":"girlsweetvoiced","day":"Sun","stage":"Tito's","start":"2:00","end":"2:45","genre":"Bedroom pop","fam":"Pop","tags":["lo-fi","indie pop","tiktok breakout"],"hometown":"Los Angeles, CA","bestKnownFor":"Canadian-born TikTok webcam sensation; debut LP Lovesweet (RCA/A24, 2026) samples Joni Mitchell","listeners":1500000,"listenersEstimated":true,"pl":[["Tonight","tonight/1885996687"],["Cranberry","cranberry/6780614606"],["Mirror Pics","mirror-pics/6780614585"],["Dumb & In Love","dumb-in-love/6780614763"]],"topSongs":[{"title":"Tonight","year":2026},{"title":"Cranberry","year":2026},{"title":"Mirror Pics","year":2026},{"title":"Dumb & In Love","year":2026}]},{"name":"Calder Allen","day":"Sun","stage":"Tito's","start":"3:15","end":"4:00","genre":"Americana / Country","fam":"Indie","tags":["singer-songwriter","texas country","austin local"],"hometown":"Austin, TX","bestKnownFor":"Fifth-generation Austinite songwriter mentored by Charlie Sexton; latest LP Fault Lines","listeners":150000,"listenersEstimated":true,"pl":[["The Game","the-game/1620568933"],["Howl","howl/1846057912"],["Norwood County Line","norwood-county-line/1846057795"],["Daylight Saves","daylight-saves/1846057354"]],"topSongs":[{"title":"The Game","year":2022},{"title":"Howl","year":2024},{"title":"Norwood County Line","year":2024},{"title":"Daylight Saves","year":2025}]},{"name":"Rio Kosta","day":"Sun","stage":"Tito's","start":"4:30","end":"5:30","genre":"Psych-funk","fam":"Hip-Hop/R&B","tags":["global funk","soul","psychedelic"],"hometown":"Los Angeles, CA","bestKnownFor":"Mike Del Rio and Kosta Galanopoulos' 'mystical global funk' duo; debut LP Unicorn (2026)","listeners":150000,"listenersEstimated":true,"pl":[["Ancients","ancients/1798559527"],["Mountain Top","mountain-top/1799718294"],["It's Starting","its-starting/1799718564"],["Unicorn","unicorn/1799718311"]],"topSongs":[{"title":"Ancients","year":2025},{"title":"Mountain Top","year":2026},{"title":"It's Starting","year":2025},{"title":"Unicorn","year":2026}]},{"name":"Fcukers","day":"Sun","stage":"Tito's","start":"6:30","end":"7:30","genre":"Dance-punk / House","fam":"EDM","tags":["indie dance","electroclash","nyc club"],"hometown":"New York, NY","bestKnownFor":"Brooklyn duo blending sleazy house beats with indie cool; viral breakout 'Bon Bon'","listeners":800000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Bon Bon","year":2024},{"title":"Mothers","year":2023},{"title":"Homie Don't Shake","year":2024},{"title":"Devils Cut","year":2023}]},{"name":"Sunday (1994)","day":"Sun","stage":"Snapchat","start":"2:00","end":"2:45","genre":"Dream pop / Shoegaze","fam":"Indie","tags":["cinematic","indie pop","shoegaze"],"hometown":"London, UK","bestKnownFor":"Anglo-American duo Paige Turner & Lee Newell making hazy, cinematic shoegaze-pop","listeners":700000,"listenersEstimated":true,"pl":[["Tired Boy","tired-boy/1765213084"],["Doomsday","doomsday/1794811170"]],"topSongs":[{"title":"Tired Boy","year":2024},{"title":"Devotion","year":2024},{"title":"Doomsday","year":2024}]},{"name":"Grace Ives","day":"Sun","stage":"Snapchat","start":"3:30","end":"4:30","genre":"Indie pop","fam":"Pop","tags":["synth-pop","bedroom pop","quirky"],"hometown":"New York, NY","bestKnownFor":"NYC synth-pop auteur of Janky Star; 2026 LP Girlfriend brought 'Dance with Me'","listeners":1200000,"listenersEstimated":true,"pl":[["Loose","loose/1609527955"],["Lullaby","lullaby/1825216097"],["Dance With Me","dance-with-me/1876369960"]],"topSongs":[{"title":"Loose","year":2022},{"title":"Lullaby","year":2022},{"title":"Dance with Me","year":2026},{"title":"Isn't It Strange","year":2019}]},{"name":"Houndmouth","day":"Sun","stage":"Snapchat","start":"5:30","end":"6:30","genre":"Indie rock / Americana","fam":"Rock","tags":["roots rock","folk rock","heartland"],"hometown":"New Albany, IN","bestKnownFor":"Indiana roots-rockers behind the ubiquitous jangly sing-along 'Sedona'","listeners":1300000,"listenersEstimated":true,"pl":[["Sedona","sedona/956085210"],["Penitentiary","penitentiary/656286984"]],"topSongs":[{"title":"Sedona","year":2015},{"title":"Penitentiary","year":2013},{"title":"On the Road","year":2013},{"title":"Comin' Round Again","year":2015}]},{"name":"The War on Drugs","day":"Sun","stage":"Snapchat","start":"7:30","end":"8:30","genre":"Indie rock","fam":"Rock","tags":["heartland rock","dream rock","guitar epics"],"hometown":"Philadelphia, PA","bestKnownFor":"Adam Granduciel's Grammy-winning band of widescreen, Springsteen-meets-shoegaze rock","listeners":2500000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Red Eyes","year":2014},{"title":"Under the Pressure","year":2014},{"title":"Pain","year":2017},{"title":"Strangest Thing","year":2017}]},{"name":"Rum Jungle","day":"Sun","stage":"American Express","start":"1:15","end":"2:00","genre":"Indie rock","fam":"Indie","tags":["surf rock","indie pop","aussie"],"hometown":"Newcastle, Australia","bestKnownFor":"Newcastle surf-indie four-piece; debut LP Recency Bias hit ARIA top 10, now touring Marginalia","listeners":400000,"listenersEstimated":true,"pl":[["Everything Is Easy","everything-is-easy/1622703592"],["Coal Dust","coal-dust/1864973500"],["Keep","keep/1505180621"],["Her and the Sun","her-and-the-sun/1531492051"]],"topSongs":[{"title":"Everything Is Easy","year":2022},{"title":"Coal Dust","year":2025},{"title":"Keep","year":2022},{"title":"Her and the Sun","year":2021}]},{"name":"Ethan Regan","day":"Sun","stage":"American Express","start":"2:45","end":"3:30","genre":"Indie folk / Pop","fam":"Indie","tags":["singer-songwriter","soft rock","self-produced"],"hometown":"Charlotte, NC","bestKnownFor":"Self-producing Charlotte troubadour; breakout 'wildflowers' led to Columbia LP YOUNG REGAN (2026)","listeners":1500000,"listenersEstimated":true,"pl":[["wildflowers","wildflowers/1800808565"],["durham","durham/1800808627"],["spaceman","spaceman/1802280901"],["get by","get-by/1811672259"]],"topSongs":[{"title":"wildflowers","year":2023},{"title":"durham","year":2023},{"title":"spaceman","year":2025},{"title":"get by","year":2025}]},{"name":"Max McNown","day":"Sun","stage":"American Express","start":"4:30","end":"5:30","genre":"Country","fam":"Pop","tags":["folk-country","singer-songwriter","heartbreak"],"hometown":"Bend, OR","bestKnownFor":"Oregon busker turned streaming star; Gold-certified breakout 'A Lot More Free'","listeners":12200000,"listenersEstimated":false,"pl":[["A Lot More Free","a-lot-more-free/1702216786"],["Better Me For You (Brown Eyes)","better-me-for-you-brown-eyes/1778759151"],["Love Me Back","love-me-back/1766575426"],["Turned Into Missing You","turned-into-missing-you/1727612911"]],"topSongs":[{"title":"A Lot More Free","year":2023},{"title":"Better Me For You (Brown Eyes)","year":2025},{"title":"Love Me Back","year":2024},{"title":"Turned Into Missing You","year":2024}]},{"name":"Sofi Tukker","day":"Sun","stage":"American Express","start":"6:30","end":"7:30","genre":"EDM / Dance-pop","fam":"EDM","tags":["house","bossa-dance","festival"],"hometown":"New York, NY","bestKnownFor":"Sophie Hawley-Weld & Tucker Halpern's Grammy-nominated party duo behind 'Best Friend'","listeners":8000000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Best Friend","year":2017},{"title":"Drinkee","year":2015},{"title":"Purple Hat","year":2019},{"title":"Summer in New York","year":2023}]},{"name":"Twenty One Pilots","day":"Sun","stage":"American Express","start":"8:30","end":"10:00","genre":"Alt-pop / Rock","fam":"Rock","tags":["alternative","rap-rock","emo-pop"],"hometown":"Columbus, OH","bestKnownFor":"Tyler Joseph & Josh Dun's genre-mashing duo; 'Stressed Out' and 'Heathens' were massive hits","listeners":25000000,"listenersEstimated":true,"pl":[],"topSongs":[{"title":"Stressed Out","year":2015},{"title":"Heathens","year":2016},{"title":"Ride","year":2015},{"title":"Car Radio","year":2013}]}];
+const DAYS={Fri:"Friday, Oct 9",Sat:"Saturday, Oct 10",Sun:"Sunday, Oct 11"};
+const STAGES=["T-Mobile","Miller Lite","BMI","Beatbox","Tito's","Snapchat","American Express"];
+const GENRES=["Pop","Indie","Hip-Hop/R&B","EDM","Rock"];
+const TIERS=[
+  {icon:"❤️",label:"Love",lo:8.1,hi:10.0,mid:9.0,sd:0.742,heat:"hot"},
+  {icon:"👍",label:"Like",lo:6.1,hi:8.0,mid:7.0,sd:0.742,heat:"warm"},
+  {icon:"😐",label:"Meh",lo:4.1,hi:6.0,mid:5.0,sd:0.742,heat:"cool"},
+  {icon:"👎",label:"Nope",lo:0.1,hi:4.0,mid:2.0,sd:1.5,heat:"cold"}];
+const POPS=[{k:0,label:"Under 10K",lo:0,hi:1e4},{k:1,label:"10K–100K",lo:1e4,hi:1e5},{k:2,label:"100K–1M",lo:1e5,hi:1e6},{k:3,label:"1M–10M",lo:1e6,hi:1e7},{k:4,label:"10M+",lo:1e7,hi:1e12}];
+const toMin=s=>{let [h,m]=s.split(":").map(Number);if(h<12)h+=12;return h*60+m};
+const fmt=m=>{let h=Math.floor(m/60),mm=m%60;h=h>12?h-12:h;return h+":"+String(mm).padStart(2,"0")};
+const A=RAW.map((a,i)=>({...a,id:i,s:toMin(a.start),e:toMin(a.end),pk:POPS.findIndex(p=>(a.listeners||0)>=p.lo&&(a.listeners||0)<p.hi)}));
+const N=A.length;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const amSearch=(artist,title)=>"https://music.apple.com/us/search?term="+encodeURIComponent(artist+(title?" "+title:""));
+const fmtL=n=>!n?"—":n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+"M":n>=1e3?Math.round(n/1e3)+"K":String(n);
+const overlap=(a,b)=>a.day===b.day?Math.max(0,Math.min(a.e,b.e)-Math.max(a.s,b.s)):0;
+const rnd=arr=>arr[Math.floor(Math.random()*arr.length)];
+
+/* ---------- state: everything, including what's on screen, is saved after every action ---------- */
+const LS="acl26w2-"+MODE;
+const blankF=()=>({days:[],from:750,to:1320,gen:[],pop:[],q:""});
+const blankUI=()=>({tab:"rate",f:blankF(),card:null,lastCard:null,ins:null,pair:null,pairKind:null,follow:[],ctx:null,showUnr:false,day:"Fri",sort:"time",filtersOpen:false,h2h:true});
+function fresh(name){return {v:3,name:name||"",bid:null,t:{},o:[[],[],[],[]],us:[],h:[],ui:blankUI(),u:0}}
+let S=fresh(MODE==="me"?"":"");
+function makeBid(name){const slug=(name||"guest").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"").slice(0,16)||"guest";return slug+"-"+Math.floor(Date.now()/1000)}
+function migrate(x){
+  if(!x||typeof x!=="object"||!Array.isArray(x.h))return null;
+  const s=fresh(x.name);Object.assign(s,{name:x.name||"",bid:x.bid||null,h:x.h.filter(r=>Array.isArray(r)&&r[0]<N&&r[1]<N),u:x.u||0});
+  for(const k in (x.t||{}))if(+k<N&&x.t[k]>=0&&x.t[k]<4)s.t[k]=x.t[k];
+  if(x.v===3&&Array.isArray(x.o)){s.o=[0,1,2,3].map(ti=>(x.o[ti]||[]).filter(i=>s.t[i]===ti));s.us=(x.us||[]).filter(i=>s.t[i]!==undefined);s.ui=Object.assign(blankUI(),x.ui||{});s.ui.f=Object.assign(blankF(),(x.ui||{}).f||{})}
+  else{const w={},g={};for(const [a,b,r] of s.h){g[a]=(g[a]||0)+1;g[b]=(g[b]||0)+1;if(r===0)w[a]=(w[a]||0)+1;else if(r===1)w[b]=(w[b]||0)+1;else{w[a]=(w[a]||0)+.5;w[b]=(w[b]||0)+.5}}
+    for(const k in s.t)s.o[s.t[k]].push(+k);s.o=s.o.map(l=>l.sort((p,q)=>((w[q]||0)/(g[q]||1))-((w[p]||0)/(g[p]||1))))}
+  const inList=new Set(s.o.flat());for(const k in s.t)if(!inList.has(+k)){s.o[s.t[k]].push(+k);s.us.push(+k)}
+  return s}
+try{const x=migrate(JSON.parse(localStorage.getItem(LS)||"null"));if(x)S=x}catch(e){}
+let cloud=null,saveT=null;
+function save(){S.u=Date.now();try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+  if(cloud){clearTimeout(saveT);saveT=setTimeout(()=>cloud.set({j:JSON.stringify(S),u:S.u}).catch(()=>{}),700)}}
+window.addEventListener("pagehide",()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}});
+async function initCloud(){
+  const note=document.getElementById("syncNote");note.textContent="Your board saves in this browser after every tap, so a refresh or a closed tab reopens exactly where you left off. The ranking code is your backup if the browser's data is ever cleared.";
+  if(!CLOUD)return;
+  try{
+    if(!window.claude||!window.claude.use)return;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);if(!db||!user)return;
+    const id=await user.id();if(!id)return;
+    const ref=db.collection("data/users/"+id).doc("board");const snap=await ref.get();
+    if(snap.exists){const d=snap.data();if((d.u||0)>(S.u||0)){const x=migrate(JSON.parse(d.j||"null"));if(x){S=x;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}afterLoad()}}}
+    if(!snap.exists){try{const o=await db.collection("data/users/"+id).doc("battles").get();if(o.exists){const d=o.data();if((d.u||0)>(S.u||0)){const x=migrate({name:d.name,h:JSON.parse(d.h||"[]"),t:JSON.parse(d.t||"{}"),u:d.u});if(x){S=x;afterLoad()}}}}catch(_){}}
+    cloud=ref;if(!snap.exists&&S.u)save();
+    note.textContent+=" Your own board also syncs to your Claude account, so phone and laptop match.";
+  }catch(e){}
+}
+
+/* ---------- undo ---------- */
+let UNDO=[];try{UNDO=JSON.parse(localStorage.getItem(LS+"-undo")||"[]")}catch(e){}
+function checkpoint(){UNDO.push(JSON.stringify({t:S.t,o:S.o,us:S.us,h:S.h,ui:{card:S.ui.card,ins:S.ui.ins,pair:S.ui.pair,pairKind:S.ui.pairKind,follow:S.ui.follow,ctx:S.ui.ctx}}));if(UNDO.length>30)UNDO.shift();try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}}
+function undo(){const x=UNDO.pop();if(!x)return toast("Nothing to undo");const o=JSON.parse(x);Object.assign(S,{t:o.t,o:o.o,us:o.us,h:o.h});Object.assign(S.ui,o.ui);try{localStorage.setItem(LS+"-undo",JSON.stringify(UNDO))}catch(e){}save();recompute();renderAll();toast("Undone")}
+
+/* ---------- scoring ---------- */
+function invNorm(p){const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771720,-13.28068155288572],c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416];
+  const pl=.02425;let q,r;if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  q=p-.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+function compute(st){
+  const tier=new Array(N).fill(-1),score=new Array(N).fill(null),pos=new Array(N).fill(null),W=new Array(N).fill(0),L=new Array(N).fill(0);
+  for(const [a,b,r] of st.h){if(a>=N||b>=N)continue;if(r===0){W[a]++;L[b]++}else if(r===1){W[b]++;L[a]++}}
+  const us=new Set(st.us||[]);const order=[];
+  TIERS.forEach((T,ti)=>{
+    const list=(st.o[ti]||[]).filter(i=>i<N);list.forEach(i=>tier[i]=ti);
+    const sorted=list.filter(i=>!us.has(i)),loose=list.filter(i=>us.has(i));
+    const n=sorted.length;sorted.forEach((id,i)=>{score[id]=Math.round(Math.min(T.hi,Math.max(T.lo,T.mid+invNorm((n-i-.5)/n)*T.sd))*10)/10});
+    loose.forEach(id=>score[id]=T.mid);
+    const mid=Math.floor(n/2);order.push(...sorted.slice(0,mid),...loose,...sorted.slice(mid))});
+  order.forEach((id,i)=>pos[id]=i);
+  const unr=A.filter(a=>tier[a.id]<0).map(a=>a.id);
+  return {tier,score,pos,order,unr,W,L,us}}
+let C;
+function recompute(){C=compute(S)}
+const heatOf=id=>C.tier[id]<0?"unrated":TIERS[C.tier[id]].heat;
+const iconOf=id=>C.tier[id]<0?"":TIERS[C.tier[id]].icon;
+const scoreTxt=id=>C.score[id]==null?"–":C.score[id].toFixed(1);
+function removeFromLists(id){S.o=S.o.map(l=>l.filter(i=>i!==id));S.us=S.us.filter(i=>i!==id);if(S.ui.ins&&S.ui.ins.id===id){S.ui.ins=null;S.ui.pair=null}}
+const h2hOn=()=>S.ui.h2h!==false;
+function rateArtist(id,ti){
+  removeFromLists(id);
+  if(ti===null){delete S.t[id];return}
+  S.t[id]=ti;const list=S.o[ti];
+  if(!list.length){list.push(id);return}
+  list.splice(Math.floor(list.length/2),0,id);S.us.push(id)}   // waits mid-band until placement battles finish
+
+/* ---------- filters ---------- */
+function passes(a){const f=S.ui.f;
+  if(f.days.length&&!f.days.includes(a.day))return false;
+  if(!(a.s<f.to&&a.e>f.from))return false;
+  if(f.gen.length&&!f.gen.includes(a.fam))return false;
+  if(f.pop.length&&!f.pop.includes(a.pk))return false;
+  if(f.q){const q=f.q.toLowerCase();if(![a.name,a.genre,a.fam,a.hometown,(a.tags||[]).join(" "),(a.pl||[]).map(s=>s[0]).join(" "),(a.topSongs||[]).map(s=>s.title).join(" ")].join(" ").toLowerCase().includes(q))return false}
+  return true}
+function filtersActive(){const f=S.ui.f;return !!(f.days.length||f.gen.length||f.pop.length||f.q||f.from>750||f.to<1320)}
+function buildFilters(){
+  const f=S.ui.f;
+  const pills=(arr,key,val,lab)=>arr.map(v=>`<button class="pill" data-f="${key}" data-v="${esc(val(v))}" aria-pressed="${f[key].includes(val(v))}">${esc(lab(v))}</button>`).join("");
+  document.getElementById("fDays").innerHTML=pills(["Fri","Sat","Sun"],"days",v=>v,v=>v);
+  document.getElementById("fGenres").innerHTML=pills(GENRES,"gen",v=>v,v=>v);
+  document.getElementById("fPops").innerHTML=pills(POPS,"pop",v=>v.k,v=>v.label);
+  document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{const k=b.dataset.f;let v=b.dataset.v;if(k==="pop")v=+v;const arr=f[k];const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);onFilter()});
+  document.getElementById("tFrom").value=f.from;document.getElementById("tTo").value=f.to;document.getElementById("q").value=f.q;
+  syncTime();updateFcount()}
+function syncTime(){const f=S.ui.f,lo=750,hi=1320;document.getElementById("tLabel").textContent=fmt(f.from)+" – "+fmt(f.to);
+  const fill=document.getElementById("tfill");fill.style.left=((f.from-lo)/(hi-lo)*100)+"%";fill.style.width=((f.to-f.from)/(hi-lo)*100)+"%"}
+function updateFcount(){const n=A.filter(passes).length;document.getElementById("fcount").textContent=filtersActive()?`Showing ${n} of ${N}`:`All ${N} artists`}
+function onFilter(){save();buildFilters();
+  if(S.ui.card!=null&&!passes(A[S.ui.card]))S.ui.card=null;
+  if(S.ui.pair&&S.ui.pairKind!=="place"&&!(passes(A[S.ui.pair[0]])&&passes(A[S.ui.pair[1]])))S.ui.pair=null;
+  save();renderAll()}
+document.getElementById("tFrom").addEventListener("input",e=>{const f=S.ui.f;f.from=Math.min(+e.target.value,f.to-15);e.target.value=f.from;syncTime()});
+document.getElementById("tTo").addEventListener("input",e=>{const f=S.ui.f;f.to=Math.max(+e.target.value,f.from+15);e.target.value=f.to;syncTime()});
+["tFrom","tTo"].forEach(id=>document.getElementById(id).addEventListener("change",onFilter));
+let qT=null;document.getElementById("q").addEventListener("input",e=>{S.ui.f.q=e.target.value;clearTimeout(qT);qT=setTimeout(onFilter,300)});
+document.getElementById("fClear").onclick=()=>{S.ui.f=blankF();onFilter()};
+document.getElementById("filterCard").addEventListener("toggle",e=>{S.ui.filtersOpen=e.target.open;save()});
+
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+function setTab(t){S.ui.tab=t;document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  ["rate","rank","sched","lineup"].forEach(k=>document.getElementById("p-"+k).hidden=k!==t);
+  document.getElementById("filterCard").hidden=!(t==="rate"||t==="lineup");
+  save();renderAll()}
+
+/* ---------- audio previews (hosted version only) ---------- */
+const PV={};let audio=null,playingId=null;
+function loadPreviews(){
+  const ids=[...new Set(A.flatMap(a=>(a.pl||[]).map(s=>s[1].split("/").pop())))];
+  for(let i=0;i<ids.length;i+=150){const cb="__pv"+i;window[cb]=j=>{(j.results||[]).forEach(r=>{if(r.previewUrl)PV[String(r.trackId)]=r.previewUrl});delete window[cb]};
+    const s=document.createElement("script");s.src="https://itunes.apple.com/lookup?id="+ids.slice(i,i+150).join(",")+"&entity=song&callback="+cb;s.onerror=()=>{};document.head.appendChild(s)}}
+function playPreview(sid,btn){
+  if(!audio){audio=new Audio();audio.addEventListener("ended",()=>{playingId=null;markPlaying()})}
+  if(playingId===sid&&!audio.paused){audio.pause();playingId=null;markPlaying();return}
+  const url=PV[sid];if(!url){window.open(btn.dataset.full,"_blank","noopener");return}
+  audio.src=url;audio.play().then(()=>{playingId=sid;markPlaying()}).catch(()=>{window.open(btn.dataset.full,"_blank","noopener")})}
+function markPlaying(){document.querySelectorAll(".sp[data-sid]").forEach(b=>{const on=b.dataset.sid===playingId;b.classList.toggle("playing",on);const p=b.querySelector(".play");if(p)p.textContent=on?"❚❚":"▶"})}
+document.addEventListener("click",e=>{const b=e.target.closest(".sp[data-sid]");if(b){e.preventDefault();playPreview(b.dataset.sid,b)}});
+
+/* ---------- shared pieces ---------- */
+const maxL=Math.max(...A.map(a=>a.listeners||0));
+function popHTML(a){const w=a.listeners?Math.max(4,Math.round((Math.log10(Math.max(a.listeners,1000))-3)/(Math.log10(maxL)-3)*100)):0;
+  return `<span class="pop"><span class="popbar"><i style="width:${w}%"></i></span><span class="tnum">${a.listenersEstimated?"≈":""}${fmtL(a.listeners)} monthly</span></span>`}
+function songsHTML(a,limit){
+  let rows;
+  if(a.pl&&a.pl.length)rows=a.pl.slice(0,limit||6).map(([t,p])=>{const full="https://music.apple.com/us/song/"+p;const sid=p.split("/").pop();
+    return HOSTED?`<li><button class="sp" data-sid="${sid}" data-full="${full}"><span class="play">▶</span><span>${esc(t)}</span></button><a class="out" href="${full}" target="_blank" rel="noopener" title="Full song in Apple Music" aria-label="Full song in Apple Music">↗</a></li>`
+      :`<li><a href="${full}" target="_blank" rel="noopener"><span class="play">▶</span><span>${esc(t)}</span></a></li>`});
+  else if(a.topSongs&&a.topSongs.length)rows=a.topSongs.slice(0,limit||4).map(s=>`<li><a href="${amSearch(a.name,s.title)}" target="_blank" rel="noopener"><span class="play search">▶</span><span>${esc(s.title)}</span><span class="tag">search</span></a></li>`);
+  else rows=[`<li><a href="${amSearch(a.name)}" target="_blank" rel="noopener"><span class="play search">▶</span><span>Find ${esc(a.name)} on Apple Music</span><span class="tag">search</span></a></li>`];
+  return `<ul class="songs">${rows.join("")}</ul>`}
+function rateHTML(id){return `<div class="rate" role="group" aria-label="Rate ${esc(A[id].name)}">${TIERS.map((T,i)=>`<button data-rate="${id}:${i}" aria-pressed="${C.tier[id]===i}">${T.icon}<span>${T.label}</span></button>`).join("")}</div>`}
+function bindRate(root,after){root.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{const [id,ti]=b.dataset.rate.split(":").map(Number);
+  checkpoint();const was=C.tier[id];rateArtist(id,was===ti?null:ti);save();recompute();
+  if(was!==ti)toast(`${A[id].name}: ${TIERS[ti].icon} ${scoreTxt(id)} · #${C.pos[id]+1}${C.us.has(id)&&h2hOn()?" · placement battles waiting on Rate & Battle":""}`);(after||renderAll)()})}
+function setLine(a){return `${a.day} · ${fmt(a.s)}–${fmt(a.e)} · ${a.stage}`}
+function scoreBlock(id){return C.tier[id]<0?`<span class="heat unrated">Not rated</span>`:`<div class="score">${iconOf(id)} ${scoreTxt(id)}<small>#${C.pos[id]+1} OVERALL</small></div>`}
+function metaHTML(a){return `<dl class="meta"><dt>Genre</dt><dd>${esc(a.fam)} <span class="muted small">· ${esc(a.genre)}</span></dd><dt>From</dt><dd>${esc(a.hometown||"—")}</dd><dt>Known for</dt><dd>${esc(a.bestKnownFor||"")}</dd><dt>Reach</dt><dd>${popHTML(a)}</dd></dl>`}
+function artCard(a){
+  return `<article class="art ${heatOf(a.id)}">
+  <div class="topline"><div><h3>${esc(a.name)}</h3><div class="setline">${setLine(a)}</div>${C.us.has(a.id)&&h2hOn()?`<div class="needs">Placement battles waiting</div>`:""}</div>${scoreBlock(a.id)}</div>
+  ${metaHTML(a)}${songsHTML(a)}${rateHTML(a.id)}</article>`}
+
+/* ---------- RATE & BATTLE: swipe card → placement battles → fine-tuning ---------- */
+const CLASH=(()=>{const o=[];for(let i=0;i<N;i++)for(let j=i+1;j<N;j++)if(overlap(A[i],A[j])>=20)o.push([i,j]);return o})();
+const seen=(a,b)=>S.h.some(([x,y])=>(x===a&&y===b)||(x===b&&y===a));
+document.getElementById("h2hSwitch").onclick=()=>{S.ui.h2h=!h2hOn();if(S.ui.pairKind==="place"||S.ui.ins){S.ui.ins=null;S.ui.pair=null;S.ui.pairKind=null}
+  save();recompute();renderAll();toast(h2hOn()?"Head-to-head placement on":"Rate-only: just the four buttons. Switch back on anytime to place what you've rated.")};
+function insList(ins){return S.o[ins.ti].filter(i=>i!==ins.id&&!S.us.includes(i))}
+function startInsertion(){
+  for(const id of [...S.us]){const ti=S.t[id];if(ti===undefined){S.us=S.us.filter(i=>i!==id);continue}
+    const L=insList({id,ti});if(!L.length){S.us=S.us.filter(i=>i!==id);continue}
+    S.ui.ins={id,ti,lo:0,hi:L.length,n:0,max:Math.max(1,Math.ceil(Math.log2(L.length+1)))};return true}
+  return false}
+function nextStep(){
+  const ui=S.ui;
+  if(ui.follow&&ui.follow.length)return;
+  if(h2hOn()){
+    if(!ui.ins&&S.us.length)startInsertion();
+    if(ui.ins){const L=insList(ui.ins);if(!L.length||ui.ins.lo>=ui.ins.hi){finishInsertion();return nextStep()}
+      const mid=Math.floor((ui.ins.lo+ui.ins.hi)/2);ui.pair=[ui.ins.id,L[mid]];ui.pairKind="place";ui.card=null;return}
+  }
+  if(ui.pair&&ui.pairKind==="clash")return;
+  if(ui.card!=null&&C.tier[ui.card]<0&&passes(A[ui.card])){ui.pair=null;return}
+  let pool=A.filter(a=>C.tier[a.id]<0&&passes(a));if(pool.length>1)pool=pool.filter(a=>a.id!==ui.lastCard);
+  if(pool.length){ui.card=rnd(pool).id;ui.pair=null;ui.pairKind=null;return}
+  ui.card=null;
+  if(!h2hOn()){ui.pair=null;ui.pairKind=null;return}
+  if(ui.pair&&ui.pairKind)return;
+  const cand=[];
+  S.o.forEach(l=>{const L=l.filter(i=>!S.us.includes(i)&&passes(A[i]));for(let i=0;i+1<L.length;i++)if(!seen(L[i],L[i+1]))cand.push([L[i],L[i+1],"refine"])});
+  const cl=CLASH.filter(([a,b])=>C.tier[a]>=0&&C.tier[a]<=1&&C.tier[b]>=0&&C.tier[b]<=1&&passes(A[a])&&passes(A[b])&&!seen(a,b)).map(p=>[p[0],p[1],"clash"]);
+  const pick=(cl.length&&(Math.random()<.5||!cand.length))?rnd(cl):cand.length?rnd(cand):null;
+  if(pick){ui.pair=Math.random()<.5?[pick[0],pick[1]]:[pick[1],pick[0]];ui.pairKind=pick[2]}else{ui.pair=null;ui.pairKind=null}}
+function finishInsertion(){const ins=S.ui.ins;if(!ins)return;const L=insList(ins);
+  const before=snapshotScores();const target=L[ins.lo];
+  S.o[ins.ti]=S.o[ins.ti].filter(i=>i!==ins.id);S.us=S.us.filter(i=>i!==ins.id);
+  const list=S.o[ins.ti];const at=target===undefined?list.length:list.indexOf(target);list.splice(at<0?list.length:at,0,ins.id);
+  S.ui.ins=null;S.ui.pair=null;S.ui.pairKind=null;recompute();
+  S.ui.ctx=`Placed <b>${esc(A[ins.id].name)}</b> at ${TIERS[ins.ti].icon} ${scoreTxt(ins.id)} · #${C.pos[ins.id]+1} overall`+deltaLine(before,[ins.id])}
+function snapshotScores(){return A.map(a=>C.score[a.id])}
+function deltaLine(before,skip){const ch=A.filter(a=>!skip.includes(a.id)&&before[a.id]!=null&&C.score[a.id]!=null&&before[a.id]!==C.score[a.id]).slice(0,4);
+  return ch.length?" · "+ch.map(a=>`${esc(a.name)} <span class="${C.score[a.id]>before[a.id]?"up":"dn"}">${before[a.id].toFixed(1)}→${C.score[a.id].toFixed(1)}</span>`).join(", "):""}
+function swipeRate(ti){const id=S.ui.card;if(id==null)return;checkpoint();
+  rateArtist(id,ti);S.ui.lastCard=id;S.ui.card=null;recompute();
+  S.ui.ctx=`<b>${esc(A[id].name)}</b> → ${TIERS[ti].icon} ${TIERS[ti].label}${C.us.has(id)&&h2hOn()?" · now a few head-to-heads to find its spot":` · ${scoreTxt(id)}`}`;
+  nextStep();save();renderRate()}
+function swipeSkip(){S.ui.lastCard=S.ui.card;S.ui.card=null;nextStep();save();renderRate()}
+function battle(res){const ui=S.ui;if(!ui.pair)return;checkpoint();
+  const [a,b]=ui.pair;S.h.push([a,b,res]);const w=res===1?b:a,l=res===1?a:b;const before=snapshotScores();
+  if(ui.pairKind==="place"&&ui.ins){const mid=Math.floor((ui.ins.lo+ui.ins.hi)/2);ui.ins.n++;
+    const newWon=(res===0&&a===ui.ins.id)||(res===1&&b===ui.ins.id);
+    if(res===2){ui.ins.lo=ui.ins.hi=mid+1}else if(newWon)ui.ins.hi=mid;else ui.ins.lo=mid+1;
+    ui.pair=null;ui.ctx=res===2?`Tie: <b>${esc(A[a].name)}</b> and <b>${esc(A[b].name)}</b>`:`<b>${esc(A[w].name)}</b> beat ${esc(A[l].name)}`;
+    if(ui.ins.lo>=ui.ins.hi)finishInsertion()}
+  else{
+    if(res!==2&&C.tier[w]===C.tier[l]){const list=S.o[C.tier[w]];const iw=list.indexOf(w),il=list.indexOf(l);if(iw>il){list.splice(iw,1);list.splice(list.indexOf(l),0,w)}}
+    recompute();ui.pair=null;ui.pairKind=null;
+    if(res!==2&&C.tier[w]>C.tier[l])ui.follow=[{w,l}];
+    ui.ctx=(res===2?`Tie: <b>${esc(A[a].name)}</b> and <b>${esc(A[b].name)}</b>`:`<b>${esc(A[w].name)}</b> beat ${esc(A[l].name)}`)+deltaLine(before,[])}
+  recompute();nextStep();save();renderRate()}
+function resolveUpset(o){const f=S.ui.follow[0];checkpoint();const before=snapshotScores();
+  if(o==="up"){const ti=C.tier[f.l];removeFromLists(f.w);S.t[f.w]=ti;const list=S.o[ti];list.splice(list.indexOf(f.l),0,f.w)}
+  else if(o==="down"){const ti=C.tier[f.w];removeFromLists(f.l);S.t[f.l]=ti;const list=S.o[ti];list.splice(list.indexOf(f.w)+1,0,f.l)}
+  S.ui.follow=[];recompute();S.ui.ctx=(o==="keep"?"Kept both ratings":"Ratings updated")+deltaLine(before,[]);nextStep();save();renderRate()}
+function fighter(a,side){
+  return `<div class="fighter flash">
+  <div class="topline"><div><h2>${esc(a.name)}</h2></div>${scoreBlock(a.id)}</div>
+  <div class="row"><span class="chip">${esc(a.fam)}</span><span class="chip">${esc(a.hometown||"")}</span></div>
+  <div class="setline">${setLine(a)}</div>
+  <div class="small">${esc(a.bestKnownFor||"")}</div>
+  ${songsHTML(a,4)}
+  <button class="btn primary pick" data-side="${side}">${side===0?"← ":""}${esc(a.name)}${side===1?" →":""}</button>
+  </div>`}
+function renderRate(){
+  const ui=S.ui;if(!ui.follow)ui.follow=[];
+  if(ui.card==null&&!ui.pair&&!ui.follow.length)nextStep();
+  if(ui.card!=null&&C.tier[ui.card]>=0){ui.card=null;nextStep()}
+  const rated=N-C.unr.length;const st=document.getElementById("stage"),btns=document.getElementById("stageBtns");
+  document.getElementById("meterFill").style.width=(rated/N*100)+"%";
+  document.getElementById("meterText").textContent=`${rated}/${N} rated · ${S.h.length} battles${S.us.length?` · ${S.us.length} to place`:""}`;
+  document.getElementById("h2hSwitch").setAttribute("aria-checked",h2hOn());
+  document.getElementById("context").innerHTML=ui.ctx?`<div class="context">${ui.ctx}</div>`:"";
+  if(ui.follow.length){const f=ui.follow[0],w=A[f.w],l=A[f.l],tw=TIERS[C.tier[f.w]],tl=TIERS[C.tier[f.l]];
+    st.innerHTML=`<div class="follow flash"><span class="chip" style="justify-self:start">Upset</span><h3>${esc(w.name)} beat a higher-rated act</h3>
+    <p class="small" style="margin:0">${esc(w.name)} is ${tw.icon} ${tw.label} (${scoreTxt(f.w)}) and ${esc(l.name)} is ${tl.icon} ${tl.label} (${scoreTxt(f.l)}). What should change?</p>
+    <div class="opts"><button class="btn" data-o="up">Move ${esc(w.name)} up to ${tl.icon} ${tl.label}, just above ${esc(l.name)}</button><button class="btn" data-o="down">Move ${esc(l.name)} down to ${tw.icon} ${tw.label}, just below ${esc(w.name)}</button><button class="btn" data-o="keep">Keep both. It's a matchup thing (genre, mood, set time)</button></div></div>`;
+    st.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>resolveUpset(b.dataset.o));btns.innerHTML=`<button class="btn ghost" id="undoBtn">Undo</button>`}
+  else if(ui.pair){const [a,b]=ui.pair.map(i=>A[i]);const ov=overlap(a,b);
+    let label;if(ui.pairKind==="place"&&ui.ins){const ins=ui.ins;label=`Placing ${esc(A[ins.id].name)} in ${TIERS[ins.ti].icon} ${TIERS[ins.ti].label} · battle ${ins.n+1} of about ${ins.max}`}
+    else if(ui.pairKind==="clash")label="Set clash: which one are you walking to?";else label="Fine-tuning neighbours in your ranking";
+    st.innerHTML=`<p class="hint" style="font-weight:800;font-size:14px;color:var(--ink);margin:0 0 8px">${label}</p><div class="arena">${fighter(a,0)}<div class="vs">VS${ov>=20?`<div class="clashflag">Sets overlap ${ov} min</div>`:""}</div>${fighter(b,1)}</div>`;
+    st.querySelectorAll(".pick").forEach(b=>b.onclick=()=>battle(+b.dataset.side));
+    btns.innerHTML=`<button class="btn" id="tieBtn">Can't split them</button>${ui.pairKind==="place"?`<button class="btn ghost" id="skipPlace">Place it later</button>`:`<button class="btn ghost" id="skipBtn">Skip</button>`}<button class="btn ghost" id="undoBtn">Undo</button>`;
+    document.getElementById("tieBtn").onclick=()=>battle(2);
+    const sk=document.getElementById("skipBtn");if(sk)sk.onclick=()=>{S.h.push([ui.pair[0],ui.pair[1],-1]);ui.pair=null;ui.pairKind=null;nextStep();save();renderRate()};
+    const sp=document.getElementById("skipPlace");if(sp)sp.onclick=()=>{const id=ui.ins.id;ui.ins=null;ui.pair=null;ui.pairKind=null;S.us=S.us.filter(i=>i!==id).concat([id]);
+      const pool=A.filter(a=>C.tier[a.id]<0&&passes(a));ui.card=pool.length?rnd(pool).id:null;if(ui.card==null)nextStep();save();renderRate()}}
+  else if(ui.card!=null){const a=A[ui.card];
+    st.innerHTML=`<div class="deckwrap"><div class="swipe flash" id="swipeCard">
+      <span class="stamp l">Nope</span><span class="stamp r">Like</span><span class="stamp u">Love</span><span class="stamp d">Meh</span>
+      <div class="setline">${setLine(a)}</div><h2>${esc(a.name)}</h2>
+      <div class="row"><span class="chip">${esc(a.fam)}</span><span class="chip">${esc(a.genre)}</span><span class="chip">${esc(a.hometown||"")}</span></div>
+      <div class="small">${esc(a.bestKnownFor||"")}</div><div class="small muted">${popHTML(a)}</div>${songsHTML(a,4)}</div>
+      <div class="bigrate" role="group" aria-label="Rate ${esc(a.name)}"><button class="b3" data-t="3" aria-label="Nope">👎<span>Nope</span></button><button class="b2" data-t="2" aria-label="Meh">😐<span>Meh</span></button><button class="b1" data-t="1" aria-label="Like">👍<span>Like</span></button><button class="b0" data-t="0" aria-label="Love">❤️<span>Love</span></button></div>
+      <p class="hint" style="margin-top:16px">Swipe the card or tap: left 👎 · down 😐 · right 👍 · up ❤️ · keys 1–4</p></div>`;
+    st.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>flyOut(+b.dataset.t));
+    bindSwipe(document.getElementById("swipeCard"));
+    btns.innerHTML=`<button class="btn ghost" id="skipCard">Not sure yet</button><button class="btn ghost" id="undoBtn">Undo</button>`;
+    document.getElementById("skipCard").onclick=swipeSkip}
+  else{const done=!filtersActive();
+    st.innerHTML=`<div class="card" style="text-align:center;display:grid;gap:8px;justify-items:center"><h3 style="font-size:26px">${done?"Board complete":"All done for these filters"}</h3><p class="muted" style="margin:0">${done?(h2hOn()?"Every artist is rated and placed.":"Every artist is rated. Switch on head-to-head placement to sort within each rating."):"Everything in view is rated"+(h2hOn()?" and placed":"")+". Widen the filters for more."}</p><button class="btn primary" id="toRank">See my ranking</button></div>`;
+    document.getElementById("toRank").onclick=()=>setTab("rank");btns.innerHTML=`<button class="btn ghost" id="undoBtn">Undo</button>`}
+  const u=document.getElementById("undoBtn");if(u)u.onclick=undo;
+  if(HOSTED)markPlaying()}
+function flyOut(ti){const c=document.getElementById("swipeCard");if(!c){swipeRate(ti);return}
+  const v={3:[-1,0],2:[0,1],1:[1,0],0:[0,-1]}[ti];c.style.transform=`translate(${v[0]*600}px,${v[1]*500}px) rotate(${v[0]*20}deg)`;c.style.opacity="0";setTimeout(()=>swipeRate(ti),200)}
+function bindSwipe(c){let x0=0,y0=0,dx=0,dy=0,on=false;
+  const st={l:c.querySelector(".stamp.l"),r:c.querySelector(".stamp.r"),u:c.querySelector(".stamp.u"),d:c.querySelector(".stamp.d")};
+  c.addEventListener("pointerdown",e=>{if(e.target.closest("a,button"))return;on=true;x0=e.clientX;y0=e.clientY;dx=dy=0;c.classList.add("dragging");try{c.setPointerCapture(e.pointerId)}catch(_){}});
+  c.addEventListener("pointermove",e=>{if(!on)return;dx=e.clientX-x0;dy=e.clientY-y0;c.style.transform=`translate(${dx}px,${dy}px) rotate(${dx/18}deg)`;
+    const h=Math.abs(dx)>Math.abs(dy);st.l.style.opacity=h&&dx<0?Math.min(1,-dx/110):0;st.r.style.opacity=h&&dx>0?Math.min(1,dx/110):0;st.u.style.opacity=!h&&dy<0?Math.min(1,-dy/110):0;st.d.style.opacity=!h&&dy>0?Math.min(1,dy/110):0});
+  const end=()=>{if(!on)return;on=false;c.classList.remove("dragging");const h=Math.abs(dx)>Math.abs(dy),d=h?Math.abs(dx):Math.abs(dy);
+    if(d>110)flyOut(h?(dx<0?3:1):(dy<0?0:2));else{c.style.transform="";Object.values(st).forEach(s=>s.style.opacity=0)}};
+  c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end)}
+document.addEventListener("keydown",e=>{if(S.ui.tab!=="rate"||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const ui=S.ui;
+  if(ui.card!=null&&!ui.pair&&!(ui.follow||[]).length){const m={"1":3,"2":2,"3":1,"4":0,ArrowLeft:3,ArrowDown:2,ArrowRight:1,ArrowUp:0}[e.key];if(m!==undefined){e.preventDefault();flyOut(m)}}
+  else if(ui.pair&&!(ui.follow||[]).length){if(e.key==="ArrowLeft"){e.preventDefault();battle(0)}else if(e.key==="ArrowRight"){e.preventDefault();battle(1)}else if(e.key==="ArrowDown"){e.preventDefault();battle(2)}}});
+
+/* ---------- lineup ---------- */
+document.getElementById("fSort").addEventListener("input",e=>{S.ui.sort=e.target.value;save();renderLineup()});
+function renderLineup(){
+  const so=S.ui.sort||"time";document.getElementById("fSort").value=so;const dOrd={Fri:0,Sat:1,Sun:2};const rk=id=>C.pos[id]==null?1e3+id:C.pos[id];
+  const L=A.filter(passes).sort(so==="rank"?(x,y)=>rk(x.id)-rk(y.id):so==="pop"?(x,y)=>(y.listeners||0)-(x.listeners||0):so==="name"?(x,y)=>x.name.localeCompare(y.name):(x,y)=>dOrd[x.day]-dOrd[y.day]||x.s-y.s||STAGES.indexOf(x.stage)-STAGES.indexOf(y.stage));
+  const el=document.getElementById("lineup");el.innerHTML=L.length?L.map(artCard).join(""):`<div class="card">No artists match these filters.</div>`;
+  bindRate(el,renderLineup);if(HOSTED)markPlaying()}
+document.getElementById("copyPlaylist").onclick=()=>{
+  const L=A.filter(passes).sort((x,y)=>({Fri:0,Sat:1,Sun:2}[x.day]-{Fri:0,Sat:1,Sun:2}[y.day])||x.s-y.s);
+  copy(L.flatMap(a=>(a.pl&&a.pl.length?a.pl.map(s=>s[0]):(a.topSongs||[]).map(s=>s.title)).map(t=>a.name+" - "+t)).join("\n"),"Song list copied")};
+
+/* ---------- rankings ---------- */
+function renderRank(){
+  document.getElementById("rankTitle").textContent=S.name?S.name+"'s ranking":"My ranking";
+  ["bidChip","bidChip2"].forEach(id=>document.getElementById(id).textContent=S.bid||"set a name");
+  let html="";
+  TIERS.forEach((T,ti)=>{const m=C.order.filter(id=>C.tier[id]===ti);
+    html+=`<div class="tierhead"><h3>${T.icon} ${T.label}</h3><span class="small muted">${m.length} artist${m.length===1?"":"s"}</span></div>`;
+    html+=m.length?`<ol class="ranklist">${m.map(id=>{const a=A[id];return `<li class="${T.heat}"><span class="n tnum">${C.pos[id]+1}</span><span class="nm">${esc(a.name)}<div class="sub">${a.day} ${fmt(a.s)} · ${a.stage} · ${esc(a.fam)}${C.us.has(id)?" · not placed yet":""}</div></span><span class="rec tnum">${C.W[id]+C.L[id]?C.W[id]+"–"+C.L[id]:""}</span><span class="sc tnum">${scoreTxt(id)}</span></li>`}).join("")}</ol>`:`<p class="small muted" style="margin:0">Nobody here yet.</p>`});
+  html+=`<div class="tierhead"><h3>Not rated yet</h3><span class="small muted">${C.unr.length}</span>${C.unr.length?`<button class="btn ghost" id="unrToggle" style="padding:3px 12px;font-size:12px">${S.ui.showUnr?"Hide names":"Show names"}</button>`:""}</div>`;
+  if(S.ui.showUnr&&C.unr.length)html+=`<p class="small muted" style="margin:0">${C.unr.map(i=>esc(A[i].name)).join(" · ")}</p>`;
+  document.getElementById("ranklist").innerHTML=html;
+  const t=document.getElementById("unrToggle");if(t)t.onclick=()=>{S.ui.showUnr=!S.ui.showUnr;save();renderRank()};
+  const nm=document.getElementById("myName");if(document.activeElement!==nm)nm.value=S.name||"";
+  renderDist();renderFriend()}
+function renderDist(){
+  const W=520,H=170,x=v=>24+(v/10)*(W-48);const cols=["var(--hot)","var(--warm)","var(--cool)","var(--cold)"];
+  const pts=C.order.map(id=>({v:C.score[id],t:C.tier[id],nm:A[id].name}));
+  const F=FRIEND?FRIEND.c.order.map(id=>({v:FRIEND.c.score[id],nm:A[id].name})):[];
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Score spread">`;
+  TIERS.forEach((T,i)=>{s+=`<rect x="${x(T.lo)}" y="20" width="${x(T.hi)-x(T.lo)}" height="${H-52}" fill="${cols[i]}" opacity=".14" rx="6"/><text x="${(x(T.lo)+x(T.hi))/2}" y="14" text-anchor="middle" font-size="13">${T.icon}</text>`;
+    let d="";for(let v=T.lo;v<=T.hi+.001;v+=.05){const y=H-34-Math.exp(-((v-T.mid)**2)/(2*T.sd*T.sd))*(H-66);d+=(d?"L":"M")+x(v).toFixed(1)+","+y.toFixed(1)}s+=`<path d="${d}" fill="none" stroke="${cols[i]}" stroke-width="2"/>`});
+  const stack={};pts.forEach(p=>{const k=p.v.toFixed(1);stack[k]=(stack[k]||0)+1;s+=`<circle cx="${x(p.v)}" cy="${H-40-(stack[k]-1)*7}" r="3.4" fill="${cols[p.t]}" stroke="var(--surface)" stroke-width="1"><title>${esc(p.nm)} ${p.v.toFixed(1)}</title></circle>`});
+  F.forEach(p=>{s+=`<line x1="${x(p.v)}" x2="${x(p.v)}" y1="${H-30}" y2="${H-23}" stroke="currentColor" stroke-width="1.5" opacity=".7"><title>${esc(FRIEND.name)}: ${esc(p.nm)} ${p.v.toFixed(1)}</title></line>`});
+  s+=`<line x1="24" x2="${W-24}" y1="${H-31}" y2="${H-31}" stroke="currentColor" opacity=".35"/>`;
+  for(let v=0;v<=10;v+=2)s+=`<text x="${x(v)}" y="${H-8}" text-anchor="middle" font-size="11" fill="currentColor" opacity=".75">${v}</text>`;
+  s+=`</svg>`;
+  document.getElementById("distChart").innerHTML=pts.length?s+(FRIEND?`<p class="note" style="margin:4px 0 0">Dots = you · ticks under the line = ${esc(FRIEND.name)}</p>`:""):`<p class="small muted" style="margin:0">Rate a few artists and your spread appears here.</p>`}
+document.getElementById("myName").addEventListener("input",e=>{S.name=e.target.value.slice(0,40);ensureBid(true);save();document.getElementById("rankTitle").textContent=S.name?S.name+"'s ranking":"My ranking";["bidChip","bidChip2"].forEach(id=>document.getElementById(id).textContent=S.bid)});
+function ensureBid(rename){if(!S.bid)S.bid=makeBid(S.name);else if(rename){const ts=S.bid.split("-").pop();S.bid=makeBid(S.name).replace(/-\d+$/,"-"+ts)}}
+function b64e(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function b64d(s){s=s.replace(/-/g,"+").replace(/_/g,"/");return decodeURIComponent(escape(atob(s)))}
+function makeCode(){ensureBid();return "ACL26."+b64e(JSON.stringify({v:3,n:S.name||"A friend",b:S.bid,o:S.o.map(l=>l.join(".")).join("|"),us:S.us.join("."),h:S.h.map(x=>x.slice(0,3).join(".")).join(",")}))}
+function readCode(txt){const o=JSON.parse(b64d(txt.trim().replace(/\s+/g,"").replace(/^ACL26\./,"")));
+  const st=fresh(o.n);st.name=o.n||"";st.bid=o.b||null;
+  st.o=(o.o||"").split("|").slice(0,4).map(l=>l?l.split(".").map(Number).filter(i=>i>=0&&i<N):[]);while(st.o.length<4)st.o.push([]);
+  st.o.forEach((l,ti)=>l.forEach(i=>st.t[i]=ti));st.us=(o.us||"").split(".").filter(Boolean).map(Number).filter(i=>st.t[i]!==undefined);
+  st.h=o.h?o.h.split(",").map(x=>x.split(".").map(Number)).filter(x=>x.length===3&&x[0]<N&&x[1]<N):[];return st}
+document.getElementById("copyCode").onclick=()=>{if(!Object.keys(S.t).length)return toast("Rate a few artists first");copy(makeCode(),"Ranking code copied")};
+let FRIEND=null;
+document.getElementById("loadFriend").onclick=()=>{try{const st=readCode(document.getElementById("friendCode").value);
+  if(st.bid&&st.bid===S.bid)return toast("That's your own code. Paste a friend's.");FRIEND={name:st.name||"Friend",bid:st.bid,c:compute(st)};renderRank();toast("Loaded "+FRIEND.name+"'s board")}catch(e){toast("That code didn't read. Copy the whole thing, starting with ACL26.")}};
+document.getElementById("clearFriend").onclick=()=>{FRIEND=null;document.getElementById("friendCode").value="";renderRank()};
+function renderFriend(){const o=document.getElementById("friendOut");if(!FRIEND){o.innerHTML="";return}
+  const F=FRIEND.c;const both=A.filter(a=>C.tier[a.id]>=0&&C.tier[a.id]<=1&&F.tier[a.id]>=0&&F.tier[a.id]<=1).sort((x,y)=>(C.score[y.id]+F.score[y.id])-(C.score[x.id]+F.score[x.id]));
+  const split=A.filter(a=>C.tier[a.id]>=0&&F.tier[a.id]>=0&&Math.abs(C.score[a.id]-F.score[a.id])>=4).sort((x,y)=>Math.abs(C.score[y.id]-F.score[y.id])-Math.abs(C.score[x.id]-F.score[x.id])).slice(0,6);
+  o.innerHTML=`<div style="display:grid;gap:10px"><div><b>${esc(FRIEND.name)}</b> <span class="idchip">${esc(FRIEND.bid||"")}</span></div>
+  <div><b class="small">You both love or like (${both.length})</b><div class="row" style="margin-top:6px">${both.length?both.slice(0,16).map(a=>`<span class="chip">${esc(a.name)} · ${scoreTxt(a.id)} / ${F.score[a.id].toFixed(1)}</span>`).join(""):'<span class="small muted">No overlap yet.</span>'}</div></div>
+  ${split.length?`<div><b class="small">Biggest splits</b><div class="row" style="margin-top:6px">${split.map(a=>`<span class="chip">${esc(a.name)} · you ${scoreTxt(a.id)} / them ${F.score[a.id].toFixed(1)}</span>`).join("")}</div></div>`:""}
+  <div><b class="small">${esc(FRIEND.name)}'s top 10</b><ol class="small" style="margin:6px 0 0;padding-left:20px">${F.order.slice(0,10).map(id=>`<li>${TIERS[F.tier[id]].icon} ${F.score[id].toFixed(1)} ${esc(A[id].name)} <span class="muted">${A[id].day} ${fmt(A[id].s)}</span></li>`).join("")}</ol></div></div>`}
+document.getElementById("restoreBtn").onclick=()=>{document.getElementById("restoreBox").hidden=false};
+document.getElementById("restoreNo").onclick=()=>{document.getElementById("restoreBox").hidden=true};
+document.getElementById("restoreYes").onclick=()=>{try{const st=readCode(document.getElementById("restoreCode").value);checkpoint();st.ui=Object.assign(S.ui,{card:null,pair:null,pairKind:null,ins:null,follow:[],ctx:null});S=st;save();recompute();document.getElementById("restoreBox").hidden=true;renderAll();toast("Board restored: "+(S.name||"no name"))}catch(e){toast("That code didn't read. Copy the whole thing, starting with ACL26.")}};
+document.getElementById("resetBtn").onclick=()=>document.getElementById("resetConfirm").hidden=false;
+document.getElementById("resetNo").onclick=()=>document.getElementById("resetConfirm").hidden=true;
+document.getElementById("resetYes").onclick=()=>{checkpoint();const keep={name:S.name,bid:S.bid,ui:S.ui};S=fresh(keep.name);S.bid=keep.bid;S.ui=Object.assign(keep.ui,{card:null,pair:null,pairKind:null,ins:null,follow:[],ctx:null});save();recompute();document.getElementById("resetConfirm").hidden=true;setTab("rate");toast("Board reset. Undo brings it back.")};
+
+/* ---------- schedule ---------- */
+document.querySelectorAll("#dayBtns button").forEach(b=>b.onclick=()=>{S.ui.day=b.dataset.day;save();renderSched()});
+function h2h(a,b){let wa=0,wb=0;for(const [x,y,r] of S.h){if(r!==0&&r!==1)continue;const w=r===0?x:y,l=r===0?y:x;if(w===a&&l===b)wa++;if(w===b&&l===a)wb++}return wa>wb?a:wb>wa?b:null}
+function prefer(a,b){const h=h2h(a,b);if(h!==null)return h;return C.pos[a]<=C.pos[b]?a:b}
+function plan(d){const sets=A.filter(a=>a.day===d&&C.tier[a.id]>=0&&C.tier[a.id]<3).sort((x,y)=>C.pos[x.id]-C.pos[y.id]);const pick=[];
+  for(const a of sets){const clash=pick.filter(p=>overlap(p,a)>15);
+    if(!clash.length)pick.push(a);else if(clash.length===1&&h2h(clash[0].id,a.id)===a.id&&!pick.some(p=>p!==clash[0]&&overlap(p,a)>15))pick.splice(pick.indexOf(clash[0]),1,a)}
+  return pick.sort((x,y)=>x.s-y.s)}
+function renderSched(){
+  const day=S.ui.day||"Fri";document.querySelectorAll("#dayBtns button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.day===day));
+  const T0=12*60+30,T1=22*60,PX=1.5,H=(T1-T0)*PX;const P=new Set(plan(day).map(a=>a.id));
+  let html=`<div></div>`+STAGES.map(s=>`<div class="head">${s==="American Express"?"AmEx":s}</div>`).join("");
+  let times=`<div class="times" style="height:${H}px">`;for(let t=13*60;t<=T1;t+=60)times+=`<span style="top:${(t-T0)*PX}px">${fmt(t)}</span>`;html+=times+`</div>`;
+  for(const st of STAGES){html+=`<div class="col" style="height:${H}px;margin-top:6px">`;
+    for(const a of A.filter(x=>x.day===day&&x.stage===st)){const top=(a.s-T0)*PX,h=(a.e-a.s)*PX-3;
+      html+=`<button class="set ${heatOf(a.id)} ${P.has(a.id)?"plan":""} ${P.size&&!P.has(a.id)&&!(C.tier[a.id]===0||C.tier[a.id]===1)?"dim":""}" style="top:${top}px;height:${h}px" data-id="${a.id}" aria-label="${esc(a.name)} ${fmt(a.s)} to ${fmt(a.e)}"><b>${esc(a.name)}</b>${C.tier[a.id]>=0?`<span class="sv">${iconOf(a.id)} ${scoreTxt(a.id)}</span>`:""}<small class="tnum">${fmt(a.s)}–${fmt(a.e)}</small></button>`}
+    html+=`</div>`}
+  const el=document.getElementById("sched");el.innerHTML=html;el.querySelectorAll(".set").forEach(b=>b.onclick=()=>showArtist(A[+b.dataset.id]));
+  document.getElementById("planDay").textContent=DAYS[day];const pl=plan(day);
+  document.getElementById("planlist").innerHTML=pl.length?pl.map(a=>`<li><span class="t tnum">${fmt(a.s)}–${fmt(a.e)}</span><span><b>${esc(a.name)}</b><div class="small muted">${a.stage}</div></span><span class="heat ${heatOf(a.id)}">${iconOf(a.id)} ${scoreTxt(a.id)}</span></li>`).join(""):`<li><span></span><span class="muted">Rate some ${day} artists and your plan appears here.</span></li>`;
+  const cl=CLASH.filter(([x,y])=>A[x].day===day&&C.tier[x]>=0&&C.tier[x]<=1&&C.tier[y]>=0&&C.tier[y]<=1);
+  document.getElementById("clashes").innerHTML=cl.length?cl.map(([x,y])=>{const hw=h2h(x,y);const pf=prefer(x,y);
+    return `<div class="clash"><span class="small"><b>${esc(A[x].name)}</b> ${scoreTxt(x)} vs <b>${esc(A[y].name)}</b> ${scoreTxt(y)} · ${overlap(A[x],A[y])} min<br><span class="muted">${hw!==null?"You picked "+esc(A[hw].name)+" head to head":"Leaning "+esc(A[pf].name)+" on ranking"}</span></span><button class="btn" data-p="${x},${y}">Battle</button></div>`}).join(""):`<p class="small muted" style="margin:0">No ❤️/👍 clashes on ${day} yet.</p>`;
+  document.querySelectorAll("#clashes [data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p))}
+function goBattle(p){S.ui.pair=p.split(",").map(Number);S.ui.pairKind="clash";S.ui.card=null;S.ui.follow=[];S.ui.ins=null;document.getElementById("dialogHost").innerHTML="";setTab("rate")}
+function showArtist(a){const host=document.getElementById("dialogHost");const ov=A.filter(o=>o.id!==a.id&&overlap(o,a)>=20);
+  host.innerHTML=`<div class="dialog" role="dialog" aria-modal="true" aria-label="${esc(a.name)}"><div style="max-width:460px;width:100%;display:grid;gap:10px">${artCard(a)}
+  ${ov.length?`<div class="card" style="display:grid;gap:6px"><b class="small">Overlaps with</b>${ov.map(o=>`<div class="clash"><span class="small"><b>${esc(o.name)}</b> ${iconOf(o.id)} ${scoreTxt(o.id)} · ${overlap(o,a)} min</span><button class="btn" data-p="${a.id},${o.id}">Battle</button></div>`).join("")}</div>`:""}
+  <div class="row" style="justify-content:center"><button class="btn" id="closeDlg">Close</button></div></div></div>`;
+  const close=()=>{host.innerHTML="";renderAll()};document.getElementById("closeDlg").onclick=close;host.querySelector(".dialog").onclick=e=>{if(e.target.classList.contains("dialog"))close()};
+  bindRate(host,()=>showArtist(a));host.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>goBattle(b.dataset.p));if(HOSTED)markPlaying();document.getElementById("closeDlg").focus()}
+
+/* ---------- utils & boot ---------- */
+function toast(m){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800)}
+function copy(txt,msg){const fallback=()=>{const host=document.getElementById("dialogHost");
+    host.innerHTML=`<div class="dialog"><div class="card" style="display:grid;gap:10px;max-width:460px;width:100%"><b>Copy this</b><textarea id="cpy" style="min-height:160px">${esc(txt)}</textarea><button class="btn" id="cpyClose">Done</button></div></div>`;
+    const c=document.getElementById("cpy");c.focus();c.select();document.getElementById("cpyClose").onclick=()=>host.innerHTML=""};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast(msg),fallback)}else fallback()}
+function renderWelcome(){document.getElementById("welcome").hidden=!!S.name}
+document.getElementById("welcomeGo").onclick=()=>{const v=document.getElementById("welcomeName").value.trim();if(!v)return toast("Add a name first");S.name=v.slice(0,40);ensureBid();save();renderWelcome();setTab("rate")};
+document.getElementById("welcomeName").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("welcomeGo").click()});
+function renderAll(){renderWelcome();updateFcount();const t=S.ui.tab;if(t==="lineup")renderLineup();if(t==="rate")renderRate();if(t==="rank")renderRank();if(t==="sched")renderSched()}
+function afterLoad(){recompute();if(S.name)ensureBid();buildFilters();document.getElementById("filterCard").open=!!S.ui.filtersOpen;
+  let t=S.ui.tab||"rate";if(location.hash&&["rate","rank","sched","lineup"].includes(location.hash.slice(1)))t=location.hash.slice(1);setTab(t)}
+afterLoad();
+if(HOSTED)loadPreviews();
+initCloud();
+</script>
+
+</body></html>
